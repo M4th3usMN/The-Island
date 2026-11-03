@@ -28,7 +28,7 @@ atualiza sozinho.
 1. Crie uma conta em **github.com**.
 2. Clique em **New repository**, dê o nome `grande-ilha`, marque **Public** e crie.
 3. Na página do repositório, clique em **uploading an existing file** e arraste
-   todos os 8 arquivos desta pasta. Clique em **Commit changes**.
+   todos os 10 arquivos desta pasta. Clique em **Commit changes**.
 4. Crie uma conta em **dash.cloudflare.com** e vá em **Workers e Pages** >
    **Criar** > **Pages** > **Conectar ao Git**.
 5. Escolha o repositório `grande-ilha`. Em configurações de build, deixe o

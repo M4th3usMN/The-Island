@@ -8,6 +8,8 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 <title>A Grande Ilha</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="description" content="Uma ilha medieval ao vivo, povoada pelos comentários. Cada morador tem sua própria rotina, no horário de Manaus.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,6 +44,8 @@
   .marca { padding: 10px 14px 10px; display: grid; gap: 6px; min-width: 0; }
   .marca h1 { margin: 0; font-family: var(--f-pixel); font-weight: 700; font-size: 20px; letter-spacing: .04em; line-height: 1; color: var(--texto); text-shadow: 2px 2px 0 #000; }
   .marca h1 b { color: var(--ouro); font-weight: 700; }
+  .marca h1 { display: flex; align-items: center; gap: 10px; }
+  .logo { width: 36px; height: 36px; image-rendering: pixelated; border: 2px solid var(--borda); flex: none; }
   .linha { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-family: var(--f-pixel); font-size: 11px; letter-spacing: .06em; color: var(--apagado); }
   .aovivo { color: #ff6a5a; display: inline-flex; gap: 6px; align-items: center; }
   .aovivo::before { content: ""; width: 8px; height: 8px; background: #ff4a3a; box-shadow: 0 0 6px #ff4a3a; animation: pisca 1.4s steps(2) infinite; }
@@ -118,6 +122,7 @@
   @media (max-width: 760px) {
     .topo { display: block; }
     .marca h1 { font-size: 16px; }
+    .logo { width: 28px; height: 28px; }
     .marca { padding: 8px 10px; }
     .marca .linha { max-width: calc(100% - 132px); }
     .stat { font-size: 9px; padding: 3px 6px; }
@@ -142,7 +147,7 @@
 
 <div class="topo">
   <div class="marca px">
-    <h1>A GRANDE <b>ILHA</b></h1>
+    <h1><img class="logo" src="favicon.png" alt="" width="36" height="36">A GRANDE <b>ILHA</b></h1>
     <div class="linha"><span class="aovivo">AO VIVO</span><span class="dia" id="h-dia">DIA 2</span><span id="h-hora">--:--</span><span id="h-clima">Céu limpo</span></div>
     <div class="stats">
       <span class="stat">MORADORES <b id="h-mor">0</b></span>
