@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta property="og:title" content="A Grande Ilha — ao vivo">
+<meta property="og:description" content="Uma ilha medieval povoada pelos comentários. Cada morador tem sua própria rotina, ao vivo.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>A Grande Ilha</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Uma ilha medieval ao vivo, povoada pelos comentários. Cada morador tem sua própria rotina, no horário de Manaus.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+  /* Layout: a ilha ocupa a tela inteira; HUD de jogo flutua por cima (topo), lista de moradores à direita (gaveta no celular). */
+  :root {
+    --noite: #0b1626;      /* fundo e mar profundo */
+    --painel: #111a22;     /* paineis do HUD */
+    --borda: #2c3b38;      /* contorno dos paineis, tom de musgo */
+    --texto: #f1ead8;      /* pergaminho claro */
+    --apagado: #a9b3a6;    /* texto secundario */
+    --ouro: #ffd046;       /* destaque, igual ao numero do video */
+    --lilas: #bea0ff;      /* segundo destaque */
+    --pergaminho: #d3a55a; /* card do morador */
+    --tinta: #3a2410;      /* texto sobre pergaminho */
+    --f-pixel: "Silkscreen", "Courier New", monospace;
+    --f-texto: "Pixelify Sans", "Trebuchet MS", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body { background: var(--noite); color: var(--texto); font-family: var(--f-texto); overflow: hidden; }
+  #ilha { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; image-rendering: pixelated; }
+  .px { background: var(--painel); border: 2px solid var(--borda); box-shadow: 0 0 0 2px #05090d, 0 6px 0 rgba(0,0,0,.35); }
+  button { font: inherit; color: inherit; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px; }
+
+  .topo { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 12px); left: 0; right: 0;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; pointer-events: none; }
+  .topo > * { pointer-events: auto; }
+  .marca { padding: 10px 14px 10px; display: grid; gap: 6px; min-width: 0; }
+  .marca h1 { margin: 0; font-family: var(--f-pixel); font-weight: 700; font-size: 20px; letter-spacing: .04em; line-height: 1; color: var(--texto); text-shadow: 2px 2px 0 #000; }
+  .marca h1 b { color: var(--ouro); font-weight: 700; }
+  .linha { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-family: var(--f-pixel); font-size: 11px; letter-spacing: .06em; color: var(--apagado); }
+  .aovivo { color: #ff6a5a; display: inline-flex; gap: 6px; align-items: center; }
+  .aovivo::before { content: ""; width: 8px; height: 8px; background: #ff4a3a; box-shadow: 0 0 6px #ff4a3a; animation: pisca 1.4s steps(2) infinite; }
+  @keyframes pisca { 50% { opacity: .25; } }
+  .linha .dia { color: var(--ouro); }
+  .stats { display: flex; gap: 6px; flex-wrap: wrap; }
+  .stat { display: inline-flex; align-items: baseline; gap: 6px; padding: 4px 8px; background: #0a1016; border: 1px solid var(--borda); font-family: var(--f-pixel); font-size: 10px; letter-spacing: .06em; color: var(--apagado); }
+  .stat b { font-size: 14px; color: var(--texto); font-variant-numeric: tabular-nums; }
+
+  .som { display: flex; align-items: center; gap: 6px; padding: 6px; }
+  .ib { width: 36px; height: 36px; display: grid; place-items: center; background: #0a1016; border: 1px solid var(--borda); cursor: pointer; padding: 0; }
+  .ib:hover { border-color: var(--ouro); }
+  .ib svg { width: 18px; height: 18px; shape-rendering: crispEdges; }
+  #vol { width: 92px; accent-color: var(--ouro); }
+  .btn-lista { display: none; }
+
+  .dica-som { position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 74px);
+    font-family: var(--f-pixel); font-size: 12px; letter-spacing: .06em; padding: 10px 14px; cursor: pointer; color: var(--ouro); animation: flutua 2.4s ease-in-out infinite; white-space: nowrap; }
+  @keyframes flutua { 50% { transform: translate(-50%, -4px); } }
+
+  .painel { position: fixed; z-index: 4; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(env(safe-area-inset-top, 0px) + 92px); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    width: 290px; display: flex; flex-direction: column; min-height: 0; }
+  .painel header { padding: 12px 12px 10px; border-bottom: 2px solid var(--borda); display: grid; gap: 8px; }
+  .painel h2 { margin: 0; font-family: var(--f-pixel); font-size: 13px; letter-spacing: .08em; display: flex; justify-content: space-between; }
+  .painel h2 span { color: var(--ouro); font-variant-numeric: tabular-nums; }
+  #busca { width: 100%; box-sizing: border-box; background: #0a1016; border: 1px solid var(--borda); color: var(--texto); font: 14px var(--f-texto); padding: 7px 9px; }
+  #busca::placeholder { color: #75807a; }
+  #lista { list-style: none; margin: 0; padding: 6px; overflow-y: auto; flex: 1; min-height: 0; scrollbar-color: var(--borda) transparent; }
+  .mor { width: 100%; display: flex; gap: 10px; align-items: center; text-align: left; background: transparent; border: 1px solid transparent; padding: 6px; cursor: pointer; }
+  .mor:hover { background: #18232c; border-color: var(--borda); }
+  .mor.on { background: #1d2a24; border-color: var(--ouro); }
+  .mor-ic { width: 32px; height: 40px; flex: none; image-rendering: pixelated; background: #0a1016; border: 1px solid var(--borda); }
+  .mor-tx { display: grid; gap: 1px; min-width: 0; }
+  .mor-nome { font-weight: 600; font-size: 15px; color: var(--texto); }
+  .mor-prof { font-family: var(--f-pixel); font-size: 9px; letter-spacing: .08em; color: var(--lilas); text-transform: uppercase; }
+  .mor-ativ { font-size: 13px; color: var(--apagado); display: flex; gap: 6px; align-items: center; min-width: 0; }
+  .mor-ativ .ativ { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dot { width: 6px; height: 6px; flex: none; background: #6f8a7a; }
+  .dot.ativo { background: #7ee07a; } .dot.and { background: var(--ouro); } .dot.dorm { background: #7aa0ff; } .dot.pend { background: #6a6a74; }
+
+  .card { position: fixed; z-index: 7; width: 270px; max-width: calc(100vw - 32px); pointer-events: none;
+    background: var(--pergaminho); color: var(--tinta); border: 2px solid #8a5a22; box-shadow: 0 0 0 2px #2a1808, 0 8px 0 rgba(0,0,0,.35); padding: 12px; }
+  .card.fixo { pointer-events: auto; left: max(16px, env(safe-area-inset-left, 0px)) !important; top: calc(env(safe-area-inset-top, 0px) + 128px) !important; }
+  .card::after { content: ""; position: absolute; inset: 4px; border: 1px solid rgba(90,54,18,.45); pointer-events: none; }
+  .c-top { display: flex; gap: 10px; align-items: center; }
+  #c-ic canvas { display: block; width: 48px; height: 60px; image-rendering: pixelated; background: rgba(58,36,16,.12); }
+  .card h3 { margin: 0; font-family: var(--f-pixel); font-size: 15px; letter-spacing: .04em; line-height: 1.1; }
+  .c-prof { font-family: var(--f-pixel); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #6a2e10; margin-top: 3px; }
+  .c-hist { margin: 10px 0 8px; font-size: 14px; line-height: 1.35; }
+  .c-agora { border-top: 1px dashed rgba(58,36,16,.5); padding-top: 8px; display: grid; gap: 2px; font-size: 13px; }
+  .c-agora b { font-family: var(--f-pixel); font-size: 9px; letter-spacing: .1em; font-weight: 400; color: #6a2e10; }
+  .c-desde { font-family: var(--f-pixel); font-size: 9px; letter-spacing: .08em; color: #6a4a2a; margin-top: 6px; }
+  #c-fechar { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; background: transparent; border: 0; color: var(--tinta); cursor: pointer; font: 16px var(--f-pixel); display: none; z-index: 1; }
+  .card.fixo #c-fechar { display: block; }
+
+  .rodape { position: fixed; z-index: 5; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex; gap: 10px; align-items: flex-end; pointer-events: none; }
+  .rodape > * { pointer-events: auto; }
+  .zoom { display: flex; gap: 4px; padding: 4px; }
+  .zoom .ib { font-family: var(--f-pixel); font-size: 16px; }
+  .zoom .ib.larga { width: auto; padding: 0 10px; font-size: 10px; letter-spacing: .06em; }
+  .meio { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; pointer-events: none; }
+  .meio > * { pointer-events: auto; }
+  .chegada { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; max-width: 100%; box-sizing: border-box; }
+  #ch-txt { font-size: 14px; font-variant-numeric: tabular-nums; min-width: 0; }
+  #ch-btn { flex: none; font-family: var(--f-pixel); font-size: 10px; letter-spacing: .06em; background: var(--ouro); color: #2a1808; border: 0; padding: 7px 10px; cursor: pointer; }
+  .seguindo { display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 12px; max-width: 100%; box-sizing: border-box; }
+  .seguindo .lbl { font-family: var(--f-pixel); font-size: 10px; letter-spacing: .08em; color: var(--apagado); }
+  #sg-nome { font-family: var(--f-pixel); font-size: 12px; color: var(--ouro); }
+  #sg-ativ { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .painel-espaco { width: 290px; flex: none; }
+
+  @media (max-width: 760px) {
+    .topo { display: block; }
+    .marca h1 { font-size: 16px; }
+    .marca { padding: 8px 10px; }
+    .marca .linha { max-width: calc(100% - 132px); }
+    .stat { font-size: 9px; padding: 3px 6px; }
+    .stat b { font-size: 12px; }
+    .som { position: absolute; top: 0; right: max(16px, env(safe-area-inset-right, 0px)); border: 0; box-shadow: none; background: transparent; padding: 8px; }
+    #vol { display: none; }
+    .btn-lista { display: inline-flex; }
+    .painel { top: auto; left: max(16px, env(safe-area-inset-left, 0px)); width: auto; height: 58vh; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+      transform: translateY(calc(100% + 40px)); transition: transform .25s steps(6); z-index: 8; }
+    .painel.aberto { transform: none; }
+    .painel-espaco { display: none; }
+    .zoom .larga { display: none; }
+    .card.fixo { left: 16px !important; right: 16px; top: auto !important; bottom: calc(env(safe-area-inset-bottom, 0px) + 76px); width: auto; }
+    .dica-som { bottom: calc(env(safe-area-inset-bottom, 0px) + 128px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .dica-som, .aovivo::before { animation: none; } .painel { transition: none; } }
+</style>
+</head>
+<body>
+
+<canvas id="ilha" aria-label="Mapa da Grande Ilha ao vivo"></canvas>
+
+<div class="topo">
+  <div class="marca px">
+    <h1>A GRANDE <b>ILHA</b></h1>
+    <div class="linha"><span class="aovivo">AO VIVO</span><span class="dia" id="h-dia">DIA 2</span><span id="h-hora">--:--</span><span id="h-clima">Céu limpo</span></div>
+    <div class="stats">
+      <span class="stat">MORADORES <b id="h-mor">0</b></span>
+      <span class="stat">CASAS <b id="h-casas">0</b></span>
+      <span class="stat">CONSTRUÇÕES <b id="h-cons">0</b></span>
+    </div>
+  </div>
+  <div class="som px" role="group" aria-label="Música">
+    <button class="ib" id="btn-play" type="button" aria-label="Tocar música">
+      <svg class="ico-play" viewBox="0 0 8 8" fill="#f1ead8"><path d="M2 1h2v1h1v1h1v2H5v1H4v1H2z"/></svg>
+      <svg class="ico-pause" viewBox="0 0 8 8" fill="#f1ead8" hidden><path d="M2 1h1v6H2zM5 1h1v6H5z"/></svg>
+    </button>
+    <button class="ib" id="btn-mudo" type="button" aria-label="Silenciar" aria-pressed="false">
+      <svg class="ico-som" viewBox="0 0 8 8" fill="#f1ead8"><path d="M1 3h1V2h1V1h1v6H3V6H2V5H1zM5 3h1v2H5zM6 2h1v4H6z"/></svg>
+      <svg class="ico-mudo" viewBox="0 0 8 8" fill="#f1ead8" hidden><path d="M1 3h1V2h1V1h1v6H3V6H2V5H1zM5 3h1v1H5zM7 3h1v1H7zM6 4h1v1H6zM5 5h1v1H5zM7 5h1v1H7z"/></svg>
+    </button>
+    <input id="vol" type="range" min="0" max="100" value="55" aria-label="Volume">
+    <button class="ib btn-lista" id="btn-lista" type="button" aria-expanded="false" aria-controls="painel" aria-label="Lista de moradores"><svg viewBox="0 0 8 8" fill="#f1ead8"><path d="M1 1h1v1H1zM3 1h4v1H3zM1 3h1v1H1zM3 3h4v1H3zM1 5h1v1H1zM3 5h4v1H3z"/></svg></button>
+  </div>
+</div>
+
+<aside class="painel px" id="painel" aria-label="Moradores da ilha">
+  <header>
+    <h2>MORADORES <span id="lista-n">0</span></h2>
+    <input id="busca" type="search" placeholder="Buscar por nome ou profissão" aria-label="Buscar morador" autocomplete="off">
+  </header>
+  <ul id="lista"></ul>
+</aside>
+
+<div class="card" id="card" hidden role="dialog" aria-label="Detalhes do morador">
+  <button id="c-fechar" type="button" aria-label="Fechar">×</button>
+  <div class="c-top"><div id="c-ic"></div><div><h3 id="c-nome"></h3><div class="c-prof" id="c-prof"></div></div></div>
+  <p class="c-hist" id="c-hist"></p>
+  <div class="c-agora"><b>AGORA</b><span id="c-ativ"></span><span id="c-lugar" style="opacity:.75"></span></div>
+  <div class="c-desde" id="c-desde"></div>
+</div>
+
+<button class="dica-som px" id="dica-som" type="button">♪ TOQUE PARA OUVIR A MÚSICA</button>
+
+<div class="rodape">
+  <div class="zoom px" role="group" aria-label="Zoom">
+    <button class="ib" id="z-menos" type="button" aria-label="Afastar">−</button>
+    <button class="ib" id="z-mais" type="button" aria-label="Aproximar">+</button>
+    <button class="ib larga" id="z-ilha" type="button">ILHA INTEIRA</button>
+  </div>
+  <div class="meio">
+    <div class="seguindo px" id="seguindo" hidden>
+      <span class="lbl">SEGUINDO</span><span id="sg-nome"></span><span id="sg-ativ"></span>
+      <button class="ib" id="sg-fechar" type="button" aria-label="Parar de seguir">×</button>
+    </div>
+    <div class="chegada px" id="chegada" hidden>
+      <span id="ch-txt"></span><button id="ch-btn" type="button">Ver prévia</button>
+    </div>
+  </div>
+  <div class="painel-espaco"></div>
+</div>
+
+<script src="js/sprites.js"></script>
+<script src="js/rotinas.js"></script>
+<script src="moradores.js"></script>
+<script src="js/ilha.js"></script>
+</body>
+</html>

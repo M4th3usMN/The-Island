@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Grande Ilha — Novo morador</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+  :root { --noite:#0b1626; --painel:#111a22; --borda:#2c3b38; --texto:#f1ead8; --apagado:#a9b3a6; --ouro:#ffd046; --erro:#ff7a6a; color-scheme: dark; }
+  body { margin:0; background:var(--noite); color:var(--texto); font:15px "Pixelify Sans", system-ui, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; display:grid; gap:20px; grid-template-columns: minmax(0,1fr) 320px; }
+  h1 { grid-column: 1/-1; margin:0; font:700 22px Silkscreen, monospace; letter-spacing:.04em; }
+  h1 small { display:block; font:400 14px "Pixelify Sans", sans-serif; color:var(--apagado); margin-top:6px; letter-spacing:0; }
+  .box { background:var(--painel); border:2px solid var(--borda); padding:16px; display:grid; gap:14px; align-content:start; min-width:0; }
+  h2 { margin:0; font:400 12px Silkscreen, monospace; letter-spacing:.1em; color:var(--ouro); }
+  label { display:grid; gap:4px; font-size:13px; color:var(--apagado); }
+  input[type=text], textarea, select, input[type=datetime-local] { background:#0a1016; color:var(--texto); border:1px solid var(--borda); font:15px "Pixelify Sans", sans-serif; padding:7px 9px; width:100%; box-sizing:border-box; }
+  textarea { min-height:70px; resize:vertical; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
+  .cor { display:flex; gap:8px; align-items:center; }
+  .cor input[type=color] { width:40px; height:30px; border:1px solid var(--borda); background:#0a1016; padding:2px; }
+  .cor input[type=checkbox] { accent-color: var(--ouro); }
+  button { font:400 12px Silkscreen, monospace; letter-spacing:.06em; background:var(--ouro); color:#2a1808; border:0; padding:10px 14px; cursor:pointer; }
+  button.sec { background:#0a1016; color:var(--texto); border:1px solid var(--borda); }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:2px solid var(--ouro); outline-offset:2px; }
+  .prev { display:grid; place-items:center; background:#2f5a3e; border:2px solid var(--borda); height:200px; image-rendering:pixelated; }
+  .prev canvas { image-rendering: pixelated; }
+  pre { margin:0; background:#0a1016; border:1px solid var(--borda); padding:10px; font:12px/1.45 ui-monospace, Menlo, monospace; white-space:pre-wrap; word-break:break-word; max-height:320px; overflow:auto; }
+  .aviso { font-size:14px; color:var(--erro); }
+  .ok { font-size:14px; color:#7ee07a; }
+  .passos { margin:0; padding-left:20px; color:var(--apagado); font-size:14px; display:grid; gap:4px; }
+  @media (max-width: 820px) { main { grid-template-columns: minmax(0,1fr); } }
+</style>
+</head>
+<body>
+<main>
+  <h1>NOVO MORADOR <small>Preencha os dados do comentário. O bloco de código no fim vai para o arquivo moradores.js.</small></h1>
+
+  <form class="box" id="f" autocomplete="off">
+    <h2>QUEM É</h2>
+    <div class="grid">
+      <label>Nome <input type="text" id="nome" value="Aldric" required></label>
+      <label>Profissão <input type="text" id="profissao" value="Ferreiro"></label>
+      <label>Rotina diária <select id="rotina"></select></label>
+      <label>Onde mora <select id="casa"></select></label>
+      <label>Chega na ilha (horário de Manaus) <input type="datetime-local" id="chegada"></label>
+    </div>
+    <label>História (até 2 frases) <textarea id="historia">Fugiu de uma guerra e quer forjar a primeira espada da ilha.</textarea></label>
+
+    <h2>APARÊNCIA</h2>
+    <div class="grid">
+      <label>Tipo <select id="tipo"><option value="humano">Adulto</option><option value="crianca">Criança</option><option value="gato">Gato</option><option value="cao">Cachorro</option></select></label>
+      <label>Cabelo <select id="cabelo"><option>curto</option><option>longo</option><option>rabo</option><option>espetado</option><option>coque</option><option>careca</option></select></label>
+      <label>Chapéu <select id="chapeu"><option value="">nenhum</option><option>palha</option><option>capuz</option><option>mago</option><option>marinheiro</option><option>elmo</option><option>oculos</option><option>bandana</option><option>faixa</option><option>gorro</option></select></label>
+      <label>Objeto na mão <select id="acessorio"><option value="">nenhum</option><option>machado</option><option>cajado</option><option>cajado_magico</option><option>caneca</option><option>pena</option><option>martelo</option><option>enxada</option><option>espada</option><option>vara</option><option>chave</option><option>escudo_lanca</option><option>arco</option><option>frasco</option><option>planta</option><option>cesta</option><option>luneta</option><option>espirito</option></select></label>
+    </div>
+    <div class="grid" id="cores"></div>
+    <div class="grid">
+      <label class="cor"><input type="checkbox" id="manto"> Roupa longa (manto)</label>
+      <label class="cor"><input type="checkbox" id="kilt"> Kilt xadrez</label>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" class="sec" id="sortear">SORTEAR APARÊNCIA</button>
+    </div>
+  </form>
+
+  <section class="box">
+    <h2>PRÉVIA</h2>
+    <div class="prev"><canvas id="prev" width="32" height="40" style="width:128px;height:160px"></canvas></div>
+    <div id="msg"></div>
+    <h2>CÓDIGO PARA COLAR</h2>
+    <pre id="out"></pre>
+    <button type="button" id="copiar">COPIAR CÓDIGO</button>
+    <ol class="passos">
+      <li>Abra moradores.js no GitHub e toque no lápis (editar).</li>
+      <li>Cole o código no fim da lista, logo antes de <code>];</code></li>
+      <li>Salve (Commit). O site atualiza sozinho em cerca de 1 minuto.</li>
+    </ol>
+  </section>
+</main>
+<script src="js/sprites.js"></script>
+<script src="js/rotinas.js"></script>
+<script src="moradores.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const MOR = window.MORADORES || [];
+  const CORES = [['pele', 'Pele', '#e0a882', true], ['corCabelo', 'Cabelo', '#4a3020', true], ['roupa', 'Roupa', '#6a8a4a', true], ['calca', 'Calça', '#3a3028', true],
+    ['detalhe', 'Gola ou cachecol', '#c8a24a', false], ['avental', 'Avental', '#e8dcc0', false], ['barba', 'Barba', '#4a3020', false],
+    ['listras', 'Listras', '#2f4f8a', false], ['corChapeu', 'Cor do chapéu', '#5a3a2a', false], ['magia', 'Brilho da magia', '#a066ff', false]];
+  const cores = $('cores');
+  CORES.forEach(([k, n, v, sempre]) => {
+    const l = document.createElement('label'); l.className = 'cor';
+    l.innerHTML = (sempre ? '' : `<input type="checkbox" id="u-${k}">`) + `<input type="color" id="c-${k}" value="${v}"> ${n}`;
+    cores.appendChild(l);
+  });
+  Object.keys(window.IlhaRotinas).filter(k => k !== 'fundador').forEach(k => { const o = document.createElement('option'); o.value = k; o.textContent = k.replace(/_/g, ' '); $('rotina').appendChild(o); });
+  $('rotina').value = 'ferreiro';
+  [['auto', 'Casa nova'], ['torre', 'Na torre do mago'], ['taverna', 'Na taverna'], ['santuario', 'Cabana do santuário']].concat(MOR.map(m => ['com:' + m.id, 'Com ' + m.nome]))
+    .forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; $('casa').appendChild(o); });
+  const agora = new Date(Date.now() - 4 * 3600e3 + 3600e3); $('chegada').value = agora.toISOString().slice(0, 14) + '00';
+
+  const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 24) || 'morador';
+  const esc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  function dados() {
+    const v = { tipo: $('tipo').value };
+    if (v.tipo === 'gato' || v.tipo === 'cao') { v.roupa = $('c-roupa').value; if ($('u-detalhe').checked) v.detalhe = $('c-detalhe').value; }
+    else {
+      v.pele = $('c-pele').value; v.cabelo = $('cabelo').value; v.corCabelo = $('c-corCabelo').value; v.roupa = $('c-roupa').value; v.calca = $('c-calca').value;
+      CORES.forEach(([k, , , sempre]) => { if (!sempre && $('u-' + k).checked) v[k] = $('c-' + k).value; });
+      if ($('manto').checked) v.manto = true; if ($('kilt').checked) v.kilt = true;
+      if ($('chapeu').value) v.chapeu = $('chapeu').value; if ($('acessorio').value) v.acessorio = $('acessorio').value;
+    }
+    let id = slug($('nome').value), n = 2; const base = id;
+    while (MOR.some(m => m.id === id)) id = base + n++;
+    return { id, nome: $('nome').value.trim(), profissao: $('profissao').value.trim(), historia: $('historia').value.trim(), rotina: $('rotina').value, casa: $('casa').value, chegada: ($('chegada').value || '2026-11-04T20:00') + ':00-04:00', visual: v };
+  }
+  function assinatura(v) { return [v.tipo, v.pele, v.cabelo, v.corCabelo, v.roupa, v.calca, v.chapeu || '', v.acessorio || '', v.manto ? 1 : 0].join('|'); }
+  function atualizar() {
+    const d = dados();
+    const c = $('prev').getContext('2d'); c.clearRect(0, 0, 32, 40);
+    window.IlhaSprites.drawCharacter(c, 16, 34, d.visual, { t: 0, side: 1, dir: 'down' });
+    const vis = Object.entries(d.visual).map(([k, v]) => `${k}: ${typeof v === 'string' ? "'" + v + "'" : v}`).join(', ');
+    $('out').textContent = `  {\n    id: '${d.id}', nome: '${esc(d.nome)}', profissao: '${esc(d.profissao)}',\n    historia: '${esc(d.historia)}',\n    rotina: '${d.rotina}', casa: '${d.casa}', chegada: '${d.chegada}',\n    visual: { ${vis} }\n  },`;
+    const igual = MOR.find(m => assinatura(m.visual) === assinatura(d.visual));
+    const msg = $('msg');
+    if (!d.nome) { msg.className = 'aviso'; msg.textContent = 'Falta o nome.'; }
+    else if (igual) { msg.className = 'aviso'; msg.textContent = 'Aparência igual à de ' + igual.nome + '. Mude alguma cor ou objeto.'; }
+    else { msg.className = 'ok'; msg.textContent = 'Aparência única. Pronto para colar.'; }
+  }
+  function sortear() {
+    const R = a => a[Math.floor(Math.random() * a.length)];
+    const hex = () => '#' + Array.from({ length: 3 }, () => Math.floor(40 + Math.random() * 190).toString(16).padStart(2, '0')).join('');
+    $('c-pele').value = R(['#f2d6be', '#f0c4a0', '#e0a882', '#c98d66', '#a87452', '#8d5a3c', '#6e432c']);
+    $('c-corCabelo').value = R(['#1a120e', '#3a2a1a', '#6a3e2a', '#b88a4a', '#c0461e', '#e2e2e2', '#8a8a92']);
+    $('c-roupa').value = hex(); $('c-calca').value = hex(); $('cabelo').value = R(['curto', 'longo', 'rabo', 'espetado', 'coque', 'careca']);
+    atualizar();
+  }
+  $('f').addEventListener('input', atualizar); $('f').addEventListener('change', atualizar);
+  $('sortear').addEventListener('click', sortear);
+  $('copiar').addEventListener('click', () => {
+    const txt = $('out').textContent;
+    const done = () => { $('copiar').textContent = 'COPIADO!'; setTimeout(() => $('copiar').textContent = 'COPIAR CÓDIGO', 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, () => { const r = document.createRange(); r.selectNodeContents($('out')); getSelection().removeAllRanges(); getSelection().addRange(r); });
+  });
+  atualizar();
+})();
+</script>
+</body>
+</html>
