@@ -200,9 +200,24 @@
   <div class="painel-espaco"></div>
 </div>
 
-<script src="js/sprites.js"></script>
-<script src="js/rotinas.js"></script>
+<script src="sprites.js"></script>
+<script src="rotinas.js"></script>
 <script src="moradores.js"></script>
-<script src="js/ilha.js"></script>
+<script src="ilha.js"></script>
+<script>
+  (function () {
+    var falta = [];
+    if (!window.IlhaSprites) falta.push('sprites.js');
+    if (!window.IlhaRotinas) falta.push('rotinas.js');
+    if (!window.MORADORES) falta.push('moradores.js');
+    if (!window.GrandeIlha) falta.push('ilha.js');
+    if (!falta.length) return;
+    var d = document.createElement('div');
+    d.className = 'px';
+    d.style.cssText = 'position:fixed;z-index:20;left:50%;top:50%;transform:translate(-50%,-50%);max-width:min(440px,calc(100vw - 32px));padding:16px;font-size:15px;line-height:1.4';
+    d.textContent = 'A ilha não carregou porque estes arquivos não foram encontrados no site: ' + falta.join(', ') + '. Envie-os para a mesma pasta do index.html.';
+    document.body.appendChild(d);
+  })();
+</script>
 </body>
 </html>

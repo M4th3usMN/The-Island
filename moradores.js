@@ -5,7 +5,7 @@
    Campos:
      id         identificador único, sem espaços nem acentos
      nome, profissao, historia   aparecem no card do morador
-     rotina     uma das rotinas de js/rotinas.js (ex.: ferreiro, pescador)
+     rotina     uma das rotinas de rotinas.js (ex.: ferreiro, pescador)
      casa       "auto" (ganha casa nova), "com:<id>" (mora com alguém),
                 "torre", "taverna" ou "santuario"
      chegada    data e hora em que aparece na ilha (horário de Manaus)

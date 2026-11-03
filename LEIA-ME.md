@@ -12,9 +12,9 @@ tempo. A música também toca sincronizada para todos.
 | `index.html` | A ilha ao vivo (a página que o público abre) |
 | `moradores.js` | A lista de moradores. **É o único arquivo que você edita no dia a dia** |
 | `admin.html` | Ajudante para cadastrar um morador novo (monta o código pronto) |
-| `js/rotinas.js` | As rotinas de cada profissão (horários e lugares) |
-| `js/sprites.js` | O desenho em pixel art dos personagens |
-| `js/ilha.js` | A simulação, o mapa, a música e a interface |
+| `rotinas.js` | As rotinas de cada profissão (horários e lugares) |
+| `sprites.js` | O desenho em pixel art dos personagens |
+| `ilha.js` | A simulação, o mapa, a música e a interface |
 | `musica.mp3` | A trilha em loop |
 
 Para testar no computador, abra o `index.html` no navegador. A música pode não
@@ -28,7 +28,7 @@ atualiza sozinho.
 1. Crie uma conta em **github.com**.
 2. Clique em **New repository**, dê o nome `grande-ilha`, marque **Public** e crie.
 3. Na página do repositório, clique em **uploading an existing file** e arraste
-   todos os arquivos e a pasta `js` desta pasta. Clique em **Commit changes**.
+   todos os 8 arquivos desta pasta. Clique em **Commit changes**.
 4. Crie uma conta em **dash.cloudflare.com** e vá em **Workers e Pages** >
    **Criar** > **Pages** > **Conectar ao Git**.
 5. Escolha o repositório `grande-ilha`. Em configurações de build, deixe o
@@ -58,7 +58,7 @@ apenas assistindo.
 **Dicas**
 - Coloque a mesma hora de chegada para todos de um episódio. A ilha faz o
   desembarque em fila, um a cada 25 segundos, com o aviso "CHEGOU!".
-- Se a profissão não existir em `js/rotinas.js`, escolha a mais parecida
+- Se a profissão não existir em `rotinas.js`, escolha a mais parecida
   (por exemplo, um "curandeiro" pode usar a rotina `quimico`).
 - Casas novas surgem sozinhas. Há 22 terrenos livres no mapa; quando
   estiverem perto de acabar, me peça para expandir a ilha.
