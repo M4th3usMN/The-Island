@@ -1,12 +1,12 @@
 /* A Grande Ilha — simulação ao vivo.
-   Tudo é calculado a partir do relógio real (horário de Manaus): todo visitante
+   Tudo é calculado a partir do relógio real (horário de Brasília): todo visitante
    vê a mesma cena no mesmo instante, sem precisar de servidor. */
 (function () {
   'use strict';
   const SP = window.IlhaSprites, ROT = window.IlhaRotinas;
   const WW = 760, WH = 600, CX = 380, CY = 300, RX = 292, RY = 242;
-  const TZ = -4 * 3600e3;                                   // Manaus (UTC-4, sem horário de verão)
-  const DIA2 = Date.parse('2026-11-03T20:00:00-04:00');     // início do Dia 2
+  const TZ = -3 * 3600e3;                                   // Brasília (UTC-3, sem horário de verão)
+  const DIA2 = Date.parse('2026-11-03T21:00:00-03:00');     // início do Dia 2 (mesmo instante de 20:00 em Manaus)
   const SPEED = 9, SLOT = 20 * 60e3, ARR = 180e3;
   const FIRE = { x: 380, y: 300 }, HUB = { x: 380, y: 320 };
   const LOOP = 45.714286;
@@ -876,6 +876,10 @@
     if (ts - lastHud > 500) { lastHud = ts; updateHUD(t); }
   }
   updateHUD(Date.now());
-  requestAnimationFrame(loop);
-  window.GrandeIlha = { posAt, MOR, casas, LUG, estado, setPreview: v => { PREVIEW = v; placeCache.t = -1; } };
+  if (!window.ILHA_MANUAL) requestAnimationFrame(loop);
+  window.GrandeIlha = {
+    posAt, MOR, BY, casas, LUG, estado, cam, seguir,
+    renderAt: t => { placeCache.t = -1; render(t); updateHUD(t); },
+    setPreview: v => { PREVIEW = v; placeCache.t = -1; }
+  };
 })();

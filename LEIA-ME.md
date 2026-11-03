@@ -1,7 +1,7 @@
 # A Grande Ilha — como colocar no ar
 
 O site é estático: não precisa de servidor rodando 24 horas. A posição de cada
-morador é calculada a partir do relógio real (horário de Manaus), então todo
+morador é calculada a partir do relógio real (horário de Brasília), então todo
 visitante, em qualquer lugar do mundo, vê exatamente a mesma cena ao mesmo
 tempo. A música também toca sincronizada para todos.
 
@@ -74,7 +74,7 @@ apenas assistindo.
 
 ## Horários
 
-- O relógio da ilha é o de Manaus (UTC-4) para todos os visitantes.
-- O Dia 2 começou em 03/11/2026 às 20:00. Cada dia novo começa às 20:00.
+- O relógio da ilha é o de Brasília (UTC-3) para todos os visitantes.
+- O Dia 2 começou em 03/11/2026 às 21:00 (Brasília). Cada dia novo começa às 21:00.
 - Dia e noite seguem o relógio real: amanhecer por volta das 5h, noite a partir das 19h.
 - O clima (céu limpo, nublado, chuva, neblina) muda a cada 3 horas.

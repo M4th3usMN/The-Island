@@ -45,7 +45,7 @@
       <label>Profissão <input type="text" id="profissao" value="Ferreiro"></label>
       <label>Rotina diária <select id="rotina"></select></label>
       <label>Onde mora <select id="casa"></select></label>
-      <label>Chega na ilha (horário de Manaus) <input type="datetime-local" id="chegada"></label>
+      <label>Chega na ilha (horário de Brasília) <input type="datetime-local" id="chegada"></label>
     </div>
     <label>História (até 2 frases) <textarea id="historia">Fugiu de uma guerra e quer forjar a primeira espada da ilha.</textarea></label>
 
@@ -100,7 +100,7 @@
   $('rotina').value = 'ferreiro';
   [['auto', 'Casa nova'], ['torre', 'Na torre do mago'], ['taverna', 'Na taverna'], ['santuario', 'Cabana do santuário']].concat(MOR.map(m => ['com:' + m.id, 'Com ' + m.nome]))
     .forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; $('casa').appendChild(o); });
-  const agora = new Date(Date.now() - 4 * 3600e3 + 3600e3); $('chegada').value = agora.toISOString().slice(0, 14) + '00';
+  const agora = new Date(Date.now() - 3 * 3600e3 + 3600e3); $('chegada').value = agora.toISOString().slice(0, 14) + '00';
 
   const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 24) || 'morador';
   const esc = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -115,7 +115,7 @@
     }
     let id = slug($('nome').value), n = 2; const base = id;
     while (MOR.some(m => m.id === id)) id = base + n++;
-    return { id, nome: $('nome').value.trim(), profissao: $('profissao').value.trim(), historia: $('historia').value.trim(), rotina: $('rotina').value, casa: $('casa').value, chegada: ($('chegada').value || '2026-11-04T20:00') + ':00-04:00', visual: v };
+    return { id, nome: $('nome').value.trim(), profissao: $('profissao').value.trim(), historia: $('historia').value.trim(), rotina: $('rotina').value, casa: $('casa').value, chegada: ($('chegada').value || '2026-11-04T21:00') + ':00-03:00', visual: v };
   }
   function assinatura(v) { return [v.tipo, v.pele, v.cabelo, v.corCabelo, v.roupa, v.calca, v.chapeu || '', v.acessorio || '', v.manto ? 1 : 0].join('|'); }
   function atualizar() {
