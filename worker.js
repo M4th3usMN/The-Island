@@ -99,6 +99,11 @@ export class Vila extends DurableObject {
     const rota = new URL(request.url).pathname;
     if (rota === "/interno/instagram") { await this.verificaInstagram(); return new Response("ok"); }
     if (rota === "/instagram/status") return Response.json(await this.statusInstagram(), { headers: { "cache-control": "no-store" } });
+    if (rota === "/instagram/verificar") { // verificação manual, no máximo uma por minuto
+      const ult = (await this.ctx.storage.get("ig:manual")) || 0;
+      if (Date.now() - ult > 60e3) { await this.ctx.storage.put("ig:manual", Date.now()); await this.verificaInstagram(); }
+      return Response.json(await this.statusInstagram(), { headers: { "cache-control": "no-store" } });
+    }
     if (this.viajantes().length >= MAX_VIAJANTES) return new Response("A ilha está cheia agora.", { status: 503 });
     const { 0: client, 1: server } = new WebSocketPair();
     this.ctx.acceptWebSocket(server);
@@ -337,7 +342,7 @@ export class Vila extends DurableObject {
   }
   async statusInstagram() {
     const st = (await this.ctx.storage.get("ig:status")) || {};
-    return { ativo: !!st.ativo, conta: st.conta || null, etapa: st.etapa || null, tipoToken: st.tipoToken || null, codigosEnviados: st.enviados || 0, ultimaVerificacao: st.ultima ? new Date(st.ultima).toISOString() : null, ultimoEnvio: st.ultimoEnvio ? new Date(st.ultimoEnvio).toISOString() : null, erro: st.erro || null };
+    return { ativo: !!st.ativo, tokenNoServidor: !!this.env.IG_TOKEN, conta: st.conta || null, etapa: st.etapa || null, tipoToken: st.tipoToken || null, codigosEnviados: st.enviados || 0, ultimaVerificacao: st.ultima ? new Date(st.ultima).toISOString() : null, ultimoEnvio: st.ultimoEnvio ? new Date(st.ultimoEnvio).toISOString() : null, erro: st.erro || null };
   }
 }
 
@@ -351,8 +356,8 @@ export default {
       const vila = env.VILA.get(env.VILA.idFromName("grande-ilha"));
       return vila.fetch(request);
     }
-    if (url.pathname === "/instagram/status") {
-      return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/instagram/status"));
+    if (url.pathname === "/instagram/status" || url.pathname === "/instagram/verificar") {
+      return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha" + url.pathname));
     }
     if (url.pathname === "/ao-vivo") {
       if (request.headers.get("Upgrade") !== "websocket") {
