@@ -861,6 +861,29 @@
   window.addEventListener('pointerdown', primeiro, true);
   window.addEventListener('keydown', primeiro, true);
 
+  // ---------------------------------------------------------------- quem esta assistindo agora
+  const MIN_PLATEIA = 3; // abaixo disso o painel mostra so "AO VIVO"
+  function mostrarPlateia(n) {
+    const el = $('h-ao');
+    if (typeof n === 'number' && n >= MIN_PLATEIA) { el.textContent = n + ' ASSISTINDO'; el.hidden = false; }
+    else el.hidden = true;
+  }
+  let tentativas = 0;
+  function conectarPlateia() {
+    if (window.ILHA_MANUAL || !/^https?:$/.test(location.protocol)) return;
+    let ws, ping;
+    try { ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ao-vivo'); }
+    catch (e) { return; }
+    ws.onopen = () => { tentativas = 0; ping = setInterval(() => { try { ws.send('ping'); } catch (e) { } }, 50000); };
+    ws.onmessage = e => { try { const d = JSON.parse(e.data); if (typeof d.assistindo === 'number') mostrarPlateia(d.assistindo); } catch (err) { } };
+    ws.onclose = () => {
+      clearInterval(ping); mostrarPlateia(null);
+      tentativas++;
+      if (tentativas <= 8) setTimeout(conectarPlateia, Math.min(60000, 3000 * 2 ** tentativas) + Math.random() * 3000);
+    };
+  }
+  conectarPlateia();
+
   // ---------------------------------------------------------------- loop
   resize();
   cam.s = defaultScale();

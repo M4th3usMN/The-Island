@@ -51,6 +51,8 @@
   .aovivo::before { content: ""; width: 8px; height: 8px; background: #ff4a3a; box-shadow: 0 0 6px #ff4a3a; animation: pisca 1.4s steps(2) infinite; }
   @keyframes pisca { 50% { opacity: .25; } }
   .linha .dia { color: var(--ouro); }
+  .linha .assistindo { color: #ff9a8a; margin-left: -6px; }
+  .linha .assistindo::before { content: "· "; }
   .linha .fuso { font-size: 9px; color: var(--apagado); margin-left: -6px; opacity: .8; }
   .stats { display: flex; gap: 6px; flex-wrap: wrap; }
   .stat { display: inline-flex; align-items: baseline; gap: 6px; padding: 4px 8px; background: #0a1016; border: 1px solid var(--borda); font-family: var(--f-pixel); font-size: 10px; letter-spacing: .06em; color: var(--apagado); }
@@ -149,7 +151,7 @@
 <div class="topo">
   <div class="marca px">
     <h1><img class="logo" src="favicon.png" alt="" width="36" height="36">A GRANDE <b>ILHA</b></h1>
-    <div class="linha"><span class="aovivo">AO VIVO</span><span class="dia" id="h-dia">DIA 2</span><span id="h-hora">--:--</span><span class="fuso">BRASÍLIA</span><span id="h-clima">Céu limpo</span></div>
+    <div class="linha"><span class="aovivo">AO VIVO</span><span class="assistindo" id="h-ao" hidden></span><span class="dia" id="h-dia">DIA 2</span><span id="h-hora">--:--</span><span class="fuso">BRASÍLIA</span><span id="h-clima">Céu limpo</span></div>
     <div class="stats">
       <span class="stat">MORADORES <b id="h-mor">0</b></span>
       <span class="stat">CASAS <b id="h-casas">0</b></span>
