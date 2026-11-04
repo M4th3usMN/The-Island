@@ -454,7 +454,7 @@
       const confere = () => {
         const m = moradorDe(limpaArroba(el.querySelector('#jg-arroba').value));
         dica.hidden = !m;
-        if (m) { dica.innerHTML = `Esse @ é do morador <b>${esc(m.nome)}</b> (${esc(m.profissao.toLowerCase())})! Você vai jogar com ele.`; if (!store.get('codigo:' + m.arroba.toLowerCase(), '')) mostraCod(); }
+        if (m) { dica.innerHTML = `Esse @ é do morador <b>${esc(m.nome)}</b> (${esc(m.profissao.toLowerCase())})! Você vai jogar com ele.`; }
         el.querySelector('#jg-ed').closest('.jg-ed-box').hidden = !!m;
       };
       el.querySelector('#jg-arroba').addEventListener('input', confere);
