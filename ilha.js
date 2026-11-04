@@ -59,7 +59,8 @@
     [300, 216], [490, 380], [542, 352], [420, 422], [332, 454], [252, 264], [542, 242], [430, 172], [522, 414], [300, 172], [560, 300], [212, 380]];
   const YUKINE_CASA = [632, 298];
   const SLOTS_EXTRA = [[364, 432], [264, 228], [484, 204], [404, 456], [520, 188], [200, 344], [192, 292], [216, 424], [588, 360]];
-  const LOTES = [];  // casas com lugar marcado (casa: 'lote:x,y' em moradores.js)
+  const LOTES = [];
+  const TRAP = { x0: 586, y0: 170, x1: 597, y1: 137 }; // trapiche da praia até a ponte  // casas com lugar marcado (casa: 'lote:x,y' em moradores.js)
 
   // ---------------------------------------------------------------- moradores
   const MOR = (window.MORADORES || []).map((m, i) => Object.assign({}, m, { _i: i }));
@@ -487,6 +488,12 @@
       P(c, x - 9, y - 5, 18, 8, '#8a6234'); for (let i = -9; i < 9; i += 3) P(c, x + i, y - 5, 1, 8, '#6e4c28');
       P(c, x - 9, y - 7, 18, 1, '#5e3c24'); P(c, x - 9, y + 3, 18, 1, '#5e3c24');
       P(c, x - 9, y - 8, 2, 3, '#5e3c24'); P(c, x + 7, y - 8, 2, 3, '#5e3c24'); P(c, x - 9, y + 2, 2, 3, '#5e3c24'); P(c, x + 7, y + 2, 2, 3, '#5e3c24');
+      // trapiche: liga a praia à ponte (por ele os viajantes chegam até lá)
+      for (let yy = TRAP.y1; yy <= TRAP.y0; yy++) {
+        const cx = Math.round(TRAP.x0 + (yy - TRAP.y0) / (TRAP.y1 - TRAP.y0) * (TRAP.x1 - TRAP.x0));
+        P(c, cx - 2, yy + 1, 5, 1, 'rgba(0,0,0,.22)'); P(c, cx - 2, yy, 5, 1, (yy >> 1) % 2 ? '#8a6234' : '#7a5530');
+        if ((yy - TRAP.y1) % 9 === 4) { P(c, cx - 3, yy, 1, 3, '#5e3c24'); P(c, cx + 3, yy, 1, 3, '#5e3c24'); }
+      }
     }
   };
   function drawFire(c, t) {
@@ -954,7 +961,9 @@
     posAt, MOR, BY, casas, LUG, estado, cam, seguir, pararSeguir,
     rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, jogados: JOGADOS, arrived: (m, t) => t >= m._ch, localHours,
     andavel: (x, y) => {
-      if (Math.hypot(x - LUG.ponte.sx, y - LUG.ponte.sy) < 12 || Math.hypot(x - LUG.cais.sx, y - LUG.cais.sy) < 9) return true; // ponte e cais
+      if (x > LUG.ponte.x - 9 && x < LUG.ponte.x + 9 && y > LUG.ponte.y - 5 && y < LUG.ponte.y + 4) return true; // tábuas da ponte
+      if (y >= TRAP.y1 && y <= TRAP.y0 + 2 && Math.abs(x - (TRAP.x0 + (y - TRAP.y0) / (TRAP.y1 - TRAP.y0) * (TRAP.x1 - TRAP.x0))) < 3) return true; // trapiche
+      if (Math.hypot(x - LUG.cais.sx, y - LUG.cais.sy) < 9) return true; // cais
       if (idist(x, y) >= 0.985 || (((x - LAKE.x) / LAKE.rx) ** 2 + ((y - LAKE.y) / LAKE.ry) ** 2) < 1.1) return false;
       if (Math.hypot(x - FIRE.x, (y - FIRE.y - 2) / 0.7) < 8) return false; // fogueira
       const agora = Date.now();

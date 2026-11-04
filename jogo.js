@@ -185,7 +185,7 @@
     if (aqui === 'fogueira') { registra('fogueira', 0.5); if (h < 4) conquista('coruja'); }
     if (aqui === 'pasto' && h >= 5 && h < 7) conquista('madrugador');
     if (G.MOR.some(m => { const q = G.posAt(m, t); return q && q.arriving && Math.hypot(q.x - eu.x, q.y - eu.y) < 48; })) conquista('recepcao');
-    if ((K.quadro() || []).some(q => Math.hypot(q.p.x - eu.x, q.p.y - eu.y) < 16)) registra('mascote');
+    if ((K.quadro() || []).some(q => q.a.arroba !== eu.arroba && Math.hypot(q.p.x - eu.x, q.p.y - eu.y) < 16)) registra('mascote'); // o próprio mascote não vale
     if (passosAcum >= 1) { const n = Math.floor(passosAcum); passosAcum -= n; registra('passos', n); }
     if (S.conversa) {
       const m = G.BY[S.conversa], q = m && G.posAt(m, t);

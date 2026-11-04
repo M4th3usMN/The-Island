@@ -36,6 +36,7 @@ window.COMUNIDADE = {
 
   apoiadores: [
     // { arroba: 'fulano', mascote: 'caranguejo', desde: '2026-11-04T17:00:00-04:00' },
+    { arroba: 'jaraeeljt', mascote: 'sapinho', desde: '2026-11-04T18:24:00-04:00' }, // PIX de R$ 5,00 (Jareel, o ferreiro)
   ],
 
   aviso: null,

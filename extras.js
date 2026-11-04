@@ -168,7 +168,15 @@
     return { x: A.x + (B.x - A.x) * k, y: A.y + (B.y - A.y) * k, anda: k < 1, s: B.x >= A.x ? 1 : -1 };
   }
 
-  let quadro = [], seguirMasc = null;
+  let quadro = [], seguirMasc = null, ultimoT = 0;
+  // apoiador jogando no modo viajante: o mascote vai atrás do personagem dele
+  const atras = {};
+  function donoJogando(arroba) {
+    const J = window.IlhaJogo; if (!J || !J.on) return null;
+    const S = J.S; if (S.eu && S.eu.arroba === arroba) return S.eu;
+    for (const o of S.outros.values()) if (o.arroba === arroba) return o;
+    return null;
+  }
   function desenha(c, a, x, y, t, anda, s) {
     const M = MASCOTES[a.tipo || a];
     const f = anda || M.voa ? Math.floor(t * (M.voa ? 8 : 6)) % 2 : 0;
@@ -176,9 +184,17 @@
   }
   G.hooks.push((objs, c, info) => {
     quadro = [];
+    const dt = Math.min(0.6, Math.max(0, (info.t - ultimoT) / 1000)); ultimoT = info.t;
     ativos(info.t).forEach(a => {
-      const p = posMascote(a, info.t);
+      let p = posMascote(a, info.t);
       if (!p) return;
+      const dono = donoJogando(a.arroba);
+      if (dono) {
+        const s = dono.s || 1, alvo = { x: dono.x - s * 9, y: dono.y + 2 }, f = atras[a.arroba] || (atras[a.arroba] = { x: p.x, y: p.y });
+        const d = Math.hypot(alvo.x - f.x, alvo.y - f.y);
+        if (d > 120) { f.x = alvo.x; f.y = alvo.y; } else { const k = 1 - Math.pow(0.02, dt); f.x += (alvo.x - f.x) * k; f.y += (alvo.y - f.y) * k; }
+        p = { x: f.x, y: f.y, anda: d > 1.5, s: alvo.x >= f.x ? 1 : -1 };
+      } else delete atras[a.arroba];
       quadro.push({ a, p });
       objs.push({
         y: p.y, f: () => {
