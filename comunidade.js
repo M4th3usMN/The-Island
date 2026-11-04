@@ -28,7 +28,7 @@ window.COMUNIDADE = {
   instagram: 'the_island.lab',
 
   apoio: {
-    chavePix: '',
+    chavePix: 'b892cf62-409e-47de-8cc7-6782b06db1e6',
     recebedor: '',
     cidade: '',
     valores: [5, 10, 20]
