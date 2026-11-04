@@ -60,6 +60,7 @@
   const BY = {}; MOR.forEach(m => { BY[m.id] = m; });
   let PREVIEW = false;
   const HOOKS = window.IlhaHooks = window.IlhaHooks || [];
+  const TEXTO = window.IlhaTexto = window.IlhaTexto || [];
 
   const casas = [];
   (function setup() {
@@ -657,6 +658,8 @@
         ctx.fillStyle = '#2a2420'; ctx.fillText(fr, sx, by + h - (fs === 16 ? 6 : 5));
       }
     });
+    // textos de extras (ex.: @ dos viajantes, falas, em jogo.js)
+    TEXTO.forEach(h => { try { h(ctx, scr, fs, { t, sec }); } catch (e) { } });
   }
 
   // ---------------------------------------------------------------- HUD e lista
@@ -799,6 +802,7 @@
     const moved = drag.moved; drag = null; stage.style.cursor = 'grab';
     if (moved) return;
     const q = hitAt(e.clientX, e.clientY);
+    if (window.IlhaClique && window.IlhaClique(e.clientX, e.clientY, q)) return; // modo jogador (jogo.js)
     if (q) seguir(q.m.id); else if (pinnedId) pararSeguir();
   });
   stage.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY < 0 ? 1 : -1); }, { passive: false });
@@ -905,7 +909,21 @@
   if (!window.ILHA_MANUAL) requestAnimationFrame(loop);
   window.GrandeIlha = {
     posAt, MOR, BY, casas, LUG, estado, cam, seguir, pararSeguir,
-    rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, arrived: (m, t) => t >= m._ch,
+    rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, arrived: (m, t) => t >= m._ch, localHours,
+    andavel: (x, y) => {
+      if (Math.hypot(x - LUG.ponte.sx, y - LUG.ponte.sy) < 12 || Math.hypot(x - LUG.cais.sx, y - LUG.cais.sy) < 9) return true; // ponte e cais
+      if (idist(x, y) >= 0.985 || (((x - LAKE.x) / LAKE.rx) ** 2 + ((y - LAKE.y) / LAKE.ry) ** 2) < 1.1) return false;
+      if (Math.hypot(x - FIRE.x, (y - FIRE.y - 2) / 0.7) < 8) return false; // fogueira
+      const agora = Date.now();
+      for (const h of casas) if (x > h.x - 10 && x < h.x + 10 && y > h.y - 11 && y < h.y - 1 && h.donos.some(m => agora >= m._ch)) return false; // paredes das casas
+      for (const k of ['taverna', 'forja', 'oficina', 'laboratorio', 'biblioteca', 'torre']) { const L = LUG[k]; if (Math.abs(x - L.x) < 11 && y > L.y - 14 && y < L.y - 2) return false; }
+      for (let i = 0; i < STREAM.length - 1; i++) { // riacho: só se atravessa pela ponte
+        const [ax, ay] = STREAM[i], [bx, by] = STREAM[i + 1], L2 = (bx - ax) ** 2 + (by - ay) ** 2;
+        const k = clamp(((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / L2, 0, 1);
+        if (Math.hypot(x - ax - (bx - ax) * k, y - ay - (by - ay) * k) < 3.5) return false;
+      }
+      return true;
+    },
     toWorld: (cx, cy) => { const r = stage.getBoundingClientRect(); return { x: (cx - r.left) / cam.s + lastOx, y: (cy - r.top) / cam.s + lastOy }; },
     renderAt: t => { placeCache.t = -1; render(t); updateHUD(t); },
     setPreview: v => { PREVIEW = v; placeCache.t = -1; }

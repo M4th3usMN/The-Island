@@ -84,6 +84,23 @@ Também em `comunidade.js`: `aviso` (popup que aparece uma vez para cada
 visitante) e `diario` (anotações especiais do Diário da Ilha; chegadas,
 metas e apoiadores entram no diário sozinhos).
 
+## Modo viajante (jogar na ilha)
+
+Arquivos: `jogo.js` (personagem, missões e conquistas) e a classe `Vila` em
+`worker.js` (servidor que junta os viajantes e guarda o progresso de cada @).
+
+- Quem toca em **▶ JOGAR** entra com o @ do Instagram, monta o visual e
+  desembarca no cais. Todos os viajantes se veem andando, com o @ em cima.
+- Na primeira entrada, o @ ganha um **código de acesso**. Sem ele, ninguém
+  entra com aquele @, nem em outro aparelho.
+- Os moradores dos comentários não mudam: viajantes só visitam e conversam.
+- Missões do dia (3, iguais para todos, trocam às 21h de Brasília),
+  16 conquistas e níveis por XP.
+- Para bloquear alguém: coloque o @ em `banidos.json`. Vale em até 1 minuto.
+- Custos: no plano grátis da Cloudflare, os Durable Objects têm limite de
+  pedidos por dia. Com muita gente jogando ao mesmo tempo, pode valer o
+  plano pago (Workers Paid, US$ 5 por mês; confira o preço atual).
+
 ## Domínio próprio (opcional)
 
 1. Compre um domínio, por exemplo no **registro.br** (um `.com.br` custa em

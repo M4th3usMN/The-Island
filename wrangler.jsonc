@@ -9,9 +9,13 @@
     "binding": "ASSETS"
   },
   "durable_objects": {
-    "bindings": [{ "name": "PLATEIA", "class_name": "Plateia" }]
+    "bindings": [
+      { "name": "PLATEIA", "class_name": "Plateia" },
+      { "name": "VILA", "class_name": "Vila" }
+    ]
   },
   "migrations": [
-    { "tag": "v1", "new_sqlite_classes": ["Plateia"] }
+    { "tag": "v1", "new_sqlite_classes": ["Plateia"] },
+    { "tag": "v2", "new_sqlite_classes": ["Vila"] }
   ]
 }

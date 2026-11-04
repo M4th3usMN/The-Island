@@ -235,7 +235,7 @@
   stage.addEventListener('pointerleave', () => { tip.hidden = true; });
   stage.addEventListener('pointerup', e => {
     const moveu = toque && Math.abs(e.clientX - toque.x) + Math.abs(e.clientY - toque.y) > 5; toque = null;
-    if (moveu) return;
+    if (moveu || (window.IlhaJogo && window.IlhaJogo.on)) return; // jogando: tocar no chão é andar
     const q = mascoteEm(e.clientX, e.clientY);
     if (q && $('card').hidden) abrirSelo(q.a);
   });
@@ -580,5 +580,6 @@
   checaFesta(Date.now());
   setTimeout(() => { if (!store.get('boas-vindas', 0)) abrirBoasVindas(true); else talvezAviso(); }, 1200);
 
-  window.IlhaComunidade = { brcode, crc16, MASCOTES, APO, entradas, abrirApoio, abrirDiario, abrirBoasVindas, abrirSelo, selo };
+  window.IlhaComunidade = { brcode, crc16, MASCOTES, APO, entradas, abrirApoio, abrirDiario, abrirBoasVindas, abrirSelo, selo,
+    abrir, fechar, abas, anuncia, ativos, posMascote, copiar, esc, limpaArroba, store, IG, quadro: () => quadro };
 })();

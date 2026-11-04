@@ -40,9 +40,175 @@ export class Plateia extends DurableObject {
   }
 }
 
+// ---------------------------------------------------------------------------
+// A Vila: viajantes (visitantes que controlam um personagem) andando juntos.
+// Guarda o visual, o nível e o progresso de missões/conquistas de cada @.
+// Cada @ tem um código de acesso secreto, criado na primeira entrada: sem ele,
+// ninguém entra com o @ de outra pessoa.
+const MAX_VIAJANTES = 80;
+const EMOTES = 6;
+const PROIBIDO = ['porra', 'caralh', 'buceta', 'xoxota', 'piroca', 'arrombad', 'viado', 'fdp', 'vsf', 'tnc', 'merda', 'putaria', 'puta_', '_puta', 'nazi', 'hitler', 'estupr', 'pedof', 'pedo_', 'racist', 'macaco_', 'bosta', 'cuzao', 'otario', 'vagabund', 'piranha'];
+const CORES = /^#[0-9a-f]{6}$/i;
+const CABELOS = ['curto', 'longo', 'rabo', 'espetado', 'coque', 'careca'];
+const CHAPEUS = ['', 'palha', 'capuz', 'gorro', 'bandana', 'faixa', 'oculos', 'marinheiro'];
+const nivel = xp => 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 60));
+const limpaArroba = s => String(s || '').trim().replace(/^@+/, '').toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 30);
+const num = (v, a, b) => (typeof v === 'number' && isFinite(v) ? Math.max(a, Math.min(b, Math.round(v * 10) / 10)) : null);
+
+function limpaLook(v) {
+  if (!v || typeof v !== 'object') return null;
+  const cor = (k, d) => (CORES.test(v[k] || '') ? v[k].toLowerCase() : d);
+  const o = { tipo: 'humano', pele: cor('pele', '#e0a882'), cabelo: CABELOS.includes(v.cabelo) ? v.cabelo : 'curto', corCabelo: cor('corCabelo', '#4a3020'),
+    roupa: cor('roupa', '#3a6a8a'), calca: cor('calca', '#3a3028') };
+  if (CHAPEUS.includes(v.chapeu) && v.chapeu) { o.chapeu = v.chapeu; o.corChapeu = cor('corChapeu', '#6a4a2a'); }
+  if (CORES.test(v.barba || '')) o.barba = v.barba.toLowerCase();
+  if (v.manto === true) o.manto = true;
+  return o;
+}
+function limpaPerfil(p) {
+  if (!p || typeof p !== 'object' || Array.isArray(p)) return null;
+  const s = JSON.stringify(p);
+  if (s.length > 6000) return null;
+  const xp = num(p.xp, 0, 1e7);
+  if (xp === null) return null;
+  return JSON.parse(s);
+}
+async function hash(codigo) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('grande-ilha:' + codigo));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+function novoCodigo() {
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r = crypto.getRandomValues(new Uint8Array(12));
+  let s = ''; r.forEach((n, i) => { s += A[n % A.length]; if (i === 3 || i === 7) s += '-'; });
+  return s;
+}
+
+export class Vila extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.env = env;
+    this.ban = { lista: new Set(), t: 0 };
+    this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
+  }
+
+  async fetch(request) {
+    if (this.viajantes().length >= MAX_VIAJANTES) return new Response("A ilha está cheia agora.", { status: 503 });
+    const { 0: client, 1: server } = new WebSocketPair();
+    this.ctx.acceptWebSocket(server);
+    server.serializeAttachment({});
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  viajantes() { return this.ctx.getWebSockets().map(ws => [ws, ws.deserializeAttachment() || {}]).filter(([, a]) => a.id); }
+  envia(ws, m) { try { ws.send(JSON.stringify(m)); } catch (e) { } }
+  todos(m, exceto) { const s = JSON.stringify(m); for (const [ws] of this.viajantes()) if (ws !== exceto) { try { ws.send(s); } catch (e) { } } }
+  publico(a) { return { id: a.id, arroba: a.arroba, look: a.look, x: a.x, y: a.y, lv: a.lv || 1 }; }
+
+  // lista de @ bloqueados: arquivo banidos.json do próprio site (atualiza a cada 60 s)
+  async banidos() {
+    if (Date.now() - this.ban.t > 60e3) {
+      this.ban.t = Date.now();
+      try {
+        const r = await this.env.ASSETS.fetch(new Request("https://ilha/banidos.json"));
+        if (r.ok) { const j = await r.json(); this.ban.lista = new Set((Array.isArray(j) ? j : j.banidos || []).map(limpaArroba)); }
+      } catch (e) { }
+    }
+    return this.ban.lista;
+  }
+
+  async webSocketMessage(ws, raw) {
+    if (typeof raw !== "string" || raw.length > 8000) return;
+    let m; try { m = JSON.parse(raw); } catch (e) { return; }
+    const a = ws.deserializeAttachment() || {}, agora = Date.now();
+    // limite de mensagens por conexão (balde: 10 por segundo, rajada de 20)
+    a.b = Math.min(20, (a.b ?? 20) + (agora - (a.bt || agora)) / 1000 * 10); a.bt = agora;
+    if (a.b < 1) { ws.serializeAttachment(a); return; }
+    a.b -= 1;
+    if (m.t === "entrar") return this.entrar(ws, a, m);
+    if (!a.id) { ws.serializeAttachment(a); return; }
+    if (m.t === "alvo") {
+      const x = num(m.x, 0, 760), y = num(m.y, 0, 600);
+      if (x !== null && y !== null) { a.x = x; a.y = y; this.todos({ t: "alvo", id: a.id, x, y }, ws); }
+    } else if (m.t === "emote") {
+      const i = m.i | 0;
+      if (i >= 0 && i < EMOTES && agora - (a.et || 0) > 2000) { a.et = agora; this.todos({ t: "emote", id: a.id, i }); }
+    } else if (m.t === "visual") {
+      const look = limpaLook(m.look);
+      if (look) { a.look = look; this.todos({ t: "visual", id: a.id, look }, ws); await this.salva(a.arroba, { look }); }
+    } else if (m.t === "perfil") {
+      const p = limpaPerfil(m.perfil);
+      if (p && agora - (a.st || 0) > 3000) {
+        a.st = agora;
+        const lv = nivel(p.xp);
+        if (lv !== a.lv) { a.lv = lv; this.todos({ t: "lv", id: a.id, lv }, ws); }
+        await this.salva(a.arroba, { perfil: p });
+      }
+    }
+    ws.serializeAttachment(a);
+  }
+
+  async salva(arroba, parte) {
+    const k = "j:" + arroba, rec = await this.ctx.storage.get(k);
+    if (rec) await this.ctx.storage.put(k, Object.assign(rec, parte));
+  }
+
+  async entrar(ws, a, m) {
+    if (a.id) return;
+    const arroba = limpaArroba(m.arroba);
+    const erro = (motivo, extra) => { ws.serializeAttachment(a); this.envia(ws, Object.assign({ t: "erro", motivo }, extra || {})); };
+    if (arroba.length < 2) return erro("Digite um @ válido.");
+    if (PROIBIDO.some(p => arroba.includes(p)) || (await this.banidos()).has(arroba)) return erro("Esse @ não pode entrar na ilha.");
+    const k = "j:" + arroba;
+    let rec = await this.ctx.storage.get(k), codigoNovo = null;
+    const codigo = String(m.codigo || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^(.{4})(.{4})(.{4})$/, "$1-$2-$3");
+    if (rec) {
+      if (!codigo || (await hash(codigo)) !== rec.h) {
+        a.falhas = (a.falhas || 0) + 1;
+        if (a.falhas > 6) { ws.serializeAttachment(a); try { ws.close(4003, "tentativas demais"); } catch (e) { } return; }
+        return erro(codigo ? "Código de acesso errado." : "Esse @ já tem um viajante na ilha. Digite o código de acesso dele.", { precisaCodigo: true });
+      }
+    } else {
+      codigoNovo = novoCodigo();
+      rec = { h: await hash(codigoNovo), look: null, perfil: null, criado: Date.now() };
+    }
+    const look = limpaLook(m.look) || rec.look || limpaLook({});
+    rec.look = look; rec.visto = Date.now();
+    await this.ctx.storage.put(k, rec);
+    // o mesmo @ aberto em outro aparelho sai
+    for (const [w, b] of this.viajantes()) if (b.arroba === arroba && w !== ws) {
+      this.envia(w, { t: "fim", motivo: "Você entrou na ilha por outro aparelho." });
+      const velho = b.id; b.id = null; w.serializeAttachment(b); this.todos({ t: "saiu", id: velho }, w);
+      try { w.close(4001, "outra sessão"); } catch (e) { }
+    }
+    Object.assign(a, { id: crypto.randomUUID().slice(0, 8), arroba, look, x: 392, y: 512, lv: nivel((rec.perfil && rec.perfil.xp) || 0), falhas: 0 });
+    ws.serializeAttachment(a);
+    const outros = this.viajantes().filter(([w]) => w !== ws).map(([, b]) => this.publico(b));
+    this.envia(ws, { t: "ok", eu: this.publico(a), codigo: codigoNovo, perfil: rec.perfil, outros });
+    this.todos({ t: "entrou", ...this.publico(a) }, ws);
+  }
+
+  async webSocketClose(ws, code, reason) {
+    const a = ws.deserializeAttachment() || {};
+    if (a.id) this.todos({ t: "saiu", id: a.id }, ws);
+    try { ws.close(code, reason); } catch (e) { }
+  }
+
+  async webSocketError(ws) {
+    const a = ws.deserializeAttachment() || {};
+    if (a.id) this.todos({ t: "saiu", id: a.id }, ws);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/jogo") {
+      if (request.headers.get("Upgrade") !== "websocket") {
+        return new Response("Esta rota é usada pela página da ilha.", { status: 426 });
+      }
+      const vila = env.VILA.get(env.VILA.idFromName("grande-ilha"));
+      return vila.fetch(request);
+    }
     if (url.pathname === "/ao-vivo") {
       if (request.headers.get("Upgrade") !== "websocket") {
         return new Response("Esta rota é usada pela página da ilha.", { status: 426 });
