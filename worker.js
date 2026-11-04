@@ -47,6 +47,7 @@ export class Plateia extends DurableObject {
 // ninguém entra com o @ de outra pessoa.
 const MAX_VIAJANTES = 80;
 const IG_VERSAO = "v23.0";
+const IG_CONTA = "17841467331405114"; // ID da conta @the_island.lab (aparece no painel da Meta)
 const SITE = "the-island.theisland-app.workers.dev";
 const EMOTES = 6;
 const PROIBIDO = ['porra', 'caralh', 'buceta', 'xoxota', 'piroca', 'arrombad', 'viado', 'fdp', 'vsf', 'tnc', 'merda', 'putaria', 'puta_', '_puta', 'nazi', 'hitler', 'estupr', 'pedof', 'pedo_', 'racist', 'macaco_', 'bosta', 'cuzao', 'otario', 'vagabund', 'piranha'];
@@ -242,8 +243,11 @@ export class Vila extends DurableObject {
   // (uma vez só) com o código dela. O comentário prova que o @ é dela: o código
   // enviado passa a ser o único que vale para esse @, mesmo que alguém tenha
   // entrado antes com ele. Precisa do segredo IG_TOKEN no Cloudflare.
+  // dois tipos de token: "IGAA..." (login do Instagram, graph.instagram.com) e
+  // "EAA..." (login unificado / usuário do sistema, graph.facebook.com)
   async ig(caminho, opts) {
-    const r = await fetch("https://graph.instagram.com/" + IG_VERSAO + caminho, opts);
+    const host = this.igHost || "graph.instagram.com";
+    const r = await fetch("https://" + host + "/" + IG_VERSAO + caminho, opts);
     const j = await r.json().catch(() => ({}));
     if (!r.ok || j.error) throw new Error((j.error && j.error.message) || "HTTP " + r.status);
     return j;
@@ -253,7 +257,7 @@ export class Vila extends DurableObject {
     if (!t && this.env.IG_TOKEN) t = { valor: this.env.IG_TOKEN, renovado: Date.now() };
     if (!t) return null;
     if (this.env.IG_TOKEN && t.origem !== this.env.IG_TOKEN) t = { valor: this.env.IG_TOKEN, renovado: Date.now(), origem: this.env.IG_TOKEN }; // token novo colado no painel
-    if (Date.now() - t.renovado > 20 * 864e5) { // o token dura 60 dias: renova a cada 20
+    if (/^IG/.test(t.valor) && Date.now() - t.renovado > 20 * 864e5) { // token do Instagram dura 60 dias: renova a cada 20
       try {
         const r = await fetch("https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=" + encodeURIComponent(t.valor));
         const j = await r.json();
@@ -279,13 +283,19 @@ export class Vila extends DurableObject {
       const token = await this.tokenInstagram();
       if (!token) { st.ativo = false; st.erro = "Falta o segredo IG_TOKEN no Cloudflare."; await this.ctx.storage.put("ig:status", st); return; }
       const auth = { headers: { Authorization: "Bearer " + token } };
-      const eu = await this.ig("/me?fields=user_id,username", auth);
+      const fb = !/^IG/.test(token);
+      this.igHost = fb ? "graph.facebook.com" : "graph.instagram.com";
+      st.etapa = "conta";
+      const eu = fb ? Object.assign({ user_id: IG_CONTA }, await this.ig("/" + IG_CONTA + "?fields=id,username", auth)) : await this.ig("/me?fields=user_id,username", auth);
       const meuArroba = String(eu.username || "").toLowerCase();
       const moradores = await this.moradoresPorArroba();
-      const midias = await this.ig("/me/media?fields=id,timestamp&limit=8", auth);
-      let envios = 0;
+      st.etapa = "vídeos";
+      const midias = await this.ig((fb ? "/" + IG_CONTA : "/me") + "/media?fields=id,timestamp&limit=8", auth);
+      let envios = 0, parou = false;
       for (const md of midias.data || []) {
+        if (parou) break;
         if (Date.now() - Date.parse(md.timestamp) > 9 * 864e5) continue;
+        st.etapa = "comentários";
         const cs = await this.ig("/" + md.id + "/comments?fields=id,text,timestamp,username,from&limit=50", auth);
         for (const c of cs.data || []) {
           const arroba = limpaArroba((c.from && c.from.username) || c.username);
@@ -299,11 +309,11 @@ export class Vila extends DurableObject {
           try {
             await this.ig("/" + eu.user_id + "/messages", { method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: JSON.stringify({ recipient: { comment_id: c.id }, message: { text: texto } }) });
           } catch (e) {
-            const n = ((await this.ctx.storage.get("dmerro:" + arroba)) || 0) + 1;
-            await this.ctx.storage.put("dmerro:" + arroba, n);
-            if (n >= 3) await this.ctx.storage.put("dm:" + arroba, { t: Date.now(), falhou: String(e.message).slice(0, 200) });
+            // a Meta recusou (falta de permissão, limite etc.): para esta rodada e tenta de novo daqui a 5 min,
+            // sem marcar a pessoa como atendida
             st.erro = "Mensagem para @" + arroba + ": " + String(e.message).slice(0, 200);
-            continue;
+            st.etapa = "mensagens";
+            parou = true; break;
           }
           envios++; st.enviados++;
           await this.ctx.storage.put("dm:" + arroba, { t: Date.now(), comentario: c.id });
@@ -318,8 +328,8 @@ export class Vila extends DurableObject {
           }
         }
       }
-      st.ativo = true; st.conta = meuArroba; if (envios) st.ultimoEnvio = Date.now();
-      if (!st.erro || envios) delete st.erro;
+      st.ativo = !parou; st.conta = meuArroba; if (!parou) st.etapa = "ok"; st.tipoToken = fb ? "facebook (usuário do sistema)" : "instagram"; if (envios) st.ultimoEnvio = Date.now();
+      if (!parou) delete st.erro;
     } catch (e) {
       st.ativo = false; st.erro = String(e.message).slice(0, 300);
     }
@@ -327,7 +337,7 @@ export class Vila extends DurableObject {
   }
   async statusInstagram() {
     const st = (await this.ctx.storage.get("ig:status")) || {};
-    return { ativo: !!st.ativo, conta: st.conta || null, codigosEnviados: st.enviados || 0, ultimaVerificacao: st.ultima ? new Date(st.ultima).toISOString() : null, ultimoEnvio: st.ultimoEnvio ? new Date(st.ultimoEnvio).toISOString() : null, erro: st.erro || null };
+    return { ativo: !!st.ativo, conta: st.conta || null, etapa: st.etapa || null, tipoToken: st.tipoToken || null, codigosEnviados: st.enviados || 0, ultimaVerificacao: st.ultima ? new Date(st.ultima).toISOString() : null, ultimoEnvio: st.ultimoEnvio ? new Date(st.ultimoEnvio).toISOString() : null, erro: st.erro || null };
   }
 }
 
