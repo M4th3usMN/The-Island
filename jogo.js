@@ -325,10 +325,10 @@
   let ultimoT = 0;
   const fase = id => { let h = 0; for (const ch of String(id)) h = h * 31 + ch.charCodeAt(0) | 0; return (h >>> 0) % 100 / 10; };
   G.hooks.push((objs, c, info) => {
-    const dt = Math.min(0.1, Math.max(0, (info.t - ultimoT) / 1000)); ultimoT = info.t;
+    const dt = Math.min(0.6, Math.max(0, (info.t - ultimoT) / 1000)); ultimoT = info.t;
     if (!S.on) return;
-    passo(S.eu, dt, true);
-    S.outros.forEach(o => passo(o, dt, false));
+    // passos pequenos: mesmo com poucos quadros por segundo, ninguém atravessa parede
+    for (let r = dt; r > 0; r -= 0.05) { const d = Math.min(0.05, r); passo(S.eu, d, true); S.outros.forEach(o => passo(o, d, false)); }
     [S.eu, ...S.outros.values()].forEach(v => objs.push({ y: v.y, f: () => SP.drawCharacter(c, v.x, v.y, v.look, { t: info.sec + fase(v.id), walking: v.anda, side: v.s, dir: v.dir || 'down' }) }));
     if (S.marca && S.marca.ate > info.t) { const k = (S.marca.ate - info.t) / 600 * 3; objs.push({ y: S.marca.y - 1, f: () => { G.P(c, S.marca.x - k, S.marca.y, 1, 1, '#ffd046'); G.P(c, S.marca.x + k, S.marca.y, 1, 1, '#ffd046'); G.P(c, S.marca.x, S.marca.y - k / 2, 1, 1, '#ffd046'); G.P(c, S.marca.x, S.marca.y + k / 2, 1, 1, '#ffd046'); } }); }
     if (!S.camLivre && !G.cam.follow) { G.cam.x += (S.eu.x - G.cam.x) * 0.15; G.cam.y += (S.eu.y - 8 - G.cam.y) * 0.15; }
