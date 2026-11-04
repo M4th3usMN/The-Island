@@ -174,14 +174,22 @@ export class Vila extends DurableObject {
     const k = "j:" + arroba;
     let rec = await this.ctx.storage.get(k), codigoNovo = null;
     const codigo = String(m.codigo || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/^(.{4})(.{4})(.{4})$/, "$1-$2-$3");
-    if (rec) {
+    const convite = (await this.reservados())[arroba];
+    if (rec && convite) {
+      // @ de morador: só o código de convite vale, mesmo que alguém tenha criado um viajante antes
+      if (!codigo || (await hash(codigo)) !== convite) {
+        a.falhas = (a.falhas || 0) + 1;
+        if (a.falhas > 6) { ws.serializeAttachment(a); try { ws.close(4003, "tentativas demais"); } catch (e) { } return; }
+        return erro(codigo ? "Código de convite errado." : "Esse @ é de um morador da ilha. Digite o código de convite que o @the_island.lab mandou no seu direct.", { precisaCodigo: true });
+      }
+      rec.h = convite; rec.morador = true;
+    } else if (rec) {
       if (!codigo || (await hash(codigo)) !== rec.h) {
         a.falhas = (a.falhas || 0) + 1;
         if (a.falhas > 6) { ws.serializeAttachment(a); try { ws.close(4003, "tentativas demais"); } catch (e) { } return; }
         return erro(codigo ? "Código de acesso errado." : "Esse @ já tem um viajante na ilha. Digite o código de acesso dele.", { precisaCodigo: true });
       }
     } else {
-      const convite = (await this.reservados())[arroba];
       if (convite) {
         if (!codigo || (await hash(codigo)) !== convite) {
           a.falhas = (a.falhas || 0) + 1;
