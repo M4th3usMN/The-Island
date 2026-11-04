@@ -441,6 +441,7 @@
       <label class="m-campo"><span>Seu @ do Instagram</span><input id="jg-arroba" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="@seu_usuario" value="${esc(arroba ? '@' + arroba : '')}"></label>
       <label class="m-campo" id="jg-cod-box" hidden><span>Código de acesso ou de convite</span><input id="jg-codigo" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX"></label>
       <button type="button" class="jg-link" id="jg-tenho">Já joguei em outro aparelho (tenho um código)</button>
+      <p class="m-nota">Comentou em um vídeo do @${esc(K.IG)}? Seu código chega sozinho no seu direct, em poucos minutos. Ele protege o seu @: com ele, ninguém joga no seu lugar.</p>
       <p class="m-nota">Seu @ aparece em cima do personagem para todos. Nomes ofensivos são bloqueados.</p>
       <div class="jg-ed-box"><h3>SEU VISUAL</h3><div id="jg-ed"></div></div>
       <p class="m-erro" id="jg-erro" role="alert" hidden></p>

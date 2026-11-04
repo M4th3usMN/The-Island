@@ -46,6 +46,8 @@ export class Plateia extends DurableObject {
 // Cada @ tem um código de acesso secreto, criado na primeira entrada: sem ele,
 // ninguém entra com o @ de outra pessoa.
 const MAX_VIAJANTES = 80;
+const IG_VERSAO = "v23.0";
+const SITE = "the-island.theisland-app.workers.dev";
 const EMOTES = 6;
 const PROIBIDO = ['porra', 'caralh', 'buceta', 'xoxota', 'piroca', 'arrombad', 'viado', 'fdp', 'vsf', 'tnc', 'merda', 'putaria', 'puta_', '_puta', 'nazi', 'hitler', 'estupr', 'pedof', 'pedo_', 'racist', 'macaco_', 'bosta', 'cuzao', 'otario', 'vagabund', 'piranha'];
 const CORES = /^#[0-9a-f]{6}$/i;
@@ -93,6 +95,9 @@ export class Vila extends DurableObject {
   }
 
   async fetch(request) {
+    const rota = new URL(request.url).pathname;
+    if (rota === "/interno/instagram") { await this.verificaInstagram(); return new Response("ok"); }
+    if (rota === "/instagram/status") return Response.json(await this.statusInstagram(), { headers: { "cache-control": "no-store" } });
     if (this.viajantes().length >= MAX_VIAJANTES) return new Response("A ilha está cheia agora.", { status: 503 });
     const { 0: client, 1: server } = new WebSocketPair();
     this.ctx.acceptWebSocket(server);
@@ -187,7 +192,9 @@ export class Vila extends DurableObject {
       if (!codigo || (await hash(codigo)) !== rec.h) {
         a.falhas = (a.falhas || 0) + 1;
         if (a.falhas > 6) { ws.serializeAttachment(a); try { ws.close(4003, "tentativas demais"); } catch (e) { } return; }
-        return erro(codigo ? "Código de acesso errado." : "Esse @ já tem um viajante na ilha. Digite o código de acesso dele.", { precisaCodigo: true });
+        return erro(codigo ? "Código de acesso errado." : rec.verificado
+          ? "Esse @ já tem dono. O código chegou no direct dele, enviado pelo @the_island.lab."
+          : "Esse @ já tem um viajante na ilha. Digite o código de acesso dele.", { precisaCodigo: true });
       }
     } else {
       if (convite) {
@@ -228,6 +235,100 @@ export class Vila extends DurableObject {
     const a = ws.deserializeAttachment() || {};
     if (a.id) this.todos({ t: "saiu", id: a.id }, ws);
   }
+
+  // -------------------------------------------------------------------------
+  // Código automático pelo Instagram. A cada 5 minutos (cron), lê os comentários
+  // dos vídeos recentes do @the_island.lab e responde no direct de cada pessoa
+  // (uma vez só) com o código dela. O comentário prova que o @ é dela: o código
+  // enviado passa a ser o único que vale para esse @, mesmo que alguém tenha
+  // entrado antes com ele. Precisa do segredo IG_TOKEN no Cloudflare.
+  async ig(caminho, opts) {
+    const r = await fetch("https://graph.instagram.com/" + IG_VERSAO + caminho, opts);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || j.error) throw new Error((j.error && j.error.message) || "HTTP " + r.status);
+    return j;
+  }
+  async tokenInstagram() {
+    let t = await this.ctx.storage.get("ig:token");
+    if (!t && this.env.IG_TOKEN) t = { valor: this.env.IG_TOKEN, renovado: Date.now() };
+    if (!t) return null;
+    if (this.env.IG_TOKEN && t.origem !== this.env.IG_TOKEN) t = { valor: this.env.IG_TOKEN, renovado: Date.now(), origem: this.env.IG_TOKEN }; // token novo colado no painel
+    if (Date.now() - t.renovado > 20 * 864e5) { // o token dura 60 dias: renova a cada 20
+      try {
+        const r = await fetch("https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=" + encodeURIComponent(t.valor));
+        const j = await r.json();
+        if (j.access_token) t = { valor: j.access_token, renovado: Date.now(), origem: t.origem };
+      } catch (e) { }
+    }
+    await this.ctx.storage.put("ig:token", t);
+    return t.valor;
+  }
+  async moradoresPorArroba() {
+    const mapa = {};
+    try {
+      const r = await this.env.ASSETS.fetch(new Request("https://ilha/moradores.js"));
+      const txt = await r.text();
+      for (const m of txt.matchAll(/arroba: '([^']+)', nome: '([^']+)'/g)) mapa[m[1].toLowerCase()] = m[2];
+    } catch (e) { }
+    return mapa;
+  }
+  async verificaInstagram() {
+    const st = (await this.ctx.storage.get("ig:status")) || { enviados: 0 };
+    st.ultima = Date.now();
+    try {
+      const token = await this.tokenInstagram();
+      if (!token) { st.ativo = false; st.erro = "Falta o segredo IG_TOKEN no Cloudflare."; await this.ctx.storage.put("ig:status", st); return; }
+      const auth = { headers: { Authorization: "Bearer " + token } };
+      const eu = await this.ig("/me?fields=user_id,username", auth);
+      const meuArroba = String(eu.username || "").toLowerCase();
+      const moradores = await this.moradoresPorArroba();
+      const midias = await this.ig("/me/media?fields=id,timestamp&limit=8", auth);
+      let envios = 0;
+      for (const md of midias.data || []) {
+        if (Date.now() - Date.parse(md.timestamp) > 9 * 864e5) continue;
+        const cs = await this.ig("/" + md.id + "/comments?fields=id,text,timestamp,username,from&limit=50", auth);
+        for (const c of cs.data || []) {
+          const arroba = limpaArroba((c.from && c.from.username) || c.username);
+          if (!arroba || arroba === meuArroba || envios >= 25) continue;
+          if (Date.now() - Date.parse(c.timestamp) > 6.5 * 864e5) continue; // a Meta só deixa responder em até 7 dias
+          if (await this.ctx.storage.get("dm:" + arroba)) continue;
+          const codigo = novoCodigo(), nome = moradores[arroba];
+          const texto = `Olá, @${arroba}! 🏝️ Aqui está o seu código para jogar na Grande Ilha: ${codigo}\n\n` +
+            (nome ? `Com ele você joga com o seu morador, ${nome}! ` : "Com ele você entra como viajante, anda pela ilha e cumpre missões. ") +
+            `Entre em ${SITE}, toque em JOGAR e digite o seu @ e este código. Guarde esta mensagem!`;
+          try {
+            await this.ig("/" + eu.user_id + "/messages", { method: "POST", headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" }, body: JSON.stringify({ recipient: { comment_id: c.id }, message: { text: texto } }) });
+          } catch (e) {
+            const n = ((await this.ctx.storage.get("dmerro:" + arroba)) || 0) + 1;
+            await this.ctx.storage.put("dmerro:" + arroba, n);
+            if (n >= 3) await this.ctx.storage.put("dm:" + arroba, { t: Date.now(), falhou: String(e.message).slice(0, 200) });
+            st.erro = "Mensagem para @" + arroba + ": " + String(e.message).slice(0, 200);
+            continue;
+          }
+          envios++; st.enviados++;
+          await this.ctx.storage.put("dm:" + arroba, { t: Date.now(), comentario: c.id });
+          // o código enviado no direct passa a valer para esse @ (quem entrou antes com ele sai)
+          const k = "j:" + arroba, rec = (await this.ctx.storage.get(k)) || { look: null, perfil: null, criado: Date.now() };
+          rec.h = await hash(codigo); rec.verificado = true;
+          await this.ctx.storage.put(k, rec);
+          for (const [w, b] of this.viajantes()) if (b.arroba === arroba) {
+            this.envia(w, { t: "fim", motivo: "O dono deste @ recebeu o código no direct. Entre de novo com o código." });
+            const velho = b.id; b.id = null; w.serializeAttachment(b); this.todos({ t: "saiu", id: velho }, w);
+            try { w.close(4001, "verificado"); } catch (e) { }
+          }
+        }
+      }
+      st.ativo = true; st.conta = meuArroba; if (envios) st.ultimoEnvio = Date.now();
+      if (!st.erro || envios) delete st.erro;
+    } catch (e) {
+      st.ativo = false; st.erro = String(e.message).slice(0, 300);
+    }
+    await this.ctx.storage.put("ig:status", st);
+  }
+  async statusInstagram() {
+    const st = (await this.ctx.storage.get("ig:status")) || {};
+    return { ativo: !!st.ativo, conta: st.conta || null, codigosEnviados: st.enviados || 0, ultimaVerificacao: st.ultima ? new Date(st.ultima).toISOString() : null, ultimoEnvio: st.ultimoEnvio ? new Date(st.ultimoEnvio).toISOString() : null, erro: st.erro || null };
+  }
 }
 
 export default {
@@ -240,6 +341,9 @@ export default {
       const vila = env.VILA.get(env.VILA.idFromName("grande-ilha"));
       return vila.fetch(request);
     }
+    if (url.pathname === "/instagram/status") {
+      return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/instagram/status"));
+    }
     if (url.pathname === "/ao-vivo") {
       if (request.headers.get("Upgrade") !== "websocket") {
         return new Response("Esta rota é usada pela página da ilha.", { status: 426 });
@@ -248,5 +352,10 @@ export default {
       return contador.fetch(request);
     }
     return env.ASSETS.fetch(request);
+  },
+  // a cada 5 minutos: confere os comentários novos no Instagram e manda os códigos
+  async scheduled(event, env, ctx) {
+    const vila = env.VILA.get(env.VILA.idFromName("grande-ilha"));
+    ctx.waitUntil(vila.fetch(new Request("https://ilha/interno/instagram")));
   },
 };
