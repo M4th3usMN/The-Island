@@ -30,9 +30,9 @@
     if (!v.manto) {
       const l1 = o.walking && step === 1 ? 1 : 0, l2 = o.walking && step === 0 ? 1 : 0;
       P(bx, y - lh - l1, 2, lh, v.calca);
-      P(bx + bw - 2, y - lh - l2, 2, lh, v.calca);
       P(bx, y - 1 - l1, 2, 1, '#2b2220');
-      P(bx + bw - 2, y - 1 - l2, 2, 1, '#2b2220');
+      if (v.pernaDePau) { P(bx + bw - 2, y - lh - l2, 2, 1, v.calca); P(bx + bw - 2, y - lh + 1 - l2, 1, lh - 1, '#9a6a3a'); } // perna de pau
+      else { P(bx + bw - 2, y - lh - l2, 2, lh, v.calca); P(bx + bw - 2, y - 1 - l2, 2, 1, '#2b2220'); }
     }
 
     // escudo nas costas (vista de tras)
@@ -89,6 +89,12 @@
     if (ch === 'bandana') { P(x - 3, HY - 1, 6, 2, cc); P(side > 0 ? x - 4 : x + 3, HY, 1, 2, cc); }
     if (ch === 'faixa') P(x - 3, HY, 6, 1, cc);
     if (ch === 'gorro') { P(x - 3, HY - 2, 6, 2, cc); P(x - 3, HY - 1, 6, 1, shade(cc, 0.8)); }
+    if (ch === 'tricornio') { P(x - 4, HY - 3, 8, 2, cc); P(x - 5, HY - 1, 10, 1, cc); P(x - 5, HY - 2, 1, 1, cc); P(x + 4, HY - 2, 1, 1, cc); P(x - 4, HY - 1, 8, 1, '#c9a14a'); P(x - 1, HY - 3, 2, 1, '#e8e2c8'); }
+    if (ch === 'boina') { P(x - 3, HY - 2, 7, 2, cc); P(x - 3, HY - 1, 6, 1, shade(cc, 0.8)); P(side > 0 ? x + 3 : x - 4, HY - 1, 1, 1, cc); if (!back) P(x - 2, HY - 2, 1, 1, '#c9a14a'); }
+    if (ch === 'elmo_aco') { P(x - 3, HY - 1, 6, 2, '#9aa0aa'); P(x - 3, HY + 1, 1, 3, '#9aa0aa'); P(x + 2, HY + 1, 1, 3, '#9aa0aa'); P(x - 1, HY - 2, 2, 1, '#c9ced8'); if (!back) P(x - 1, HY + 1, 1, 2, '#7d828e'); else P(x - 3, HY, 6, 4, '#868c96'); }
+    if (ch === 'monoculo' && !back) { P(x, HY + 1, 3, 3, '#c9a14a'); P(x + 1, HY + 2, 1, 1, '#8fd3ff'); P(x + 2, HY + 4, 1, 2, '#c9a14a'); }
+    if (ch === 'feltro') { P(x - 4, HY, 8, 1, cc); P(x - 3, HY - 2, 6, 2, cc); P(x - 3, HY - 1, 6, 1, shade(cc, 0.7)); }
+    if (ch === 'bardo') { P(x - 3, HY - 2, 6, 2, cc); P(x - 4, HY - 1, 1, 1, cc); P(side > 0 ? x + 2 : x - 3, HY - 5, 1, 3, '#e8483a'); P(side > 0 ? x + 3 : x - 4, HY - 6, 1, 1, '#f2c040'); }
 
     // acessorio (mao do lado "side")
     const M = (dx, dy, w, h, col) => P(side > 0 ? x + dx : x - dx - w, Y + dy, w, h, col);
@@ -109,6 +115,15 @@
       if (a === 'frasco') { M(4, 1, 2, 3, '#7dff9a'); M(4, 0, 1, 1, '#dddddd'); M(5, 2, 1, 1, '#d6ffe0'); }
       if (a === 'planta') { M(4, -1, 1, 5, '#e8e2c8'); M(4, -1, 1, 1, '#9fc4ff'); }
       if (a === 'luneta') { M(4, 0, 3, 1, '#c9a14a'); M(6, 0, 1, 1, '#8fd3ff'); }
+      if (a === 'alaude') { M(3, 1, 3, 3, '#a0602a'); M(4, 2, 1, 1, '#3a2010'); M(5, -3, 1, 4, '#7a4a20'); M(5, -4, 2, 1, '#5a3418'); }
+      if (a === 'besta') { M(4, -2, 1, 6, '#6a4a2a'); M(2, -1, 5, 1, '#7a5230'); M(2, 0, 1, 1, 'rgba(235,235,235,0.6)'); M(6, 0, 1, 1, 'rgba(235,235,235,0.6)'); M(4, -3, 1, 1, '#cfd3da'); }
+      if (a === 'engrenagem') { M(4, 0, 3, 3, '#b8bcc8'); M(5, 1, 1, 1, '#5a5e68'); M(5, -1, 1, 1, '#b8bcc8'); M(7, 1, 1, 1, '#b8bcc8'); M(5, 3, 1, 1, '#b8bcc8'); M(3, 1, 1, 1, '#b8bcc8'); }
+      if (a === 'bandeira') { M(4, -9, 1, 14, '#7a5a3a'); M(5, -9, 4, 3, v.corBandeira || '#c0392b'); M(5, -7, 4, 1, shade(v.corBandeira || '#c0392b', 0.75)); M(6, -8, 1, 1, '#f2e6c8'); }
+      if (a === 'saco') { M(3, 1, 3, 4, '#d8c08a'); M(3, 1, 3, 1, '#b8a06a'); M(4, 0, 1, 1, '#8a6a3a'); }
+      if (a === 'tabua') { M(0, -1, 8, 2, '#b08050'); M(0, -1, 8, 1, '#c89a64'); M(3, 0, 1, 1, '#7a5230'); }
+      if (a === 'mapa') { M(4, 1, 3, 3, '#e8d8a8'); M(4, 1, 1, 3, '#b8a06a'); M(6, 2, 1, 1, '#c0392b'); }
+      if (a === 'barril') { M(3, 1, 4, 4, '#8a5a2e'); M(3, 2, 4, 1, '#5a5e68'); M(3, 4, 4, 1, '#5a5e68'); }
+      if (a === 'tenaz') { M(4, -2, 1, 6, '#5a5e68'); M(5, -2, 1, 1, '#5a5e68'); M(5, -3, 1, 1, '#ff8a3a'); }
       if (a === 'cesta') { M(3, 2, 3, 2, '#a0773f'); M(3, 1, 1, 1, '#a0773f'); M(5, 1, 1, 1, '#a0773f'); }
     }
     if (a === 'espirito') {

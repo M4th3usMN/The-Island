@@ -204,3 +204,4 @@
   .pill { padding: 4px 8px; letter-spacing: .05em; }
   .pill-jogar .pj-nome { display: none; }
 }
+.jg-dica { background: var(--pergaminho); color: var(--tinta); border: 2px solid #8a5a22; padding: 8px 10px; font-size: 14px; margin: 0 0 8px; }

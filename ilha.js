@@ -47,13 +47,19 @@
     floresta: { nome: 'Floresta', x: 350, y: 150, sx: 350, sy: 150, r: 75, sempre: true },
     torre: { nome: 'Torre do mago', x: 190, y: 210, sx: 190, sy: 220, r: 7 },
     santuario: { nome: 'Santuário', x: 648, y: 322, sx: 648, sy: 330, r: 8 },
-    ponte: { nome: 'Ponte do riacho', x: 600, y: 133, sx: 596, sy: 144, r: 6 }
+    ponte: { nome: 'Ponte do riacho', x: 600, y: 133, sx: 596, sy: 144, r: 6 },
+    mercearia: { nome: 'Mercearia', x: 292, y: 314, sx: 292, sy: 324, r: 9 }
   };
+  // construções e terrenos da expansão (Dia 3 em diante): ficam fora do sorteio do terreno original,
+  // então nenhuma árvore, pedra ou caminho que já existia muda de lugar.
+  const NOVOS = new Set(['mercearia']);
   const LAKE = { x: 540, y: 150, rx: 32, ry: 18 };
   const STREAM = [[566, 150], [600, 132], [640, 112], [672, 96]];
   const SLOTS = [[412, 278], [352, 240], [404, 238], [446, 302], [420, 378], [378, 384], [338, 400], [278, 354], [446, 208], [370, 208],
     [300, 216], [490, 380], [542, 352], [420, 422], [332, 454], [252, 264], [542, 242], [430, 172], [522, 414], [300, 172], [560, 300], [212, 380]];
   const YUKINE_CASA = [632, 298];
+  const SLOTS_EXTRA = [[364, 432], [264, 228], [484, 204], [404, 456], [520, 188], [200, 344], [192, 292], [216, 424], [588, 360]];
+  const LOTES = [];  // casas com lugar marcado (casa: 'lote:x,y' em moradores.js)
 
   // ---------------------------------------------------------------- moradores
   const MOR = (window.MORADORES || []).map((m, i) => Object.assign({}, m, { _i: i }));
@@ -61,6 +67,7 @@
   let PREVIEW = false;
   const HOOKS = window.IlhaHooks = window.IlhaHooks || [];
   const TEXTO = window.IlhaTexto = window.IlhaTexto || [];
+  const JOGADOS = new Map(); // moradores sendo controlados pelo próprio dono agora (id -> @), ver jogo.js
 
   const casas = [];
   (function setup() {
@@ -77,13 +84,18 @@
       m._jit = animal ? 0 : (rnd(m.id, 'jit') - 0.5) * 0.6;
       m._usa = new Set(m._blocos.map(b => b[2]));
       const c = m.casa || 'auto';
-      if (c === 'auto' && slot < SLOTS.length) {
-        const s = SLOTS[slot++]; const h = { x: s[0], y: s[1], donos: [m], v: Math.floor(rnd(m.id, 'casa') * 4) };
+      const TODOS = SLOTS.concat(SLOTS_EXTRA);
+      if (c.indexOf('lote:') === 0) {
+        const [lx, ly] = c.slice(5).split(',').map(Number); LOTES.push([lx, ly]);
+        const h = { x: lx, y: ly, donos: [m], v: Math.floor(rnd(m.id, 'casa') * 4) };
+        casas.push(h); m._casaObj = h; m._home = { x: lx, y: ly + 6, dentro: true };
+      } else if (c === 'auto' && slot < TODOS.length) {
+        const s = TODOS[slot++]; const h = { x: s[0], y: s[1], donos: [m], v: Math.floor(rnd(m.id, 'casa') * 4) };
         casas.push(h); m._casaObj = h; m._home = { x: s[0], y: s[1] + 6, dentro: true };
       } else if (c === 'santuario') {
         const h = { x: YUKINE_CASA[0], y: YUKINE_CASA[1], donos: [m], v: 4 }; casas.push(h); m._casaObj = h;
         m._home = { x: h.x, y: h.y + 6, dentro: true }; m._usa.add('santuario');
-      } else if (c === 'torre' || c === 'taverna') {
+      } else if (c === 'torre' || c === 'taverna' || c === 'mercearia') {
         const L = LUG[c]; m._home = { x: L.sx, y: L.sy - 4, dentro: true, lugar: c }; m._usa.add(c);
         if (animal) m._home = { x: L.x + 10, y: L.y - 22, dentro: false, telhado: true };
       } else if (c.indexOf('com:') === 0 && BY[c.slice(4)] && BY[c.slice(4)]._home) {
@@ -220,7 +232,7 @@
     const pathMask = new Uint8Array(WW * WH);
     const stamp = (x, y, r, val) => { for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) { const X = Math.round(x + i), Y = Math.round(y + j); if (X >= 0 && Y >= 0 && X < WW && Y < WH) pathMask[Y * WW + X] = Math.max(pathMask[Y * WW + X], val); } };
     const line = (a, b, r, val) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y)); for (let s = 0; s <= n; s++) { const f = n ? s / n : 0; stamp(a.x + (b.x - a.x) * f + (R() - 0.5) * 0.8, a.y + (b.y - a.y) * f, r, val); } };
-    Object.keys(LUG).forEach(k => { if (k !== 'fogueira' && k !== 'floresta') line(HUB, { x: LUG[k].sx, y: LUG[k].sy }, 1, 1); });
+    Object.keys(LUG).forEach(k => { if (k !== 'fogueira' && k !== 'floresta' && !NOVOS.has(k)) line(HUB, { x: LUG[k].sx, y: LUG[k].sy }, 1, 1); });
     line(HUB, { x: 350, y: 200 }, 1, 1);
     SLOTS.forEach(s => line({ x: s[0], y: s[1] + 3 }, { x: s[0] + (HUB.x - s[0]) * 0.25, y: s[1] + 3 + (HUB.y - s[1]) * 0.25 }, 0, 1));
     line({ x: 600, y: 144 }, { x: YUKINE_CASA[0], y: YUKINE_CASA[1] + 4 }, 1, 1);
@@ -245,12 +257,28 @@
       if (idist(x, y) > 0.9) return true;
       if (pathMask[Math.round(y) * WW + Math.round(x)] || pathMask[Math.round(y + 3) * WW + Math.round(x)]) return true;
       if (Math.hypot(x - FIRE.x, (y - FIRE.y) / 0.75) < 52) return true;
-      for (const k in LUG) { if (k === 'floresta') continue; const L = LUG[k]; if (Math.hypot(x - L.x, y - L.y + 6) < 26 + L.r || Math.hypot(x - L.sx, y - L.sy) < 14 + L.r) return true; }
+      for (const k in LUG) { if (k === 'floresta' || NOVOS.has(k)) continue; const L = LUG[k]; if (Math.hypot(x - L.x, y - L.y + 6) < 26 + L.r || Math.hypot(x - L.sx, y - L.sy) < 14 + L.r) return true; }
       for (const s of SLOTS) if (Math.hypot(x - s[0], y - s[1] + 6) < 20) return true;
       if (Math.hypot(x - YUKINE_CASA[0], y - YUKINE_CASA[1] + 6) < 20) return true;
       if (((x - LAKE.x) / (LAKE.rx + 8)) ** 2 + ((y - LAKE.y) / (LAKE.ry + 8)) ** 2 < 1) return true;
       return false;
     };
+    // caminhos da expansão (sorteio próprio: não altera o resto do mapa)
+    (function () {
+      const R2 = mulberry(303), cam = (a, b, r) => {
+        const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y));
+        for (let s = 0; s <= n; s++) {
+          const f = n ? s / n : 0, cx = a.x + (b.x - a.x) * f + (R2() - 0.5) * 0.8, cy = a.y + (b.y - a.y) * f;
+          for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) {
+            const X = Math.round(cx + i), Y = Math.round(cy + j);
+            if (X < 0 || Y < 0 || X >= WW || Y >= WH || idist(X, Y) > 0.93) continue;
+            P(c, X, Y, 1, 1, R2() < 0.5 ? '#7c6446' : '#705a3e');
+          }
+        }
+      };
+      NOVOS.forEach(k => { const L = LUG[k], d = Math.hypot(HUB.x - L.sx, HUB.y - L.sy), f = Math.min(1, 46 / d); cam({ x: L.sx, y: L.sy }, { x: L.sx + (HUB.x - L.sx) * f, y: L.sy + (HUB.y - L.sy) * f }, 1); });
+      SLOTS_EXTRA.concat(LOTES).forEach(s => cam({ x: s[0], y: s[1] + 3 }, { x: s[0] + (HUB.x - s[0]) * 0.2, y: s[1] + 3 + (HUB.y - s[1]) * 0.2 }, 0));
+    })();
     const trees = [];
     for (let i = 0; i < 9000 && trees.length < 420; i++) {
       const x = 90 + R() * 580, y = 60 + R() * 470;
@@ -361,6 +389,19 @@
       if (g) { P(c, x - 11, y - 8, 1, 1, '#c9a14a'); P(c, x - 5, y - 8, 1, 1, '#c9a14a'); } else { P(c, x - 8, y - 11, 1, 1, '#c9a14a'); P(c, x - 8, y - 5, 1, 1, '#c9a14a'); }
       P(c, x + 12, y - 4, 5, 5, '#a0773f'); P(c, x + 12, y - 2, 5, 1, '#7a5a2e'); P(c, x + 15, y - 8, 4, 4, '#a0773f');
       P(c, x + 6, y + 4, 8, 2, '#6a4428'); P(c, x + 7, y + 3, 2, 1, '#9aa0aa'); P(c, x + 11, y + 2, 2, 2, '#c9a14a');
+    },
+    mercearia(c, L, t, night) {
+      const x = L.x, y = L.y;
+      P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
+      P(c, x - 13, y - 12, 26, 12, '#9a7a52'); for (let i = -13; i < 13; i += 4) P(c, x + i, y - 12, 1, 12, '#7a5a38');
+      roof(c, x, y - 21, y - 21, 9, 20, 30, ['#3f7a4a', '#4f9258', '#2e5e38']);
+      for (let i = -13; i < 13; i += 4) { P(c, x + i, y - 13, 2, 3, '#f2ead6'); P(c, x + i + 2, y - 13, 2, 3, '#3f7a4a'); } // toldo listrado
+      P(c, x - 2, y - 8, 5, 8, '#3a261a'); P(c, x + 2, y - 4, 1, 1, '#c9a14a');
+      P(c, x - 10, y - 9, 5, 4, night ? '#ffd36a' : '#2a2c3c'); P(c, x + 6, y - 9, 5, 4, night ? '#ffd36a' : '#2a2c3c');
+      P(c, x - 6, y - 17, 12, 3, '#6a4428'); P(c, x - 4, y - 16, 2, 1, '#e8d8a8'); P(c, x - 1, y - 16, 1, 1, '#e8d8a8'); P(c, x + 2, y - 16, 2, 1, '#e8d8a8'); // placa
+      P(c, x - 19, y - 5, 6, 5, '#a0773f'); P(c, x - 19, y - 3, 6, 1, '#7a5a2e'); P(c, x - 18, y - 6, 2, 1, '#d04a3a'); P(c, x - 15, y - 6, 2, 1, '#e0a040'); // caixote de frutas
+      P(c, x + 14, y - 5, 4, 5, '#d8c08a'); P(c, x + 14, y - 6, 4, 1, '#b8a06a'); P(c, x + 18, y - 4, 3, 4, '#c8b07a'); // sacos
+      P(c, x - 21, y + 1, 4, 3, '#8a6234'); P(c, x - 20, y, 2, 1, '#7ac24a');
     },
     laboratorio(c, L, t) {
       const x = L.x, y = L.y;
@@ -496,6 +537,7 @@
     // personagens
     frameChars = [];
     MOR.forEach(m => {
+      if (JOGADOS.has(m.id)) return;
       const p = posAt(m, t);
       if (!p) return;
       const p2 = posAt(m, t - 300);
@@ -684,6 +726,7 @@
     });
   }
   function estado(m, t) {
+    if (JOGADOS.has(m.id)) return { txt: 'Jogando agora: @' + JOGADOS.get(m.id), cls: 'ativo', p: null, jogado: true };
     const p = posAt(m, t);
     if (!p) return { txt: 'Chega ' + quando(m._ch), cls: 'pend', p: null };
     if (p.arriving) return { txt: 'Chegando de barco agora', cls: 'and', p };
@@ -747,7 +790,7 @@
     const e = estado(m, t);
     $('c-nome').textContent = m.nome; $('c-prof').textContent = m.profissao; $('c-hist').textContent = m.historia;
     $('c-ativ').textContent = e.txt;
-    $('c-lugar').textContent = e.p ? (e.p.viagem ? 'Andando pela ilha' : placeName(e.p.leg.pl, m)) : 'Ainda no mar';
+    $('c-lugar').textContent = e.jogado ? 'Controlado pelo dono no modo viajante' : e.p ? (e.p.viagem ? 'Andando pela ilha' : placeName(e.p.leg.pl, m)) : 'Ainda no mar';
     $('c-desde').textContent = m._ch <= DIA2 - 864e5 ? 'Fundador da ilha' : 'Chegou no Dia ' + diaDe(m._ch);
     const ic = $('c-ic'); ic.innerHTML = ''; ic.appendChild(SP.icon(m.visual, 3));
     card.hidden = false;
@@ -909,14 +952,14 @@
   if (!window.ILHA_MANUAL) requestAnimationFrame(loop);
   window.GrandeIlha = {
     posAt, MOR, BY, casas, LUG, estado, cam, seguir, pararSeguir,
-    rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, arrived: (m, t) => t >= m._ch, localHours,
+    rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, jogados: JOGADOS, arrived: (m, t) => t >= m._ch, localHours,
     andavel: (x, y) => {
       if (Math.hypot(x - LUG.ponte.sx, y - LUG.ponte.sy) < 12 || Math.hypot(x - LUG.cais.sx, y - LUG.cais.sy) < 9) return true; // ponte e cais
       if (idist(x, y) >= 0.985 || (((x - LAKE.x) / LAKE.rx) ** 2 + ((y - LAKE.y) / LAKE.ry) ** 2) < 1.1) return false;
       if (Math.hypot(x - FIRE.x, (y - FIRE.y - 2) / 0.7) < 8) return false; // fogueira
       const agora = Date.now();
       for (const h of casas) if (x > h.x - 10 && x < h.x + 10 && y > h.y - 11 && y < h.y - 1 && h.donos.some(m => agora >= m._ch)) return false; // paredes das casas
-      for (const k of ['taverna', 'forja', 'oficina', 'laboratorio', 'biblioteca', 'torre']) { const L = LUG[k]; if (Math.abs(x - L.x) < 11 && y > L.y - 14 && y < L.y - 2) return false; }
+      for (const k of ['taverna', 'forja', 'oficina', 'laboratorio', 'biblioteca', 'torre', 'mercearia']) { const L = LUG[k]; if (Math.abs(x - L.x) < 11 && y > L.y - 14 && y < L.y - 2) return false; }
       for (let i = 0; i < STREAM.length - 1; i++) { // riacho: só se atravessa pela ponte
         const [ax, ay] = STREAM[i], [bx, by] = STREAM[i + 1], L2 = (bx - ax) ** 2 + (by - ay) ** 2;
         const k = clamp(((x - ax) * (bx - ax) + (y - ay) * (by - ay)) / L2, 0, 1);

@@ -88,6 +88,7 @@ export class Vila extends DurableObject {
     super(ctx, env);
     this.env = env;
     this.ban = { lista: new Set(), t: 0 };
+    this.res = { mapa: {}, t: 0 };
     this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
 
@@ -114,6 +115,18 @@ export class Vila extends DurableObject {
       } catch (e) { }
     }
     return this.ban.lista;
+  }
+
+  // @ dos moradores: só entra quem tem o código de convite (o site guarda só o hash do código)
+  async reservados() {
+    if (Date.now() - this.res.t > 60e3) {
+      this.res.t = Date.now();
+      try {
+        const r = await this.env.ASSETS.fetch(new Request("https://ilha/reservados.json"));
+        if (r.ok) { const j = await r.json(); this.res.mapa = j.reservados || {}; }
+      } catch (e) { }
+    }
+    return this.res.mapa;
   }
 
   async webSocketMessage(ws, raw) {
@@ -168,8 +181,18 @@ export class Vila extends DurableObject {
         return erro(codigo ? "Código de acesso errado." : "Esse @ já tem um viajante na ilha. Digite o código de acesso dele.", { precisaCodigo: true });
       }
     } else {
-      codigoNovo = novoCodigo();
-      rec = { h: await hash(codigoNovo), look: null, perfil: null, criado: Date.now() };
+      const convite = (await this.reservados())[arroba];
+      if (convite) {
+        if (!codigo || (await hash(codigo)) !== convite) {
+          a.falhas = (a.falhas || 0) + 1;
+          if (a.falhas > 6) { ws.serializeAttachment(a); try { ws.close(4003, "tentativas demais"); } catch (e) { } return; }
+          return erro(codigo ? "Código de convite errado." : "Esse @ é de um morador da ilha. Digite o código de convite que o @the_island.lab mandou no seu direct.", { precisaCodigo: true });
+        }
+        rec = { h: convite, look: null, perfil: null, criado: Date.now(), morador: true };
+      } else {
+        codigoNovo = novoCodigo();
+        rec = { h: await hash(codigoNovo), look: null, perfil: null, criado: Date.now() };
+      }
     }
     const look = limpaLook(m.look) || rec.look || limpaLook({});
     rec.look = look; rec.visto = Date.now();

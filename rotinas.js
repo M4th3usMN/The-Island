@@ -101,6 +101,63 @@
         [19, 22, 'fogueira', 'De olho no mar, desconfiado']],
       trabalho: ['Mais um pilar.', 'Essa não cai.', 'Medida certa.'], social: ['Minha ponte caiu...', 'Aqui eu recomeço.']
     },
+    // ---- Dia 3
+    relojoeiro: {
+      blocos: [[23, 7, 'casa', 'Dormindo', S], [7, 8, 'casa', 'Dando corda nos relógios'], [8, 12, 'oficina', 'Ajustando engrenagens com Vitor'],
+        [12, 13, 'fogueira', 'Almoçando na hora certa'], [13, 17, 'oficina', 'Montando uma máquina nova'], [17, 19, 'passeio', 'Passeando com calma pela ilha'],
+        [19, 23, 'casa', 'Consertando um relógio à luz de vela']],
+      trabalho: ['Tic, tac...', 'Falta uma engrenagem.', 'Precisão é tudo.'], social: ['Aqui o tempo passa devagar.', 'Que paz.']
+    },
+    construtor: {
+      blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 6, 'casa', 'Afiando as ferramentas'], [6, 12, 'passeio', 'Erguendo uma casa nova'],
+        [12, 13, 'fogueira', 'Almoçando'], [13, 17, 'passeio', 'Consertando telhados'], [17, 19, 'floresta', 'Escolhendo madeira boa'],
+        [19, 22, 'taverna', 'Descansando depois da obra']],
+      trabalho: ['Martelo e prego!', 'Essa parede fica reta.', 'Mais uma tábua.'], social: ['Enfim, um lugar para ficar.', 'Andei muito até aqui.']
+    },
+    merceeiro: {
+      blocos: [[22, 5, 'casa', 'Dormindo na mercearia', S], [5, 7, 'cais', 'Recebendo mercadorias do barco'], [7, 12, 'mercearia', 'Atendendo na mercearia'],
+        [12, 13, 'fogueira', 'Almoçando'], [13, 15, 'passeio', 'Cuidando dos assuntos da ilha'], [15, 19, 'mercearia', 'Vendendo frutas e grãos'],
+        [19, 22, 'fogueira', 'Organizando os trabalhos de amanhã']],
+      trabalho: ['Fruta fresquinha!', 'Leva duas, paga uma.', 'Chegou mercadoria!'], social: ['Eu cuido da ilha.', 'Tudo em ordem por aqui.']
+    },
+    capitao: {
+      blocos: [[23, 5, 'casa', 'Dormindo', S], [5, 10, 'cais', 'Carregando a caravela'], [10, 15, 'cais', 'Fazendo a travessia de mantimentos'],
+        [15, 17, 'mercearia', 'Entregando encomendas'], [17, 19, 'taverna', 'Bebendo com a tripulação'], [19, 23, 'cais', 'Conferindo as cargas da noite']],
+      trabalho: ['Içar velas!', 'Carga a bordo!', 'Mar calmo hoje.'], social: ['Cheguei aqui com fome.', 'Trago de tudo, até gente.']
+    },
+    cervejeiro: {
+      blocos: [[3, 10, 'casa', 'Dormindo na taverna', S], [10, 13, 'fazenda', 'Colhendo mel para o hidromel'], [13, 14, 'fogueira', 'Almoçando'],
+        [14, 18, 'taverna', 'Fermentando hidromel (sem contrabando!)'], [18, 3, 'taverna', 'Servindo hidromel na taverna']],
+      trabalho: ['Hidromel da casa!', 'Tudo dentro da lei.', 'Mais uma caneca?'], social: ['Contrabando? Eu? Nunca mais.', 'Dei minha palavra.']
+    },
+    revolucionario: {
+      blocos: [[1, 8, 'casa', 'Dormindo', S], [8, 10, 'biblioteca', 'Escrevendo manifestos'], [10, 12, 'passeio', 'Recrutando aliados'],
+        [12, 13, 'fogueira', 'Almoçando'], [13, 16, 'arena', 'Treinando seus seguidores'], [16, 19, 'passeio', 'Espalhando suas ideias'],
+        [19, 1, 'fogueira', 'Discursando na fogueira']],
+      trabalho: ['Juntos somos fortes!', 'A ilha é do povo!', 'Quem está comigo?'], social: ['A revolução começa aqui.', 'Ouçam!']
+    },
+    ferreiro_pescador: {
+      blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 8, 'cais', 'Pescando como nos velhos tempos'], [8, 12, 'forja', 'Ajudando o amigo na forja'],
+        [12, 13, 'fogueira', 'Almoçando'], [13, 18, 'forja', 'Forjando anzóis e ferraduras'], [18, 22, 'taverna', 'Contando como perdeu a perna']],
+      trabalho: ['Toc, toc, perna de pau!', 'Ferro quente!', 'Amigo é pra isso.'], social: ['Já fui pescador.', 'O mar me deve uma perna.']
+    },
+    bardo: {
+      blocos: [[3, 10, 'casa', 'Dormindo', S], [10, 12, 'santuario', 'Visitando Yukine'], [12, 13, 'fogueira', 'Almoçando'],
+        [13, 17, 'passeio', 'Recolhendo histórias pela ilha'], [17, 19, 'fogueira', 'Compondo uma canção nova'], [19, 3, 'taverna', 'Cantando na taverna']],
+      trabalho: ['♪ Lá-lá-lá ♪', 'Essa vai virar canção!', 'Ouçam esta história...'], social: ['Yukine é meu amigo.', 'Toda ilha merece uma música.']
+    },
+    atirador: {
+      blocos: [[23, 5, 'casa', 'Dormindo', S], [5, 7, 'torre', 'Vigiando do alto da torre'], [7, 12, 'arena', 'Treinando pontaria'],
+        [12, 13, 'fogueira', 'Almoçando em silêncio'], [13, 17, 'floresta', 'Patrulhando a floresta'], [17, 20, 'arena', 'Ensinando táticas ao exército'],
+        [20, 23, 'cais', 'Montando guarda no cais']],
+      trabalho: ['Alvo na mira.', 'Respira... e solta.', 'Posição!'], social: ['O passado pesa.', 'Aqui encontrei refúgio.']
+    },
+    estrategista: {
+      blocos: [[0, 7, 'casa', 'Dormindo', S], [7, 9, 'arena', 'Treinando com a espada'], [9, 12, 'biblioteca', 'Estudando mapas de guerra'],
+        [12, 13, 'fogueira', 'Almoçando'], [13, 16, 'passeio', 'Inspecionando as defesas da ilha'], [16, 19, 'arena', 'Treinando com a espada'],
+        [19, 24, 'fogueira', 'Planejando a volta ao trono']],
+      trabalho: ['Aço não se dobra.', 'Cada pedra conta.', 'Em guarda!'], social: ['Meu trono foi usurpado.', 'Silêncio não é rendição.']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

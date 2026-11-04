@@ -13,6 +13,11 @@
   const nivel = xp => 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 60));
   const xpNivel = lv => 60 * (lv - 1) ** 2;
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  // o @ de quem comentou liga o viajante ao próprio morador (campo arroba em moradores.js)
+  const moradorDe = arroba => G.MOR.find(m => m.arroba && m.arroba.toLowerCase() === arroba) || null;
+  const moradorAtivo = (arroba, t) => { const m = moradorDe(arroba); return m && t >= m._ch + 120e3 ? m : null; };
+  const visualDe = v => (v.mor ? v.mor.visual : v.look);
+  const nomeDe = v => (v.mor ? v.mor.nome.toUpperCase() : '@' + v.arroba);
 
   // ---------------------------------------------------------------- estado
   const S = { ws: null, on: false, eu: null, outros: new Map(), perfil: null, codigo: '', camLivre: false, conversa: null, falas: [], fim: false, tent: 0, ping: null, mudou: false };
@@ -173,6 +178,7 @@
   // a cada meio segundo: onde o viajante está, o que está acontecendo perto dele
   let passosAcum = 0;
   setInterval(() => {
+    atualizaJogados();
     if (!S.on) return;
     const t = Date.now(), eu = S.eu, h = G.localHours(t), aqui = lugarDe(eu.x, eu.y);
     if (aqui) registra('lugar', aqui);
@@ -190,6 +196,22 @@
     S.falas = S.falas.filter(f => f.ate > t);
   }, 500);
 
+  function atualizaJogados() {
+    const t = Date.now(), J = G.jogados; J.clear();
+    if (!S.on) return;
+    [S.eu, ...S.outros.values()].forEach(v => {
+      const antes = v.mor, m = moradorAtivo(v.arroba, t);
+      if (m && !antes && v === S.eu) {
+        // o morador acabou de chegar à ilha: o dono assume o personagem onde ele estiver
+        const p = G.posAt(m, t);
+        if (p && !p.hidden) { v.x = v.tx = p.x; v.y = v.ty = p.y; envia({ t: 'alvo', x: v.x, y: v.y }); }
+        anuncia({ titulo: 'VOCÊ É ' + m.nome.toUpperCase() + '!', texto: `Agora você controla o seu morador (${m.profissao.toLowerCase()}). Quando sair, ele volta à rotina.`, dur: 7000 });
+        setTimeout(atualizaUI, 50);
+      }
+      v.mor = m;
+      if (m) J.set(m.id, v.arroba);
+    });
+  }
   function conversar(m) {
     const R = ROT[m.rotina] || {}, linhas = (R.social || []).concat(R.trabalho || []);
     const txt = linhas.length ? linhas[Math.floor(Math.random() * linhas.length)] : '...';
@@ -228,6 +250,13 @@
     const arroba = m.eu.arroba, voltou = !!S.eu && S.eu.arroba === arroba;
     const pos = voltou ? { x: S.eu.x, y: S.eu.y } : { x: m.eu.x, y: m.eu.y };
     S.eu = Object.assign({}, m.eu, pos, { tx: pos.x, ty: pos.y, s: 1 });
+    const meu = moradorDe(arroba), ativo = moradorAtivo(arroba, Date.now());
+    if (ativo && !voltou) {
+      const p = G.posAt(ativo, Date.now()), h = ativo._home;
+      const q = p && !p.hidden ? p : h ? { x: h.x, y: h.y + 4 } : null;
+      if (q) { S.eu.x = S.eu.tx = q.x; S.eu.y = S.eu.ty = q.y; }
+    }
+    S.eu.mor = ativo;
     if (m.codigo) store.set('codigo:' + arroba, m.codigo); else if (codigo) store.set('codigo:' + arroba, codigo);
     S.codigo = store.get('codigo:' + arroba, '');
     const local = store.get('perfil:' + arroba, null);
@@ -238,18 +267,21 @@
     store.set('jogador', { arroba, look: m.eu.look }); store.set('jogando', 1);
     clearInterval(S.ping); S.ping = setInterval(() => { try { S.ws.send('ping'); } catch (e) { } }, 45000);
     G.pararSeguir(); if (G.cam.s < 4) G.cam.s = 4; G.cam.x = S.eu.x; G.cam.y = S.eu.y - 8;
-    if (voltou) { if (S.eu.x !== m.eu.x) envia({ t: 'alvo', x: S.eu.x, y: S.eu.y }); }
-    else {
+    if (S.eu.x !== m.eu.x || S.eu.y !== m.eu.y) envia({ t: 'alvo', x: S.eu.x, y: S.eu.y });
+    if (!voltou) {
       diaria(); revisa(); S.mudou = true;
-      anuncia({ titulo: 'VOCÊ DESEMBARCOU!', texto: 'Toque no chão para andar e num morador para conversar. Veja suas missões em ⚑.', dur: 7000 });
+      if (ativo) anuncia({ titulo: 'VOCÊ É ' + ativo.nome.toUpperCase() + '!', texto: 'Você está jogando com o seu morador. Ande, converse e cumpra missões. Quando sair, ele volta à rotina.', dur: 8000 });
+      else if (meu) anuncia({ titulo: 'BEM-VINDO, ' + meu.nome.toUpperCase() + '!', texto: `Seu morador chega de barco ${new Date(meu._ch).getTime() > Date.now() ? 'em breve' : 'agora'}. Até lá, você explora como viajante.`, dur: 8000 });
+      else anuncia({ titulo: 'VOCÊ DESEMBARCOU!', texto: 'Toque no chão para andar e num morador para conversar. Veja suas missões em ⚑.', dur: 7000 });
     }
+    atualizaJogados();
     atualizaUI();
     if (m.codigo) mostraCodigo(m.codigo, true);
   }
   function recebe(m) {
     const o = S.outros.get(m.id);
     if (m.t === 'entrou') S.outros.set(m.id, Object.assign(m, { tx: m.x, ty: m.y, s: 1 }));
-    else if (m.t === 'saiu') S.outros.delete(m.id);
+    else if (m.t === 'saiu') { S.outros.delete(m.id); atualizaJogados(); }
     else if (m.t === 'alvo' && o) { o.tx = m.x; o.ty = m.y; }
     else if (m.t === 'visual' && o) o.look = m.look;
     else if (m.t === 'lv' && o) o.lv = m.lv;
@@ -261,7 +293,7 @@
     S.fim = true; S.on = false; store.set('jogando', 0);
     if (S.mudou) { salvaLocal(); envia({ t: 'perfil', perfil: S.perfil }); }
     setTimeout(() => { try { S.ws && S.ws.close(); } catch (e) { } }, 200);
-    S.outros.clear(); atualizaUI(); fechar();
+    S.outros.clear(); G.jogados.clear(); atualizaUI(); fechar();
   }
 
   // ---------------------------------------------------------------- movimento
@@ -329,7 +361,7 @@
     if (!S.on) return;
     // passos pequenos: mesmo com poucos quadros por segundo, ninguém atravessa parede
     for (let r = dt; r > 0; r -= 0.05) { const d = Math.min(0.05, r); passo(S.eu, d, true); S.outros.forEach(o => passo(o, d, false)); }
-    [S.eu, ...S.outros.values()].forEach(v => objs.push({ y: v.y, f: () => SP.drawCharacter(c, v.x, v.y, v.look, { t: info.sec + fase(v.id), walking: v.anda, side: v.s, dir: v.dir || 'down' }) }));
+    [S.eu, ...S.outros.values()].forEach(v => objs.push({ y: v.y, f: () => SP.drawCharacter(c, v.x, v.y, visualDe(v), { t: info.sec + fase(v.id), walking: v.anda, side: v.s, dir: v.dir || 'down' }) }));
     if (S.marca && S.marca.ate > info.t) { const k = (S.marca.ate - info.t) / 600 * 3; objs.push({ y: S.marca.y - 1, f: () => { G.P(c, S.marca.x - k, S.marca.y, 1, 1, '#ffd046'); G.P(c, S.marca.x + k, S.marca.y, 1, 1, '#ffd046'); G.P(c, S.marca.x, S.marca.y - k / 2, 1, 1, '#ffd046'); G.P(c, S.marca.x, S.marca.y + k / 2, 1, 1, '#ffd046'); } }); }
     if (!S.camLivre && !G.cam.follow) { G.cam.x += (S.eu.x - G.cam.x) * 0.15; G.cam.y += (S.eu.y - 8 - G.cam.y) * 0.15; }
   });
@@ -348,7 +380,7 @@
     // o meu nome primeiro; os outros sobem um degrau quando encostariam num nome já escrito
     [S.eu, ...[...S.outros.values()].sort((a, b) => b.y - a.y)].forEach(v => {
       let [sx, sy] = scr(v.x, v.y - 19);
-      const label = (eApoiador(v.arroba) ? '★ ' : '') + '@' + v.arroba + ' · NV ' + (v.lv || 1);
+      const label = (eApoiador(v.arroba) ? '★ ' : '') + nomeDe(v) + ' · NV ' + (v.lv || 1);
       ctx.font = `${fs}px Silkscreen, monospace`; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(10,12,16,0.9)'; ctx.lineJoin = 'round';
       const w = ctx.measureText(label).width, h = fs + 4;
       for (let k = 0; k < 6 && ocupados.some(o => Math.abs(o.x - sx) < (o.w + w) / 2 + 4 && Math.abs(o.y - sy) < h); k++) sy -= h;
@@ -394,7 +426,7 @@
   function atualizaUI() {
     barra.hidden = !S.on; emo.hidden = true;
     const b = $('btn-jogar');
-    if (S.on) { b.innerHTML = ''; b.appendChild(SP.icon(S.eu.look, 1)); b.insertAdjacentHTML('beforeend', `<span class="pj-nome">@${esc(S.eu.arroba)} · </span><span class="pj-nv">NV ${S.eu.lv}</span>`); b.setAttribute('aria-label', `Seu perfil: @${S.eu.arroba}, nível ${S.eu.lv}`); b.onclick = () => abrirPainel(2); }
+    if (S.on) { b.innerHTML = ''; b.appendChild(SP.icon(visualDe(S.eu), 1)); b.insertAdjacentHTML('beforeend', `<span class="pj-nome">@${esc(S.eu.arroba)} · </span><span class="pj-nv">NV ${S.eu.lv}</span>`); b.setAttribute('aria-label', `Seu perfil: @${S.eu.arroba}, nível ${S.eu.lv}`); b.onclick = () => abrirPainel(2); }
     else { b.innerHTML = '<span>▶ JOGAR</span>'; b.onclick = abrirEntrar; }
     atualizaBarra();
   }
@@ -407,10 +439,10 @@
     abrir('ENTRAR NA ILHA', `
       <p class="m-lead">Vire um viajante: monte seu personagem, ande pela ilha, converse com os moradores e cumpra missões. Quem estiver jogando vê você também.</p>
       <label class="m-campo"><span>Seu @ do Instagram</span><input id="jg-arroba" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="@seu_usuario" value="${esc(arroba ? '@' + arroba : '')}"></label>
-      <label class="m-campo" id="jg-cod-box" hidden><span>Código de acesso</span><input id="jg-codigo" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX"></label>
+      <label class="m-campo" id="jg-cod-box" hidden><span>Código de acesso ou de convite</span><input id="jg-codigo" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX"></label>
       <button type="button" class="jg-link" id="jg-tenho">Já joguei em outro aparelho (tenho um código)</button>
       <p class="m-nota">Seu @ aparece em cima do personagem para todos. Nomes ofensivos são bloqueados.</p>
-      <h3>SEU VISUAL</h3><div id="jg-ed"></div>
+      <div class="jg-ed-box"><h3>SEU VISUAL</h3><div id="jg-ed"></div></div>
       <p class="m-erro" id="jg-erro" role="alert" hidden></p>
       <div class="m-botoes"><button type="button" class="b-ouro" id="jg-entrar">ENTRAR NA ILHA</button><button type="button" class="b-linha" id="jg-assistir">SÓ ASSISTIR</button></div>`,
     el => {
@@ -418,6 +450,14 @@
       const cod = el.querySelector('#jg-codigo'), box = el.querySelector('#jg-cod-box'), err = el.querySelector('#jg-erro'), btn = el.querySelector('#jg-entrar');
       const mostraCod = () => { box.hidden = false; el.querySelector('#jg-tenho').hidden = true; };
       el.querySelector('#jg-tenho').onclick = () => { mostraCod(); cod.focus(); };
+      const dica = document.createElement('p'); dica.className = 'jg-dica'; dica.hidden = true; el.querySelector('#jg-cod-box').before(dica);
+      const confere = () => {
+        const m = moradorDe(limpaArroba(el.querySelector('#jg-arroba').value));
+        dica.hidden = !m;
+        if (m) { dica.innerHTML = `Esse @ é do morador <b>${esc(m.nome)}</b> (${esc(m.profissao.toLowerCase())})! Você vai jogar com ele.`; if (!store.get('codigo:' + m.arroba.toLowerCase(), '')) mostraCod(); }
+        el.querySelector('#jg-ed').closest('.jg-ed-box').hidden = !!m;
+      };
+      el.querySelector('#jg-arroba').addEventListener('input', confere);
       el.querySelector('#jg-assistir').onclick = fechar;
       const vai = () => {
         arroba = limpaArroba(el.querySelector('#jg-arroba').value);
@@ -431,12 +471,16 @@
           if (precisaCodigo) { mostraCod(); cod.focus(); }
         });
       };
-      btn.onclick = vai;
+      btn.onclick = vai; confere();
       el.querySelectorAll('#jg-arroba, #jg-codigo').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') vai(); }));
     });
   }
   function abrirVisual() {
     if (!S.on) return;
+    if (S.eu.mor) {
+      abrir('SEU VISUAL', `<p class="m-lead">Você está jogando com <b>${esc(S.eu.mor.nome)}</b>, então o visual é o do seu morador, igual ao da ilha.</p><p class="m-nota">Quer mudar alguma coisa nele? Peça no direct do @${esc(K.IG)}.</p><div class="m-botoes"><button type="button" class="b-ouro" id="jg-ok">ENTENDI</button></div>`, el => { el.querySelector('#jg-ok').onclick = fechar; });
+      return;
+    }
     const look = Object.assign({}, S.eu.look);
     abrir('SEU VISUAL', '<div id="jg-ed"></div><div class="m-botoes"><button type="button" class="b-ouro" id="jg-salvar">SALVAR VISUAL</button><button type="button" class="b-linha" id="jg-cancelar">CANCELAR</button></div>', el => {
       editorVisual(el.querySelector('#jg-ed'), look, () => { });
@@ -455,7 +499,7 @@
 
   function abrirPainel(aba) {
     if (!S.on) return abrirEntrar();
-    abrir('VIAJANTE @' + S.eu.arroba.toUpperCase(), '<div class="abas" role="tablist"></div><div class="aba-corpo"></div>', el => {
+    abrir(S.eu.mor ? S.eu.mor.nome.toUpperCase() + ' · @' + S.eu.arroba.toUpperCase() : 'VIAJANTE @' + S.eu.arroba.toUpperCase(), '<div class="abas" role="tablist"></div><div class="aba-corpo"></div>', el => {
       const feitas = conta(S.perfil.conquistas);
       abas(el, ['MISSÕES', `CONQUISTAS ${feitas}/${CONQ.length}`, 'PERFIL'], aba || 0, (i, corpo) => [abaMissoes, abaConquistas, abaPerfil][i](corpo));
     });
@@ -480,7 +524,7 @@
       <ul class="jg-stats"><li><b>${conta(p.lugares)}/${LUGARES.length}</b><span>lugares</span></li><li><b>${conta(p.conversas)}</b><span>moradores conhecidos</span></li><li><b>${p.passos}</b><span>passos</span></li><li><b>${p.missoes}</b><span>missões</span></li></ul>
       <div class="m-chave"><span>Código de acesso (para entrar em outro aparelho)</span><code>${esc(S.codigo || 'neste aparelho você entra direto')}</code>${S.codigo ? '<button type="button" class="b-linha" id="pf-cod">COPIAR CÓDIGO</button>' : ''}</div>
       <div class="m-botoes"><button type="button" class="b-linha" id="pf-visual">MUDAR VISUAL</button><button type="button" class="b-linha" id="pf-sair">SAIR DA ILHA</button></div>`;
-    corpo.querySelector('.jg-perfil-ic').appendChild(SP.icon(S.eu.look, 4));
+    corpo.querySelector('.jg-perfil-ic').appendChild(SP.icon(visualDe(S.eu), 4));
     if (S.codigo) corpo.querySelector('#pf-cod').onclick = e => copiar(S.codigo, e.currentTarget);
     corpo.querySelector('#pf-visual').onclick = abrirVisual;
     corpo.querySelector('#pf-sair').onclick = sair;
