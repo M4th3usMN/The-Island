@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&display=swap">
+<link rel="stylesheet" href="extras.css">
 <style>
   /* Layout: a ilha ocupa a tela inteira; HUD de jogo flutua por cima (topo), lista de moradores à direita (gaveta no celular). */
   :root {
@@ -157,6 +158,11 @@
       <span class="stat">CASAS <b id="h-casas">0</b></span>
       <span class="stat">CONSTRUÇÕES <b id="h-cons">0</b></span>
     </div>
+    <div class="acoes">
+      <button class="pill pill-ouro" id="btn-apoiar" type="button"><span>♥ APOIAR</span></button>
+      <button class="pill" id="btn-diario" type="button">DIÁRIO</button>
+      <button class="pill" id="btn-ajuda" type="button" aria-label="Como funciona a ilha">?</button>
+    </div>
   </div>
   <div class="som px" role="group" aria-label="Música">
     <button class="ib" id="btn-play" type="button" aria-label="Tocar música">
@@ -212,6 +218,9 @@
 <script src="rotinas.js"></script>
 <script src="moradores.js"></script>
 <script src="ilha.js"></script>
+<script src="qrcode.js"></script>
+<script src="comunidade.js"></script>
+<script src="extras.js"></script>
 <script>
   (function () {
     var falta = [];

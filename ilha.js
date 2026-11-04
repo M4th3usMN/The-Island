@@ -59,6 +59,7 @@
   const MOR = (window.MORADORES || []).map((m, i) => Object.assign({}, m, { _i: i }));
   const BY = {}; MOR.forEach(m => { BY[m.id] = m; });
   let PREVIEW = false;
+  const HOOKS = window.IlhaHooks = window.IlhaHooks || [];
 
   const casas = [];
   (function setup() {
@@ -549,6 +550,8 @@
       }
     }
     frameChars.forEach(q => { if (!q.p.hidden) objs.push({ y: q.p.y, f: () => SP.drawCharacter(c, q.p.x, q.p.y, q.m.visual, { t: sec + q.m._i, walking: q.p.walking, side: q.side, dir: q.dir, dormindo: q.p.sleeping }) }); });
+    // extras (ex.: mascotes dos apoiadores, em extras.js) entram na mesma ordenação por y
+    HOOKS.forEach(h => { try { h(objs, c, { t, sec, night, hrs }); } catch (e) { } });
     objs.sort((a, b) => a.y - b.y).forEach(o => o.f());
 
     // brilho de chegada
@@ -901,7 +904,9 @@
   updateHUD(Date.now());
   if (!window.ILHA_MANUAL) requestAnimationFrame(loop);
   window.GrandeIlha = {
-    posAt, MOR, BY, casas, LUG, estado, cam, seguir,
+    posAt, MOR, BY, casas, LUG, estado, cam, seguir, pararSeguir,
+    rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, arrived: (m, t) => t >= m._ch,
+    toWorld: (cx, cy) => { const r = stage.getBoundingClientRect(); return { x: (cx - r.left) / cam.s + lastOx, y: (cy - r.top) / cam.s + lastOy }; },
     renderAt: t => { placeCache.t = -1; render(t); updateHUD(t); },
     setPreview: v => { PREVIEW = v; placeCache.t = -1; }
   };

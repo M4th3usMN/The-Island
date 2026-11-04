@@ -63,6 +63,27 @@ apenas assistindo.
 - Casas novas surgem sozinhas. Há 22 terrenos livres no mapa; quando
   estiverem perto de acabar, me peça para expandir a ilha.
 
+## Apoio por PIX, selo e mascotes (comunidade.js)
+
+Arquivos novos: `comunidade.js` (dados que você edita), `extras.js` e
+`extras.css` (painéis), `qrcode.js` (gera o QR do PIX, licença MIT).
+
+1. Coloque a chave PIX, o nome do recebedor e a cidade em `comunidade.js`.
+   O painel **♥ APOIAR** passa a mostrar o QR code e o "copia e cola".
+2. Quem apoia escolhe um mascote e manda o comprovante no direct com o seu @.
+3. **Confira o PIX no extrato** e adicione a pessoa na lista `apoiadores`:
+   `{ arroba: 'fulano', mascote: 'tartaruga', desde: '2026-11-04T18:00:00-04:00' }`
+4. No horário do `desde`, o mascote desembarca no cais, todo mundo vê o aviso
+   "NOVO APOIADOR" e o selo fica pronto na aba **MEU SELO** para baixar.
+
+O site não tem como saber sozinho que um PIX caiu: a liberação é sempre
+depois da sua conferência. Para liberar na hora seria preciso uma conta num
+provedor de PIX com aviso automático (Mercado Pago, Efí etc.).
+
+Também em `comunidade.js`: `aviso` (popup que aparece uma vez para cada
+visitante) e `diario` (anotações especiais do Diário da Ilha; chegadas,
+metas e apoiadores entram no diário sozinhos).
+
 ## Domínio próprio (opcional)
 
 1. Compre um domínio, por exemplo no **registro.br** (um `.com.br` custa em
