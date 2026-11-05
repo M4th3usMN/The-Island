@@ -243,3 +243,24 @@
 .ct-mini.falta { opacity: .45; cursor: default; }
 .ct-q { display: grid; place-items: center; width: 40px; height: 48px; font: 700 22px var(--f-pixel); color: var(--apagado); }
 .ct-acoes { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+
+/* ---------------------------------------------------------------- painel ao vivo */
+.feed { position: fixed; left: 16px; bottom: 70px; z-index: 12; width: min(300px, calc(100vw - 32px)); padding: 7px 8px 6px; box-sizing: border-box; pointer-events: none; }
+.feed-t { display: flex; align-items: center; gap: 6px; font: 700 9px var(--f-pixel); letter-spacing: .1em; color: var(--apagado); margin-bottom: 4px; }
+.feed-t i { width: 7px; height: 7px; background: #ff4a3a; box-shadow: 0 0 6px #ff4a3a; animation: feed-pisca 1.2s steps(2) infinite; }
+@keyframes feed-pisca { 50% { opacity: .25; } }
+.feed ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.feed li { display: flex; gap: 6px; align-items: baseline; font-size: 12.5px; line-height: 1.3; color: var(--texto); padding: 4px 5px; background: rgba(10, 16, 22, .6); border-left: 3px solid var(--borda); animation: feed-entra .35s ease-out; transition: opacity .6s, transform .6s; }
+.feed li.sai { opacity: 0; transform: translateX(-10px); }
+.feed li > i { font-style: normal; flex: none; width: 12px; text-align: center; }
+.feed li span { min-width: 0; overflow-wrap: anywhere; }
+.feed li b { color: var(--ouro); font-weight: 600; }
+.feed li em { font-style: normal; color: var(--apagado); font-size: 11px; }
+.feed li small { margin-left: auto; flex: none; color: var(--apagado); font-size: 10px; }
+.feed .feed-entrou { border-left-color: #3a8a3a; } .feed .feed-entrou > i { color: #6fd06f; }
+.feed .feed-conquista { border-left-color: var(--ouro); } .feed .feed-conquista > i { color: var(--ouro); }
+.feed .feed-carta { border-left-color: #b070ff; } .feed .feed-carta > i { color: #c8a0ff; }
+.feed .feed-nivel { border-left-color: #4aa0ff; } .feed .feed-nivel > i { color: #8fc8ff; }
+.feed .feed-chegada { border-left-color: #ff8a3a; } .feed .feed-chegada > i { color: #ffb070; }
+@keyframes feed-entra { from { opacity: 0; transform: translateX(-12px); } }
+@media (max-width: 760px) { .feed { left: 8px; bottom: 82px; width: min(240px, calc(100vw - 16px)); padding: 5px 6px 4px; } .feed li { font-size: 11px; padding: 3px 4px; } .feed li em { display: none; } .feed li:nth-child(n+4) { display: none; } }

@@ -114,6 +114,7 @@ export class Vila extends DurableObject {
   viajantes() { return this.ctx.getWebSockets().map(ws => [ws, ws.deserializeAttachment() || {}]).filter(([, a]) => a.id); }
   envia(ws, m) { try { ws.send(JSON.stringify(m)); } catch (e) { } }
   todos(m, exceto) { const s = JSON.stringify(m); for (const [ws] of this.viajantes()) if (ws !== exceto) { try { ws.send(s); } catch (e) { } } }
+  aviso(m, exceto) { this.hist = (this.hist || []).concat(m).slice(-10); this.todos(m, exceto); }
   publico(a) { return { id: a.id, arroba: a.arroba, look: a.look, x: a.x, y: a.y, lv: a.lv || 1 }; }
 
   // lista de @ bloqueados: arquivo banidos.json do próprio site (atualiza a cada 60 s)
@@ -159,6 +160,12 @@ export class Vila extends DurableObject {
     } else if (m.t === "visual") {
       const look = limpaLook(m.look);
       if (look) { a.look = look; this.todos({ t: "visual", id: a.id, look }, ws); await this.salva(a.arroba, { look }); }
+    } else if (m.t === "feito") {
+      // conquista ou carta nova: vai para o painel ao vivo de todo mundo
+      const k = m.k, v = String(m.v || "");
+      if ((k === "conquista" || k === "carta") && /^[a-z0-9_.:]{1,48}$/.test(v) && agora - (a.ft || 0) > 1500) {
+        a.ft = agora; this.aviso({ t: "aviso", k, v, arroba: a.arroba, em: agora }, ws);
+      }
     } else if (m.t === "perfil") {
       const p = limpaPerfil(m.perfil);
       if (p && agora - (a.st || 0) > 3000) {
@@ -230,8 +237,9 @@ export class Vila extends DurableObject {
     ws.serializeAttachment(a);
     const outros = this.viajantes().filter(([w]) => w !== ws).map(([, b]) => this.publico(b));
     const niveis = (await this.ctx.storage.get("niveis")) || {};
-    this.envia(ws, { t: "ok", eu: this.publico(a), codigo: codigoNovo, perfil: rec.perfil, outros, niveis });
+    this.envia(ws, { t: "ok", eu: this.publico(a), codigo: codigoNovo, perfil: rec.perfil, outros, niveis, hist: this.hist || [] });
     this.todos({ t: "entrou", ...this.publico(a) }, ws);
+    this.hist = (this.hist || []).concat({ t: "aviso", k: "entrou", arroba, em: Date.now() }).slice(-10);
   }
 
   async webSocketClose(ws, code, reason) {

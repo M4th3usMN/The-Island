@@ -123,12 +123,13 @@
     const p = S.perfil, antes = nivel(p.xp); p.xp += n; S.niveis[S.eu.arroba] = nivel(p.xp);
     const lv = nivel(p.xp);
     if (S.eu) S.eu.lv = lv;
+    if (lv > antes) feed({ k: 'nivel', arroba: S.eu.arroba, v: lv });
     if (lv > antes) anuncia({ titulo: `NÍVEL ${lv}!`, texto: `@${S.eu.arroba} subiu de nível. Continue explorando!`, dur: 5000 });
   }
   function conquista(id) {
     const p = S.perfil, c = CONQ.find(x => x.id === id);
     if (!c || p.conquistas[id]) return;
-    p.conquistas[id] = Date.now(); ganhaXp(c.xp); S.mudou = true;
+    p.conquistas[id] = Date.now(); ganhaXp(c.xp); S.mudou = true; envia({ t: 'feito', k: 'conquista', v: id }); feed({ k: 'conquista', arroba: S.eu.arroba, v: id });
     anuncia({ titulo: 'CONQUISTA!', texto: `${c.nome}: ${c.desc}${c.xp ? ` (+${c.xp} XP)` : ''}`, acao: 'VER', fn: () => abrirPainel(1), dur: 6000 });
   }
   function avanca(k, n, absoluto) {
@@ -151,7 +152,7 @@
     const p = S.perfil; if (!p.cartas) p.cartas = {};
     if (p.cartas[chave]) return;
     if (chave.indexOf('v:') === 0 && Object.keys(p.cartas).filter(k => k.indexOf('v:') === 0).length >= 40) return;
-    p.cartas[chave] = Object.assign({ e: Date.now(), l: nomeLugar() }, extra || {}); S.mudou = true;
+    p.cartas[chave] = Object.assign({ e: Date.now(), l: nomeLugar() }, extra || {}); S.mudou = true; envia({ t: 'feito', k: 'carta', v: chave }); feed({ k: 'carta', arroba: S.eu.arroba, v: chave });
     const nome = chave.indexOf('v:') === 0 ? '@' + chave.slice(2) : (G.BY[chave] || {}).nome || chave;
     anuncia({ titulo: 'NOVA CARTA!', texto: `Você ganhou a carta de ${nome}.`, acao: 'VER', fn: () => abrirCarta(chave), dur: 6000 });
   }
@@ -255,6 +256,18 @@
 
   // ---------------------------------------------------------------- rede
   function envia(m) { if (S.ws && S.ws.readyState === 1) S.ws.send(JSON.stringify(m)); }
+  // painel ao vivo (aovivo.js): o que os outros viajantes fazem aparece para todos
+  function feed(a) {
+    const F = window.IlhaFeed; if (!F) return;
+    const q = F.quem(a.arroba);
+    if (a.k === 'entrou') F.push({ k: 'entrou', html: `${q} entrou na ilha`, t: a.em });
+    else if (a.k === 'nivel') F.push({ k: 'nivel', html: `${q} chegou ao <b>nível ${a.v | 0}</b>`, t: a.em });
+    else if (a.k === 'conquista') { const c = CONQ.find(x => x.id === a.v); if (c) F.push({ k: 'conquista', html: `${q} conquistou <b>${esc(c.nome)}</b>`, t: a.em }); }
+    else if (a.k === 'carta') {
+      const v = String(a.v || ''), nome = v.indexOf('v:') === 0 ? '@' + v.slice(2) : (G.BY[v] || {}).nome;
+      if (nome) F.push({ k: 'carta', html: `${q} ganhou a carta de <b>${esc(nome)}</b>`, t: a.em });
+    }
+  }
   function conectar(arroba, codigo, look, fim) {
     if (S.ws) { try { S.ws.close(); } catch (e) { } }
     let ws, respondeu = false;
@@ -311,17 +324,19 @@
       else if (meu) anuncia({ titulo: 'BEM-VINDO, ' + meu.nome.toUpperCase() + '!', texto: `Seu morador chega de barco ${new Date(meu._ch).getTime() > Date.now() ? 'em breve' : 'agora'}. Até lá, você explora como viajante.`, dur: 8000 });
       else anuncia({ titulo: 'VOCÊ DESEMBARCOU!', texto: 'Toque no chão para andar e num morador para conversar. Veja suas missões em ⚑.', dur: 7000 });
     }
+    if (!voltou) (m.hist || []).slice(-3).forEach(feed);
     atualizaJogados();
     atualizaUI();
     if (m.codigo) mostraCodigo(m.codigo, true);
   }
   function recebe(m) {
     const o = S.outros.get(m.id);
-    if (m.t === 'entrou') { S.outros.set(m.id, Object.assign(m, { tx: m.x, ty: m.y, s: 1 })); S.niveis[m.arroba] = m.lv || 1; }
+    if (m.t === 'entrou') { S.outros.set(m.id, Object.assign(m, { tx: m.x, ty: m.y, s: 1 })); S.niveis[m.arroba] = m.lv || 1; feed({ k: 'entrou', arroba: m.arroba }); }
     else if (m.t === 'saiu') { S.outros.delete(m.id); atualizaJogados(); }
     else if (m.t === 'alvo' && o) { o.tx = m.x; o.ty = m.y; }
     else if (m.t === 'visual' && o) o.look = m.look;
-    else if (m.t === 'lv' && o) { o.lv = m.lv; S.niveis[o.arroba] = m.lv; }
+    else if (m.t === 'lv' && o) { o.lv = m.lv; S.niveis[o.arroba] = m.lv; feed({ k: 'nivel', arroba: o.arroba, v: m.lv }); }
+    else if (m.t === 'aviso') feed(m);
     else if (m.t === 'emote') { const v = m.id === S.eu.id ? S.eu : o; if (v) v.emote = { txt: EMOTES[m.i] || '', ate: Date.now() + 4000 }; }
     else if (m.t === 'fim') { S.fim = true; S.on = false; store.set('jogando', 0); atualizaUI(); anuncia({ titulo: 'VOCÊ SAIU DA ILHA', texto: m.motivo, dur: 6000 }); }
     if (m.t === 'entrou' || m.t === 'saiu') atualizaBarra();
