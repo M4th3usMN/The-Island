@@ -20,8 +20,8 @@
   const nomeDe = v => (v.mor ? v.mor.nome.toUpperCase() : '@' + v.arroba);
 
   // ---------------------------------------------------------------- estado
-  const S = { ws: null, on: false, eu: null, outros: new Map(), perfil: null, codigo: '', camLivre: false, conversa: null, falas: [], fim: false, tent: 0, ping: null, mudou: false };
-  window.IlhaJogo = { get on() { return S.on; }, S };
+  const S = { niveis: {}, ws: null, on: false, eu: null, outros: new Map(), perfil: null, codigo: '', camLivre: false, conversa: null, falas: [], fim: false, tent: 0, ping: null, mudou: false };
+  window.IlhaJogo = { get on() { return S.on; }, get niveis() { return S.niveis; }, S };
 
   // ---------------------------------------------------------------- visual
   const PALETA = {
@@ -72,7 +72,7 @@
 
   // ---------------------------------------------------------------- perfil, missões e conquistas
   const LUGARES = Object.keys(G.LUG);
-  const novoPerfil = () => ({ v: 1, xp: 0, lugares: {}, conversas: {}, passos: 0, missoes: 0, cumprimentos: 0, dias: [], conquistas: {}, diaria: null });
+  const novoPerfil = () => ({ v: 1, xp: 0, lugares: {}, conversas: {}, passos: 0, missoes: 0, cumprimentos: 0, dias: [], conquistas: {}, diaria: null, cartas: {} });
   const conta = o => Object.keys(o || {}).length;
   const eApoiador = arroba => (K.ativos(Date.now()) || []).some(a => a.arroba === arroba);
   const chegados = () => G.MOR.filter(m => G.arrived(m, Date.now()));
@@ -92,6 +92,7 @@
     { id: 'fiel', nome: 'Visitante fiel', desc: 'Entre na ilha em 3 dias diferentes', xp: 80, ok: p => p.dias.length >= 3 },
     { id: 'sociavel', nome: 'Sociável', desc: 'Cumprimente 5 viajantes de perto', xp: 60, ok: p => p.cumprimentos >= 5 },
     { id: 'apoiador', nome: 'Coração da ilha', desc: 'Tenha o selo de apoiador', xp: 100, ok: () => S.eu && eApoiador(S.eu.arroba) },
+    { id: 'colecao', nome: 'Colecionador', desc: 'Tenha a carta de todos os moradores da ilha', xp: 200, ok: p => chegados().every(m => (p.cartas || {})[m.id]) },
     { id: 'veterano', nome: 'Veterano', desc: 'Chegue ao nível 5', xp: 0, ok: p => nivel(p.xp) >= 5 }
   ];
 
@@ -119,7 +120,7 @@
     return p.diaria;
   }
   function ganhaXp(n) {
-    const p = S.perfil, antes = nivel(p.xp); p.xp += n;
+    const p = S.perfil, antes = nivel(p.xp); p.xp += n; S.niveis[S.eu.arroba] = nivel(p.xp);
     const lv = nivel(p.xp);
     if (S.eu) S.eu.lv = lv;
     if (lv > antes) anuncia({ titulo: `NÍVEL ${lv}!`, texto: `@${S.eu.arroba} subiu de nível. Continue explorando!`, dur: 5000 });
@@ -135,13 +136,44 @@
     if (!m || d.feitas[k]) return;
     d.prog[k] = absoluto ? n : (d.prog[k] || 0) + n;
     if (d.prog[k] >= m.meta) {
-      d.feitas[k] = 1; S.perfil.missoes++; ganhaXp(m.xp); S.mudou = true;
+      d.feitas[k] = 1; S.perfil.missoes++; ganhaXp(m.xp); S.mudou = true; pertos().forEach(o => cartaDeOutro(o, 'missao'));
       anuncia({ titulo: 'MISSÃO CUMPRIDA!', texto: `${m.txt} (+${m.xp} XP)`, dur: 5000 });
       if (ms.every(x => d.feitas[x.k]) && !d.bonus) { d.bonus = 1; ganhaXp(50); conquista('diaperfeito'); }
     }
     atualizaBarra();
   }
   function revisa() { CONQ.forEach(c => { if (c.ok && !S.perfil.conquistas[c.id] && c.ok(S.perfil)) conquista(c.id); }); }
+
+  // ---------------------------------------------------------------- cartas
+  const C = () => window.IlhaCartas;
+  const nomeLugar = () => { const k = lugarDe(S.eu.x, S.eu.y); return k ? G.LUG[k].nome : 'pela ilha'; };
+  function ganhaCarta(chave, extra) {
+    const p = S.perfil; if (!p.cartas) p.cartas = {};
+    if (p.cartas[chave]) return;
+    if (chave.indexOf('v:') === 0 && Object.keys(p.cartas).filter(k => k.indexOf('v:') === 0).length >= 40) return;
+    p.cartas[chave] = Object.assign({ e: Date.now(), l: nomeLugar() }, extra || {}); S.mudou = true;
+    const nome = chave.indexOf('v:') === 0 ? '@' + chave.slice(2) : (G.BY[chave] || {}).nome || chave;
+    anuncia({ titulo: 'NOVA CARTA!', texto: `Você ganhou a carta de ${nome}.`, acao: 'VER', fn: () => abrirCarta(chave), dur: 6000 });
+  }
+  function cartaDeOutro(o, como) {
+    if (o.mor) ganhaCarta(o.mor.id, { c: como });
+    else ganhaCarta('v:' + o.arroba, { c: como, k: o.look, lv: o.lv || 1 });
+  }
+  const pertos = () => [...S.outros.values()].filter(o => dist(o, S.eu) < 40);
+  function fonteDe(chave) {
+    if (chave === 'eu') { const m = moradorDe(S.eu.arroba); return m ? { m, lv: S.eu.lv } : { arroba: S.eu.arroba, look: S.eu.look, lv: S.eu.lv }; }
+    if (chave.indexOf('v:') === 0) { const c = S.perfil.cartas[chave] || {}, a = chave.slice(2); return { arroba: a, look: c.k, lv: S.niveis[a] || c.lv || 1 }; }
+    return { m: G.BY[chave] };
+  }
+  function abrirCarta(chave) {
+    if (!C()) return;
+    const c = chave === 'eu' ? null : S.perfil.cartas[chave];
+    const carimbo = c ? (c.e ? `${c.c === 'missao' ? 'missão juntos' : 'conheceu'} · ${c.l} · ${C().dataCurta(c.e)}` : 'conhecido antes das cartas') : null;
+    abrir(chave === 'eu' ? 'SUA CARTA' : 'CARTA COLETADA', '<div class="ct-vista"></div><div class="ct-acoes"><button type="button" class="b-linha" id="ct-album">VER ÁLBUM</button></div>', el => {
+      el.querySelector('.ct-vista').appendChild(C().carta(fonteDe(chave), { carimbo }));
+      el.querySelector('#ct-album').onclick = () => abrirPainel(2);
+    });
+  }
 
   function registra(tipo, v) {
     if (!S.on || !S.perfil) return;
@@ -150,6 +182,7 @@
     if (tipo === 'conversa') {
       const d = diaria();
       if (!p.conversas[v]) { p.conversas[v] = 1; S.mudou = true; }
+      ganhaCarta(v, { c: 'conversa' });
       if (!d.conv[v]) { d.conv[v] = 1; avanca('conversar', conta(d.conv), true); }
       avanca('encontrar:' + v, 1, true);
     }
@@ -262,6 +295,10 @@
     const local = store.get('perfil:' + arroba, null);
     S.perfil = Object.assign(novoPerfil(), m.perfil && (!local || (m.perfil.xp || 0) >= (local.xp || 0)) ? m.perfil : local || {});
     S.eu.lv = nivel(S.perfil.xp);
+    if (!S.perfil.cartas) S.perfil.cartas = {};
+    Object.keys(S.perfil.conversas || {}).forEach(id => { if (G.BY[id] && !S.perfil.cartas[id]) S.perfil.cartas[id] = { e: 0 }; });
+    S.niveis = Object.assign({}, m.niveis || {}); S.niveis[arroba] = S.eu.lv;
+    (m.outros || []).forEach(o => { S.niveis[o.arroba] = o.lv || 1; });
     S.outros = new Map((m.outros || []).map(o => [o.id, Object.assign(o, { tx: o.x, ty: o.y, s: 1 })]));
     S.on = true; S.tent = 0; S.camLivre = false;
     store.set('jogador', { arroba, look: m.eu.look }); store.set('jogando', 1);
@@ -280,11 +317,11 @@
   }
   function recebe(m) {
     const o = S.outros.get(m.id);
-    if (m.t === 'entrou') S.outros.set(m.id, Object.assign(m, { tx: m.x, ty: m.y, s: 1 }));
+    if (m.t === 'entrou') { S.outros.set(m.id, Object.assign(m, { tx: m.x, ty: m.y, s: 1 })); S.niveis[m.arroba] = m.lv || 1; }
     else if (m.t === 'saiu') { S.outros.delete(m.id); atualizaJogados(); }
     else if (m.t === 'alvo' && o) { o.tx = m.x; o.ty = m.y; }
     else if (m.t === 'visual' && o) o.look = m.look;
-    else if (m.t === 'lv' && o) o.lv = m.lv;
+    else if (m.t === 'lv' && o) { o.lv = m.lv; S.niveis[o.arroba] = m.lv; }
     else if (m.t === 'emote') { const v = m.id === S.eu.id ? S.eu : o; if (v) v.emote = { txt: EMOTES[m.i] || '', ate: Date.now() + 4000 }; }
     else if (m.t === 'fim') { S.fim = true; S.on = false; store.set('jogando', 0); atualizaUI(); anuncia({ titulo: 'VOCÊ SAIU DA ILHA', texto: m.motivo, dur: 6000 }); }
     if (m.t === 'entrou' || m.t === 'saiu') atualizaBarra();
@@ -414,7 +451,7 @@
   emo.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     const i = +b.dataset.i; envia({ t: 'emote', i }); S.eu.emote = { txt: EMOTES[i], ate: Date.now() + 4000 }; emo.hidden = true; $('jb-falar').setAttribute('aria-expanded', 'false');
-    if ([...S.outros.values()].some(o => dist(o, S.eu) < 40)) registra('cumprimento');
+    const perto = pertos(); if (perto.length) { registra('cumprimento'); perto.forEach(o => cartaDeOutro(o, 'conversa')); }
   });
   function atualizaBarra() {
     if (!S.on) return;
@@ -426,7 +463,7 @@
   function atualizaUI() {
     barra.hidden = !S.on; emo.hidden = true;
     const b = $('btn-jogar');
-    if (S.on) { b.innerHTML = ''; b.appendChild(SP.icon(visualDe(S.eu), 1)); b.insertAdjacentHTML('beforeend', `<span class="pj-nome">@${esc(S.eu.arroba)} · </span><span class="pj-nv">NV ${S.eu.lv}</span>`); b.setAttribute('aria-label', `Seu perfil: @${S.eu.arroba}, nível ${S.eu.lv}`); b.onclick = () => abrirPainel(2); }
+    if (S.on) { b.innerHTML = ''; b.appendChild(SP.icon(visualDe(S.eu), 1)); b.insertAdjacentHTML('beforeend', `<span class="pj-nome">@${esc(S.eu.arroba)} · </span><span class="pj-nv">NV ${S.eu.lv}</span>`); b.setAttribute('aria-label', `Seu perfil: @${S.eu.arroba}, nível ${S.eu.lv}`); b.onclick = () => abrirPainel(3); }
     else { b.innerHTML = '<span>▶ JOGAR</span>'; b.onclick = abrirEntrar; }
     atualizaBarra();
   }
@@ -502,7 +539,7 @@
     if (!S.on) return abrirEntrar();
     abrir(S.eu.mor ? S.eu.mor.nome.toUpperCase() + ' · @' + S.eu.arroba.toUpperCase() : 'VIAJANTE @' + S.eu.arroba.toUpperCase(), '<div class="abas" role="tablist"></div><div class="aba-corpo"></div>', el => {
       const feitas = conta(S.perfil.conquistas);
-      abas(el, ['MISSÕES', `CONQUISTAS ${feitas}/${CONQ.length}`, 'PERFIL'], aba || 0, (i, corpo) => [abaMissoes, abaConquistas, abaPerfil][i](corpo));
+      abas(el, ['MISSÕES', `CONQUISTAS ${feitas}/${CONQ.length}`, `CARTAS ${conta(S.perfil.cartas || {})}`, 'PERFIL'], aba || 0, (i, corpo) => [abaMissoes, abaConquistas, abaCartas, abaPerfil][i](corpo));
     });
   }
   function abaMissoes(corpo) {
@@ -518,16 +555,31 @@
   function abaConquistas(corpo) {
     corpo.innerHTML = `<ul class="jg-conq">${CONQ.map(c => { const ok = S.perfil.conquistas[c.id]; return `<li class="${ok ? 'ok' : ''}"><i aria-hidden="true">${ok ? '★' : '?'}</i><div><b>${esc(c.nome)}</b><small>${esc(c.desc)}${c.xp ? ` · +${c.xp} XP` : ''}</small></div></li>`; }).join('')}</ul>`;
   }
+  function abaCartas(corpo) {
+    if (!C()) { corpo.innerHTML = '<p>As cartas estão carregando...</p>'; return; }
+    const cs = S.perfil.cartas || {}, mor = C().ordem().filter(m => G.arrived(m, Date.now()));
+    const tem = mor.filter(m => cs[m.id]).length, viaj = Object.keys(cs).filter(k => k.indexOf('v:') === 0);
+    corpo.innerHTML = `<div class="ct-album-topo"><p style="margin:0">Você tem <b>${tem} de ${mor.length}</b> cartas de moradores. Converse com um morador, cumprimente um viajante de perto ou cumpra uma missão com alguém do lado para ganhar a carta dele.</p></div>
+      <div class="m-botoes" style="margin-bottom:12px"><button type="button" class="b-ouro" id="ct-minha">VER MINHA CARTA</button></div>
+      <h3>MORADORES</h3><div class="ct-album" id="ct-mor"></div>${viaj.length ? '<h3>VIAJANTES</h3><div class="ct-album" id="ct-via"></div>' : ''}`;
+    corpo.querySelector('#ct-minha').onclick = () => abrirCarta('eu');
+    const A = corpo.querySelector('#ct-mor');
+    mor.forEach(m => { const b = C().mini({ m }, !!cs[m.id]); b.onclick = () => abrirCarta(m.id); A.appendChild(b); });
+    const V = corpo.querySelector('#ct-via');
+    if (V) viaj.forEach(k => { const b = C().mini(fonteDe(k), true); b.onclick = () => abrirCarta(k); V.appendChild(b); });
+    if (tem === mor.length && mor.length) conquista('colecao');
+  }
   function abaPerfil(corpo) {
     const p = S.perfil, lv = nivel(p.xp), a = xpNivel(lv), b = xpNivel(lv + 1);
     corpo.innerHTML = `<div class="jg-perfil"><div class="jg-perfil-ic"></div><div><b class="jg-nome">@${esc(S.eu.arroba)}</b><span>Nível ${lv} · ${p.xp} XP</span>
       <div class="m-barra"><i style="width:${Math.round((p.xp - a) / (b - a) * 100)}%"></i></div><small>Faltam ${b - p.xp} XP para o nível ${lv + 1}</small></div></div>
       <ul class="jg-stats"><li><b>${conta(p.lugares)}/${LUGARES.length}</b><span>lugares</span></li><li><b>${conta(p.conversas)}</b><span>moradores conhecidos</span></li><li><b>${p.passos}</b><span>passos</span></li><li><b>${p.missoes}</b><span>missões</span></li></ul>
       <div class="m-chave"><span>Código de acesso (para entrar em outro aparelho)</span><code>${esc(S.codigo || 'neste aparelho você entra direto')}</code>${S.codigo ? '<button type="button" class="b-linha" id="pf-cod">COPIAR CÓDIGO</button>' : ''}</div>
-      <div class="m-botoes"><button type="button" class="b-linha" id="pf-visual">MUDAR VISUAL</button><button type="button" class="b-linha" id="pf-sair">SAIR DA ILHA</button></div>`;
+      <div class="m-botoes"><button type="button" class="b-ouro" id="pf-carta">MINHA CARTA</button><button type="button" class="b-linha" id="pf-visual">MUDAR VISUAL</button><button type="button" class="b-linha" id="pf-sair">SAIR DA ILHA</button></div>`;
     corpo.querySelector('.jg-perfil-ic').appendChild(SP.icon(visualDe(S.eu), 4));
     if (S.codigo) corpo.querySelector('#pf-cod').onclick = e => copiar(S.codigo, e.currentTarget);
     corpo.querySelector('#pf-visual').onclick = abrirVisual;
+    corpo.querySelector('#pf-carta').onclick = () => abrirCarta('eu');
     corpo.querySelector('#pf-sair').onclick = sair;
   }
 

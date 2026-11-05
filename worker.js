@@ -71,7 +71,7 @@ function limpaLook(v) {
 function limpaPerfil(p) {
   if (!p || typeof p !== 'object' || Array.isArray(p)) return null;
   const s = JSON.stringify(p);
-  if (s.length > 6000) return null;
+  if (s.length > 14000) return null;
   const xp = num(p.xp, 0, 1e7);
   if (xp === null) return null;
   return JSON.parse(s);
@@ -165,6 +165,8 @@ export class Vila extends DurableObject {
         a.st = agora;
         const lv = nivel(p.xp);
         if (lv !== a.lv) { a.lv = lv; this.todos({ t: "lv", id: a.id, lv }, ws); }
+        const niv = (await this.ctx.storage.get("niveis")) || {};
+        if (niv[a.arroba] !== lv) { niv[a.arroba] = lv; await this.ctx.storage.put("niveis", niv); }
         await this.salva(a.arroba, { perfil: p });
       }
     }
@@ -227,7 +229,8 @@ export class Vila extends DurableObject {
     Object.assign(a, { id: crypto.randomUUID().slice(0, 8), arroba, look, x: 392, y: 512, lv: nivel((rec.perfil && rec.perfil.xp) || 0), falhas: 0 });
     ws.serializeAttachment(a);
     const outros = this.viajantes().filter(([w]) => w !== ws).map(([, b]) => this.publico(b));
-    this.envia(ws, { t: "ok", eu: this.publico(a), codigo: codigoNovo, perfil: rec.perfil, outros });
+    const niveis = (await this.ctx.storage.get("niveis")) || {};
+    this.envia(ws, { t: "ok", eu: this.publico(a), codigo: codigoNovo, perfil: rec.perfil, outros, niveis });
     this.todos({ t: "entrou", ...this.publico(a) }, ws);
   }
 

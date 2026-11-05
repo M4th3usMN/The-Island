@@ -205,3 +205,41 @@
   .pill-jogar .pj-nome { display: none; }
 }
 .jg-dica { background: var(--pergaminho); color: var(--tinta); border: 2px solid #8a5a22; padding: 8px 10px; font-size: 14px; margin: 0 0 8px; }
+
+/* ---------------------------------------------------------------- cartas dos personagens */
+.carta { --r: #b8bcc8; --r2: #5a5e68; position: relative; width: min(320px, 100%); margin: 0 auto; padding: 9px; box-sizing: border-box; background: var(--r2);
+  border: 4px solid #1a1008; box-shadow: 0 0 0 3px var(--r), 6px 6px 0 #05080f, 0 0 36px color-mix(in srgb, var(--r) 30%, transparent); }
+.ct-miolo { background: #111a22; border: 3px solid #2c3b38; display: flex; flex-direction: column; }
+.ct-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 7px 9px 6px; background: #1a1008; }
+.ct-nome { font: 700 17px var(--f-pixel); color: #f1ead8; text-shadow: 2px 2px 0 #05080f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ct-nv { flex: none; font: 700 10px var(--f-pixel); color: #1a1008; background: var(--r); padding: 4px 6px 3px; border: 2px solid #1a1008; text-align: center; line-height: 1; }
+.ct-nv b { display: block; font-size: 18px; }
+.ct-arte { position: relative; margin: 0 7px; border: 3px solid #1a1008; aspect-ratio: 48 / 30; overflow: hidden; }
+.ct-arte canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.ct-rar, .ct-selo { position: absolute; top: 5px; font: 700 9px var(--f-pixel); padding: 3px 5px 2px; border: 2px solid #1a1008; }
+.ct-rar { left: 5px; background: var(--r); color: #1a1008; }
+.ct-selo { right: 5px; background: #3a8a3a; color: #fff; }
+.ct-prof { margin: -11px auto 0; position: relative; z-index: 1; max-width: 90%; font: 700 11px var(--f-pixel); color: #3a2410; background: #d3a55a; border: 3px solid #3a2410; padding: 5px 10px 4px; box-shadow: 3px 3px 0 #05080f; text-align: center; }
+.ct-poder { display: flex; align-items: center; gap: 7px; margin: 9px 10px 2px; }
+.ct-poder span { font: 700 10px var(--f-pixel); color: #ff8a3a; }
+.ct-poder b { font: 700 21px var(--f-pixel); color: #ffd046; text-shadow: 2px 2px 0 #3a2410; }
+.ct-poder i { flex: 1; height: 9px; background: #05080f; border: 2px solid #2c3b38; }
+.ct-poder s { display: block; height: 100%; background: linear-gradient(90deg, #ff8a3a, #ffd046); }
+.ct-atr { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 5px 10px; }
+.ct-atr span { background: #0b1626; border: 2px solid #2c3b38; text-align: center; padding: 4px 0 3px; font: 700 8px var(--f-pixel); color: #a9b3a6; }
+.ct-atr b { display: block; font-size: 15px; color: #f1ead8; }
+.ct-hist { margin: 4px 11px 6px !important; font-size: 13px; line-height: 1.3; color: #f1ead8; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ct-hab { margin: 0 10px 8px !important; padding-top: 6px; border-top: 2px dashed #2c3b38; font: 9px/1.45 var(--f-pixel); color: #bea0ff; }
+.ct-hab b { color: #ffd046; }
+.ct-pe { display: flex; justify-content: space-between; gap: 6px; padding: 6px 9px; background: #1a1008; font: 8px var(--f-pixel); color: #a9b3a6; }
+.ct-pe b { color: #f1ead8; }
+.ct-carimbo { position: absolute; right: -10px; bottom: -12px; width: 72%; transform: rotate(-4deg); background: #ff4a3a; color: #fff; font: 700 9px var(--f-pixel); text-align: center; padding: 5px 4px 4px; border: 3px solid #1a1008; box-shadow: 3px 3px 0 #05080f; }
+.ct-album-topo { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.ct-album { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+.ct-mini { --r: #2c3b38; display: grid; justify-items: center; gap: 2px; padding: 6px 4px; background: #0a1016; border: 2px solid var(--r); color: var(--texto); cursor: pointer; min-width: 0; }
+.ct-mini canvas { width: 40px; height: 48px; image-rendering: pixelated; }
+.ct-mini small { font-size: 11px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-mini i { font: 9px var(--f-pixel); font-style: normal; color: var(--r); }
+.ct-mini.falta { opacity: .45; cursor: default; }
+.ct-q { display: grid; place-items: center; width: 40px; height: 48px; font: 700 22px var(--f-pixel); color: var(--apagado); }
+.ct-acoes { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
