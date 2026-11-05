@@ -1,0 +1,81 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Silk; src: url(Silkscreen-Regular.ttf); }
+@font-face { font-family: SilkB; src: url(Silkscreen-Bold.ttf); }
+@font-face { font-family: Pix; src: url(Pixelify.ttf); }
+html, body { margin: 0; background: #0b1626; }
+#capa { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+#fundo, #heroi { position: absolute; image-rendering: pixelated; }
+#fundo { left: 0; top: 0; width: 1080px; height: 1920px; }
+.txt { position: absolute; left: 0; right: 0; text-align: center; color: #f1ead8; text-shadow: 6px 6px 0 #05080f; }
+#serie { top: 330px; }
+#serie span { display: inline-block; font: 40px SilkB; color: #3a2410; background: #d3a55a; padding: 18px 34px 14px; border: 8px solid #3a2410; box-shadow: 8px 8px 0 #05080f; text-shadow: none; letter-spacing: 2px; }
+#gancho { top: 470px; font: 64px SilkB; line-height: 1.12; padding: 0 70px; }
+#gancho b { color: #ffd046; font-weight: normal; }
+#nome { top: 1270px; font: 150px SilkB; white-space: nowrap; color: #ffd046; letter-spacing: 4px; text-shadow: 8px 8px 0 #3a2410, 14px 14px 0 #05080f; }
+#prof { top: 1440px; font: 52px SilkB; color: #bea0ff; }
+#canto { top: 70px; font: 30px Silk; color: #a9b3a6; text-shadow: 3px 3px 0 #05080f; letter-spacing: 3px; }
+#rodape { top: 1600px; font: 34px Pix; color: #f1ead8; }
+#rodape i { font-style: normal; color: #ff4a3a; }
+</style></head>
+<body>
+<div id="capa">
+  <canvas id="fundo" width="180" height="320"></canvas>
+  <canvas id="heroi" width="40" height="40"></canvas>
+  <div class="txt" id="canto"></div>
+  <div class="txt" id="serie"><span>COMO CHEGUEI À ILHA</span></div>
+  <div class="txt" id="gancho"></div>
+  <div class="txt" id="nome"></div>
+  <div class="txt" id="prof"></div>
+  <div class="txt" id="rodape"><i>●</i> veja ao vivo · link na bio</div>
+</div>
+<script src="../sprites.js"></script>
+<script src="../moradores.js"></script>
+<script>
+// capa.html?id=jareel&ep=4&gancho=...&prof=...   (use *palavra* para destacar em ouro)
+const q = new URLSearchParams(location.search);
+const M = window.MORADORES.find(m => m.id === q.get('id'));
+const g = document.getElementById('fundo').getContext('2d');
+const P = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+// ceu
+for (let y = 0; y < 135; y++) P(0, y, 180, 1, `rgb(${11 + y * 0.04 | 0},${22 + y * 0.08 | 0},${38 + y * 0.14 | 0})`);
+for (let i = 0; i < 70; i++) P(rnd() * 180 | 0, rnd() * 128 | 0, 1, 1, rnd() > 0.7 ? '#ffe9a8' : '#c8d4f0');
+// ilha no horizonte com fogueira
+const hz = 135; g.save(); g.translate(44, 0);
+const gl = g.createRadialGradient(90, hz - 8, 2, 90, hz - 8, 46); gl.addColorStop(0, 'rgba(255,170,70,0.55)'); gl.addColorStop(1, 'rgba(255,170,70,0)');
+g.fillStyle = gl; g.fillRect(30, hz - 60, 120, 80);
+P(46, hz - 6, 88, 6, '#2e5a2e'); P(56, hz - 9, 68, 3, '#3a6e36'); P(70, hz - 11, 40, 2, '#447a3c');
+[[60, 'p'], [72, 'c'], [84, 'p'], [104, 'c'], [116, 'p']].forEach(([x, t]) => {
+  if (t === 'p') { P(x, hz - 18, 3, 3, '#1e3a22'); P(x - 1, hz - 15, 5, 3, '#1e3a22'); P(x - 2, hz - 12, 7, 3, '#1e3a22'); }
+  else { P(x, hz - 15, 7, 5, '#5a3a24'); P(x - 1, hz - 17, 9, 2, '#a0402e'); P(x + 3, hz - 13, 1, 1, '#ffd27a'); }
+});
+P(92, hz - 14, 2, 2, '#ffd046'); P(92, hz - 15, 1, 1, '#fff2b0'); g.restore();
+// mar
+for (let y = hz; y < 320; y++) P(0, y, 180, 1, `rgb(${10 + (y - hz) * 0.02 | 0},${30 + (y - hz) * 0.06 | 0},${62 + (y - hz) * 0.06 | 0})`);
+for (let i = 0; i < 120; i++) { const y = hz + 2 + rnd() * 184 | 0; P(rnd() * 180 | 0, y, 2 + (y - hz) / 30 | 0, 1, 'rgba(120,160,220,0.35)'); }
+P(124, hz + 2, 20, 1, 'rgba(255,190,90,0.45)'); P(128, hz + 5, 12, 1, 'rgba(255,190,90,0.3)');
+// barco (o heroi fica em cima)
+P(68, 192, 44, 4, '#7a4a26'); P(72, 196, 36, 3, '#5a3418'); P(68, 192, 44, 1, '#9a6234');
+P(62, 200, 56, 1, 'rgba(160,200,240,0.4)');
+// heroi
+const h = document.getElementById('heroi'), hc = h.getContext('2d');
+if (M) {
+  window.IlhaSprites.drawCharacter(hc, 20, 30, M.visual, { t: 1, side: 1 });
+  const k = 15; h.style.width = 40 * k + 'px'; h.style.height = 40 * k + 'px';
+  h.style.left = (540 - 20 * k) + 'px'; h.style.top = (192 * 6 - 30 * k + 6) + 'px';
+}
+document.getElementById('canto').textContent = 'THE ISLAND · EP. ' + (q.get('ep') || '');
+document.getElementById('gancho').innerHTML = (q.get('gancho') || '').replace(/\*(.+?)\*/g, '<b>$1</b>');
+document.getElementById('nome').textContent = (q.get('nome') || (M ? M.nome : '')).toUpperCase();
+document.getElementById('prof').textContent = (q.get('prof') || (M ? 'o ' + M.profissao : '')).toUpperCase();
+document.fonts.ready.then(() => {
+  const n = document.getElementById('nome'); let px = 150;
+  const largura = () => { const r = document.createRange(); r.selectNodeContents(n); return r.getBoundingClientRect().width; };
+  while (largura() > 980 && px > 60) { px -= 4; n.style.fontSize = px + 'px'; }
+  n.style.top = (1270 + (150 - px) * 0.6) + 'px';
+  document.body.dataset.pronto = 1;
+});
+</script>
+</body></html>
