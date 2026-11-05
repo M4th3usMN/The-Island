@@ -97,12 +97,14 @@
     if (ch === 'mascara' && !back) { P(x - 3, HY + 3, 6, 2, cc); P(x - 3, HY + 3, 6, 1, shade(cc, 1.25)); }
     if (ch === 'mascara') P(side > 0 ? x - 4 : x + 3, HY + 3, 1, 2, cc);
     if (ch === 'eboshi') { P(x - 3, HY - 1, 6, 1, cc); P(x - 2, HY - 4, 4, 3, cc); P(x - 1, HY - 5, 3, 1, cc); P(x - 2, HY - 2, 4, 1, shade(cc, 1.6)); }
+    if (ch === 'coroa') { P(x - 3, HY - 2, 6, 2, '#e8b830'); P(x - 3, HY - 3, 1, 1, '#e8b830'); P(x - 1, HY - 4, 2, 2, '#e8b830'); P(x + 2, HY - 3, 1, 1, '#e8b830'); P(x - 3, HY - 1, 6, 1, '#b8862e'); if (!back) P(x - 1, HY - 2, 2, 1, cc); }
+    if (ch === 'elmo_negro') { P(x - 3, HY - 1, 6, 5, '#26262e'); P(x - 3, HY - 1, 6, 1, '#3a3a46'); if (!back) P(x - 2, HY + 2, 4, 1, '#0a0a0e'); P(x - 1, HY - 4, 2, 3, cc); P(side > 0 ? x - 2 : x + 1, HY - 3, 1, 2, cc); }
     if (ch === 'bardo') { P(x - 3, HY - 2, 6, 2, cc); P(x - 4, HY - 1, 1, 1, cc); P(side > 0 ? x + 2 : x - 3, HY - 5, 1, 3, '#e8483a'); P(side > 0 ? x + 3 : x - 4, HY - 6, 1, 1, '#f2c040'); }
 
     // acessorio (mao do lado "side")
     const M = (dx, dy, w, h, col) => P(side > 0 ? x + dx : x - dx - w, Y + dy, w, h, col);
     const a = v.acessorio;
-    if (!back || a === 'machado' || a === 'cajado' || a === 'cajado_magico' || a === 'vara' || a === 'escudo_lanca') {
+    if (!back || a === 'machado' || a === 'montante' || a === 'machado_runico' || a === 'cajado' || a === 'cajado_magico' || a === 'vara' || a === 'escudo_lanca') {
       if (a === 'machado') { M(4, -3, 1, 8, '#7a5230'); M(5, -3, 2, 3, '#b8bcc8'); M(5, -3, 1, 3, '#dfe3ea'); }
       if (a === 'cajado') { M(4, -6, 1, 11, '#8a6234'); M(4, -7, 3, 1, '#8a6234'); M(6, -6, 1, 2, '#8a6234'); }
       if (a === 'cajado_magico') { M(4, -5, 1, 10, '#4a3a5a'); M(3, -8, 3, 3, v.magia || '#9b6bff'); M(4, -7, 1, 1, '#ffffff'); }
@@ -129,6 +131,9 @@
       if (a === 'tenaz') { M(4, -2, 1, 6, '#5a5e68'); M(5, -2, 1, 1, '#5a5e68'); M(5, -3, 1, 1, '#ff8a3a'); }
       if (a === 'machadinha') { M(4, -1, 1, 5, '#6b4a2b'); M(5, -1, 2, 2, '#b8bcc8'); M(6, -1, 1, 2, '#dfe3ea'); }
       if (a === 'ampulheta') { M(3, 0, 4, 1, '#8a6234'); M(3, 4, 4, 1, '#8a6234'); M(4, 1, 2, 1, '#e8c06a'); M(4, 2, 2, 1, 'rgba(220,235,245,0.7)'); M(4, 3, 2, 1, '#e8c06a'); }
+      if (a === 'montante') { M(4, -7, 1, 10, '#3a3a46'); M(4, -7, 1, 1, '#6a6a7a'); M(2, 3, 5, 1, '#8a1c22'); M(4, 4, 1, 2, '#2a1a14'); }
+      if (a === 'machado_runico') { const g = 0.6 + 0.4 * Math.sin(t * 3); M(4, -5, 1, 10, '#5a3a1e'); M(5, -5, 3, 4, '#8a8e9a'); M(2, -5, 2, 4, '#8a8e9a'); M(6, -4, 1, 2, `rgba(255,170,60,${g.toFixed(2)})`); M(2, -4, 1, 2, `rgba(255,170,60,${g.toFixed(2)})`); }
+      if (a === 'orbe_mental') { const fy = Math.round(Math.sin(t * 1.8)); M(4, -2 + fy, 3, 3, v.magia || '#ff7ad9'); M(5, -2 + fy, 1, 1, '#ffffff'); M(3, -1 + fy, 1, 1, 'rgba(255,122,217,0.45)'); M(7, -1 + fy, 1, 1, 'rgba(255,122,217,0.45)'); }
       if (a === 'cesta') { M(3, 2, 3, 2, '#a0773f'); M(3, 1, 1, 1, '#a0773f'); M(5, 1, 1, 1, '#a0773f'); }
     }
     if (a === 'espirito') {

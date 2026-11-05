@@ -171,6 +171,25 @@
         [19, 22, 'fogueira', 'Dando bênçãos na fogueira']],
       trabalho: ['Que o tempo seja gentil.', 'Purifique-se.', 'Cada grão tem sua hora.'], social: ['Um santuário no topo da ilha...', 'Eu cuido do tempo.']
     },
+    // ---- Dia 4 (segunda leva)
+    mentalista: {
+      blocos: [[0, 7, 'casa', 'Dormindo', S], [7, 9, 'santuario', 'Meditando em silêncio'], [9, 12, 'biblioteca', 'Lendo pensamentos... e livros'],
+        [12, 13, 'fogueira', 'Almoçando'], [13, 17, 'passeio', 'Recrutando mentes para o Clube'], [17, 20, 'taverna', 'Reunião do Clube das Mentes'],
+        [20, 24, 'fogueira', 'Influenciando a conversa na fogueira']],
+      trabalho: ['Eu sei o que você pensou.', 'A mente é a maior força.', 'Junte-se ao Clube.'], social: ['Vim de muito, muito longe.', 'Proteger a ilha começa na mente.']
+    },
+    cavaleiro_negro: {
+      blocos: [[23, 5, 'casa', 'Dormindo', S], [5, 8, 'arena', 'Treinando com o montante'], [8, 12, 'passeio', 'Patrulhando as ruas da ilha'],
+        [12, 13, 'fogueira', 'Almoçando de armadura'], [13, 17, 'arena', 'Treinando a guarda da ilha'], [17, 20, 'cais', 'Defendendo o cais'],
+        [20, 23, 'taverna', 'Lembrando os tempos dos Cavaleiros Negros']],
+      trabalho: ['Em formação!', 'O povo vem primeiro.', 'Escudos ao alto!'], social: ['Fui chefe dos Cavaleiros Negros.', 'Um bom rei defende o povo.']
+    },
+    lenhador_magico: {
+      blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 7, 'fogueira', 'Acendendo o fogo com um soco'], [7, 12, 'floresta', 'Derrubando pinheiros com um golpe só'],
+        [12, 13, 'fogueira', 'Almoçando (muito)'], [13, 16, 'oficina', 'Carregando toras gigantes'], [16, 19, 'arena', 'Testando a força mágica'],
+        [19, 22, 'taverna', 'Queda de braço na taverna']],
+      trabalho: ['Um golpe. Uma árvore.', 'Força de sobra!', 'Madeira!'], social: ['Minha força é magia.', 'Alguém precisa levantar algo pesado?']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

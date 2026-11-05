@@ -207,5 +207,24 @@ window.MORADORES = [
     historia: 'Quer fundar um santuário no topo da ilha, onde os moradores possam se purificar e receber bênçãos. É o sacerdote do tempo e cuida dele até que sua vida chegue ao fim.',
     rotina: 'sacerdote', casa: 'auto', chegada: '2026-11-05T16:01:00-04:00',
     visual: { tipo: 'humano', pele: '#e2b28e', cabelo: 'coque', corCabelo: '#141018', roupa: '#b0242a', manto: true, detalhe: '#f2e6c8', calca: '#2a1a1e', chapeu: 'eboshi', corChapeu: '#1c1418', acessorio: 'ampulheta' }
+  },
+  // ---------------------------------------------------------------- Dia 4, segunda leva (17h02 de Brasília em diante)
+  {
+    id: 'masteredux', arroba: 'matheus_schreibeer', nome: 'Masteredux', profissao: 'Líder do Clube das Mentes',
+    historia: 'Veio de um lugar tão distante onde sua fé e seus poderes mentais despertaram, e quem o encontrou escolheu segui-lo. Chega à ilha para comandar o Clube das Mentes e mostrar que a maior força está na mente.',
+    rotina: 'mentalista', casa: 'auto', chegada: '2026-11-05T16:02:00-04:00',
+    visual: { tipo: 'humano', pele: '#d9a882', cabelo: 'curto', corCabelo: '#2a1a3a', roupa: '#3a2a6a', manto: true, detalhe: '#e8b830', calca: '#1e1830', chapeu: 'coroa', corChapeu: '#ff7ad9', acessorio: 'orbe_mental', magia: '#ff7ad9' }
+  },
+  {
+    id: 'kauan_xavier', arroba: 'kauan_xavier7', nome: 'Kauan Xavier', profissao: 'Ex-chefe dos Cavaleiros Negros',
+    historia: 'Comandou os Cavaleiros Negros e largou a ordem para proteger quem não pode se defender. Acredita que um bom rei sabe o que é melhor para o povo, e escolheu defendê-lo.',
+    rotina: 'cavaleiro_negro', casa: 'auto', chegada: '2026-11-05T16:03:00-04:00',
+    visual: { tipo: 'humano', pele: '#b07a54', cabelo: 'curto', corCabelo: '#121212', roupa: '#24242c', detalhe: '#8a1c22', calca: '#16161c', chapeu: 'elmo_negro', corChapeu: '#b0242a', acessorio: 'montante' }
+  },
+  {
+    id: 'arthur', arroba: 'arthur.znxs_26', nome: 'Arthur', profissao: 'Lenhador de força mágica',
+    historia: 'Nasceu com um dom mágico de força que nenhum mestre soube explicar. Na ilha, derruba pinheiros com um golpe só e quer aprender a usar a magia que corre nos braços.',
+    rotina: 'lenhador_magico', casa: 'auto', chegada: '2026-11-05T16:04:00-04:00',
+    visual: { tipo: 'humano', pele: '#f0c8a0', cabelo: 'espetado', corCabelo: '#e8c860', roupa: '#3a6a3a', detalhe: '#ffaa3c', calca: '#4a3a26', acessorio: 'machado_runico' }
   }
 ];
