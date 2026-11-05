@@ -1,0 +1,88 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Silk; src: url(Silkscreen-Regular.ttf); }
+@font-face { font-family: SilkB; src: url(Silkscreen-Bold.ttf); }
+@font-face { font-family: Pix; src: url(Pixelify.ttf); }
+html, body { margin: 0; background: #0b1626; }
+#mesa { width: 1600px; height: 1180px; display: flex; gap: 70px; justify-content: center; align-items: flex-start; padding-top: 60px; box-sizing: border-box;
+  background: radial-gradient(ellipse at 50% 40%, #1a2a3a, #0b1626 70%); }
+.col { width: 660px; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+.rot { font: 24px SilkB; white-space: nowrap; height: 34px; color: #a9b3a6; letter-spacing: 2px; }
+.rot b { color: #ffd046; font-weight: normal; }
+.carta { --r: #ffd046; --r2: #b8862e; position: relative; width: 640px; height: 960px; box-sizing: border-box; padding: 22px;
+  background: var(--r2); border: 10px solid #1a1008; box-shadow: 0 0 0 6px var(--r), 16px 16px 0 #05080f, 0 0 90px color-mix(in srgb, var(--r) 35%, transparent); }
+.miolo { position: absolute; inset: 22px; background: #111a22; border: 6px solid #2c3b38; display: flex; flex-direction: column; }
+.topo { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 10px; background: #1a1008; }
+.nome { white-space: nowrap; font: 46px SilkB; color: #f1ead8; text-shadow: 4px 4px 0 #05080f; }
+.nv { font: 22px SilkB; color: #1a1008; background: var(--r); padding: 8px 12px 6px; border: 4px solid #1a1008; box-shadow: 4px 4px 0 #05080f; text-align: center; line-height: 1; }
+.nv b { display: block; font-size: 40px; font-weight: normal; }
+.arte { position: relative; height: 380px; margin: 0 14px; border: 6px solid #1a1008; overflow: hidden; }
+.arte canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.raridade { position: absolute; left: 10px; top: 10px; font: 18px SilkB; color: #1a1008; background: var(--r); padding: 6px 10px 4px; border: 3px solid #1a1008; }
+.selo { position: absolute; right: 10px; top: 10px; font: 16px SilkB; color: #fff; background: #3a8a3a; padding: 6px 10px 4px; border: 3px solid #1a1008; }
+.prof { margin: -22px auto 0; position: relative; z-index: 2; font: 26px SilkB; color: #3a2410; background: #d3a55a; border: 5px solid #3a2410; padding: 10px 22px 7px; box-shadow: 5px 5px 0 #05080f; }
+.poder { display: flex; align-items: center; gap: 14px; margin: 18px 22px 4px; }
+.poder .lbl { font: 22px SilkB; color: #ff8a3a; }
+.poder .num { font: 44px SilkB; color: #ffd046; text-shadow: 3px 3px 0 #3a2410; }
+.poder .barra { flex: 1; height: 18px; background: #05080f; border: 3px solid #2c3b38; }
+.poder .barra i { display: block; height: 100%; background: linear-gradient(90deg, #ff8a3a, #ffd046); }
+.attr { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 10px 22px; }
+.attr div { background: #0b1626; border: 3px solid #2c3b38; text-align: center; padding: 8px 0 6px; font: 15px SilkB; color: #a9b3a6; }
+.attr div b { display: block; font: 30px SilkB; color: #f1ead8; font-weight: normal; }
+.hist { margin: 6px 24px; font: 23px Pix; color: #f1ead8; line-height: 1.3; height: 90px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+.hab { margin: 0 22px; font: 19px Silk; color: #bea0ff; border-top: 3px dashed #2c3b38; padding-top: 10px; }
+.hab b { color: #ffd046; font-weight: normal; font-family: SilkB; }
+.rodape { margin-top: auto; display: flex; justify-content: space-between; padding: 12px 18px; background: #1a1008; font: 18px Silk; color: #a9b3a6; }
+.rodape b { color: #f1ead8; font-weight: normal; }
+.coletada { position: absolute; left: auto; right: -24px; width: 380px; top: 112px; transform: rotate(6deg); background: #ff4a3a; color: #fff;
+  font: 21px SilkB; text-align: center; padding: 10px 0 8px; border: 5px solid #1a1008; box-shadow: 6px 6px 0 #05080f; }
+</style></head>
+<body>
+<div id="mesa"></div>
+<script src="../sprites.js"></script>
+<script src="../moradores.js"></script>
+<script>
+const RAR = { comum: ['#b8bcc8', '#6a6e78', 'COMUM'], raro: ['#4aa0ff', '#1e4a8a', 'RARO'], epico: ['#b070ff', '#4a2a7a', 'ÉPICO'], lendario: ['#ffd046', '#b8862e', 'LENDÁRIO'] };
+const CARTAS = [
+  { id: 'jareel', titulo: 'SUA CARTA', nv: 7, poder: 412, max: 1000, rar: 'raro', attr: [14, 9, 12, 7, 8], cena: 'forja', apoiador: true,
+    hab: '<b>Forja Rúnica</b> · armas que ele faz saem +10% fortes', num: '006', chegou: 'Dia 1', dono: '@jaraeeljt' },
+  { id: 'egil', titulo: 'CARTA COLETADA', nv: 12, poder: 735, max: 1000, rar: 'epico', attr: [16, 11, 13, 15, 9], cena: 'arena',
+    hab: '<b>Plano de Guerra</b> · aliados na luta ganham +1 de defesa', num: '030', chegou: 'Dia 3', dono: '@egilmontfort', coletada: 'conversou com você · 05/11' }
+];
+const mesa = document.getElementById('mesa');
+CARTAS.forEach((c, k) => {
+  const m = window.MORADORES.find(x => x.id === c.id); const r = RAR[c.rar];
+  const col = document.createElement('div'); col.className = 'col';
+  col.innerHTML = `<div class="rot">${k === 0 ? 'só você vê a <b>sua</b> carta' : 'ganha ao <b>interagir</b> com outro morador'}</div>
+  <div class="carta" style="--r:${r[0]};--r2:${r[1]}"><div class="miolo">
+    <div class="topo"><div class="nome">${m.nome.toUpperCase()}</div><div class="nv">NV<b>${c.nv}</b></div></div>
+    <div class="arte"><canvas width="72" height="45"></canvas><div class="raridade">${r[2]}</div>${c.apoiador ? '<div class="selo">🐸 APOIADOR</div>' : ''}</div>
+    <div class="prof">${m.profissao.toUpperCase()}</div>
+    <div class="poder"><span class="lbl">⚔ PODER</span><span class="num">${c.poder}</span><div class="barra"><i style="width:${c.poder / c.max * 100}%"></i></div></div>
+    <div class="attr">${['FOR', 'AGI', 'VIT', 'INT', 'ESP'].map((a, i) => `<div>${a}<b>${c.attr[i]}</b></div>`).join('')}</div>
+    <div class="hist">${m.historia.split('. ')[0].replace(/\.$/, '')}.</div>
+    <div class="hab">${c.hab}</div>
+    <div class="rodape"><span>Nº <b>${c.num}</b>/035 · chegou no <b>${c.chegou}</b></span><span><b>${c.dono}</b></span></div>
+  </div>${c.coletada ? `<div class="coletada">✦ ${c.coletada}</div>` : ''}</div>`;
+  mesa.appendChild(col);
+  const cv = col.querySelector('canvas'), g = cv.getContext('2d');
+  g.save(); g.translate(-12, -12); const P = (x, y, w, h, cc) => { g.fillStyle = cc; g.fillRect(x, y, w, h); };
+  if (c.cena === 'forja') {
+    P(0, 0, 96, 60, '#2a1a14'); for (let x = 0; x < 96; x += 8) for (let y = 0; y < 40; y += 6) P(x + (y / 6 % 2) * 4, y, 7, 5, '#3a2618');
+    P(0, 40, 96, 20, '#4a3426'); P(64, 18, 24, 22, '#5a5e68'); P(68, 24, 16, 10, '#ff8a3a'); P(70, 26, 12, 6, '#ffd046');
+    const gl = g.createRadialGradient(76, 30, 2, 76, 30, 40); gl.addColorStop(0, 'rgba(255,150,60,0.5)'); gl.addColorStop(1, 'rgba(255,150,60,0)'); g.fillStyle = gl; g.fillRect(0, 0, 96, 60);
+    P(14, 38, 16, 4, '#5a5e68'); P(18, 42, 8, 6, '#3a3e48');
+    P(60, 51, 7, 4, '#6fbf4a'); P(60, 49, 2, 2, '#6fbf4a'); P(65, 49, 2, 2, '#6fbf4a'); P(61, 49, 1, 1, '#140c08'); P(65, 49, 1, 1, '#140c08');
+  } else {
+    P(0, 0, 96, 34, '#6a8ac8'); P(0, 22, 96, 12, '#8aa8d8'); P(0, 34, 96, 26, '#b89a64');
+    for (let i = 0; i < 40; i++) P((i * 37) % 96, 36 + (i * 13) % 22, 2, 1, '#a08654');
+    P(6, 10, 2, 26, '#6a4a2a'); P(8, 10, 10, 7, '#c0392b'); P(86, 10, 2, 26, '#6a4a2a'); P(76, 10, 10, 7, '#2a4a8a');
+    P(10, 30, 76, 4, '#7a5a3a');
+  }
+  window.IlhaSprites.drawCharacter(g, 46, 53, m.visual, { t: 1, side: 1 }); g.restore();
+});
+document.fonts.ready.then(() => {
+  document.querySelectorAll('.nome').forEach(n => { let px = 46; while (n.scrollWidth > 400 && px > 24) { px -= 2; n.style.fontSize = px + 'px'; } }); document.body.dataset.pronto = 1; });
+</script>
+</body></html>
