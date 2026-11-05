@@ -94,6 +94,9 @@
     if (ch === 'elmo_aco') { P(x - 3, HY - 1, 6, 2, '#9aa0aa'); P(x - 3, HY + 1, 1, 3, '#9aa0aa'); P(x + 2, HY + 1, 1, 3, '#9aa0aa'); P(x - 1, HY - 2, 2, 1, '#c9ced8'); if (!back) P(x - 1, HY + 1, 1, 2, '#7d828e'); else P(x - 3, HY, 6, 4, '#868c96'); }
     if (ch === 'monoculo' && !back) { P(x, HY + 1, 3, 3, '#c9a14a'); P(x + 1, HY + 2, 1, 1, '#8fd3ff'); P(x + 2, HY + 4, 1, 2, '#c9a14a'); }
     if (ch === 'feltro') { P(x - 4, HY, 8, 1, cc); P(x - 3, HY - 2, 6, 2, cc); P(x - 3, HY - 1, 6, 1, shade(cc, 0.7)); }
+    if (ch === 'mascara' && !back) { P(x - 3, HY + 3, 6, 2, cc); P(x - 3, HY + 3, 6, 1, shade(cc, 1.25)); }
+    if (ch === 'mascara') P(side > 0 ? x - 4 : x + 3, HY + 3, 1, 2, cc);
+    if (ch === 'eboshi') { P(x - 3, HY - 1, 6, 1, cc); P(x - 2, HY - 4, 4, 3, cc); P(x - 1, HY - 5, 3, 1, cc); P(x - 2, HY - 2, 4, 1, shade(cc, 1.6)); }
     if (ch === 'bardo') { P(x - 3, HY - 2, 6, 2, cc); P(x - 4, HY - 1, 1, 1, cc); P(side > 0 ? x + 2 : x - 3, HY - 5, 1, 3, '#e8483a'); P(side > 0 ? x + 3 : x - 4, HY - 6, 1, 1, '#f2c040'); }
 
     // acessorio (mao do lado "side")
@@ -124,6 +127,8 @@
       if (a === 'mapa') { M(4, 1, 3, 3, '#e8d8a8'); M(4, 1, 1, 3, '#b8a06a'); M(6, 2, 1, 1, '#c0392b'); }
       if (a === 'barril') { M(3, 1, 4, 4, '#8a5a2e'); M(3, 2, 4, 1, '#5a5e68'); M(3, 4, 4, 1, '#5a5e68'); }
       if (a === 'tenaz') { M(4, -2, 1, 6, '#5a5e68'); M(5, -2, 1, 1, '#5a5e68'); M(5, -3, 1, 1, '#ff8a3a'); }
+      if (a === 'machadinha') { M(4, -1, 1, 5, '#6b4a2b'); M(5, -1, 2, 2, '#b8bcc8'); M(6, -1, 1, 2, '#dfe3ea'); }
+      if (a === 'ampulheta') { M(3, 0, 4, 1, '#8a6234'); M(3, 4, 4, 1, '#8a6234'); M(4, 1, 2, 1, '#e8c06a'); M(4, 2, 2, 1, 'rgba(220,235,245,0.7)'); M(4, 3, 2, 1, '#e8c06a'); }
       if (a === 'cesta') { M(3, 2, 3, 2, '#a0773f'); M(3, 1, 1, 1, '#a0773f'); M(5, 1, 1, 1, '#a0773f'); }
     }
     if (a === 'espirito') {

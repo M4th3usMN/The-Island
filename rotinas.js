@@ -158,6 +158,19 @@
         [19, 24, 'fogueira', 'Planejando a volta ao trono']],
       trabalho: ['Aço não se dobra.', 'Cada pedra conta.', 'Em guarda!'], social: ['Meu trono foi usurpado.', 'Silêncio não é rendição.']
     },
+    // ---- Dia 4
+    batedor: {
+      blocos: [[23, 5, 'casa', 'Dormindo', S], [5, 7, 'cais', 'Observando o mar e o horizonte'], [7, 12, 'floresta', 'Rastreando trilhas na floresta'],
+        [12, 13, 'fogueira', 'Almoçando'], [13, 16, 'passeio', 'Mapeando caminhos seguros pela ilha'], [16, 18, 'arena', 'Treinando com o machado'],
+        [18, 20, 'taverna', 'Contando o que descobriu'], [20, 23, 'cais', 'Vigiando a ilha à noite']],
+      trabalho: ['Pegadas frescas...', 'Caminho seguro por aqui.', 'Nada passa por mim.'], social: ['O que tem além da ilha?', 'Melhor pensar antes de lutar.']
+    },
+    sacerdote: {
+      blocos: [[22, 4, 'casa', 'Dormindo', S], [4, 7, 'santuario', 'Rezando ao amanhecer'], [7, 12, 'santuario', 'Purificando quem visita o santuário'],
+        [12, 13, 'fogueira', 'Almoçando em silêncio'], [13, 16, 'passeio', 'Abençoando as casas da ilha'], [16, 19, 'torre', 'Contemplando o tempo do alto'],
+        [19, 22, 'fogueira', 'Dando bênçãos na fogueira']],
+      trabalho: ['Que o tempo seja gentil.', 'Purifique-se.', 'Cada grão tem sua hora.'], social: ['Um santuário no topo da ilha...', 'Eu cuido do tempo.']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

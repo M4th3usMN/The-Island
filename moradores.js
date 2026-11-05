@@ -194,5 +194,18 @@ window.MORADORES = [
     historia: 'Herdeiro legítimo do Sul, estrategista de guerra e guerreiro forjado no aço. Teve o trono usurpado, mas não confundam seu exílio com fraqueza.',
     rotina: 'estrategista', casa: 'auto', chegada: '2026-11-04T16:09:00-04:00',
     visual: { tipo: 'humano', pele: '#f4d0b4', cabelo: 'longo', corCabelo: '#e8d8a8', barba: '#d8c898', roupa: '#2a4a8a', manto: true, detalhe: '#c9ced8', calca: '#2a2a2e', chapeu: 'elmo_aco', acessorio: 'espada' }
+  },
+  // ---------------------------------------------------------------- Dia 4: chegam pelo cais, um por minuto, a partir das 17h de Brasília (16h Manaus)
+  {
+    id: 'caio', arroba: 'magal_xyz', nome: 'Caio', profissao: 'Batedor',
+    historia: 'Explorador experiente que chegou após uma longa jornada, mestre em rastrear, sobreviver e lutar com machado. Prefere a estratégia ao confronto e quer proteger os moradores e descobrir o que existe além da ilha.',
+    rotina: 'batedor', casa: 'auto', chegada: '2026-11-05T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#9c6a48', cabelo: 'rabo', corCabelo: '#4a3424', roupa: '#6a5440', detalhe: '#3e4a3a', calca: '#2c3a30', chapeu: 'mascara', corChapeu: '#2e3436', acessorio: 'machadinha' }
+  },
+  {
+    id: 'wodysvel', arroba: 'therevolutiondistrict', nome: 'Wodysvel', profissao: 'Sacerdote do tempo',
+    historia: 'Quer fundar um santuário no topo da ilha, onde os moradores possam se purificar e receber bênçãos. É o sacerdote do tempo e cuida dele até que sua vida chegue ao fim.',
+    rotina: 'sacerdote', casa: 'auto', chegada: '2026-11-05T16:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#e2b28e', cabelo: 'coque', corCabelo: '#141018', roupa: '#b0242a', manto: true, detalhe: '#f2e6c8', calca: '#2a1a1e', chapeu: 'eboshi', corChapeu: '#1c1418', acessorio: 'ampulheta' }
   }
 ];
