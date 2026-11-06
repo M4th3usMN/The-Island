@@ -252,5 +252,17 @@ window.MORADORES = [
     historia: 'Veio de propósito: soube que a ilha virou refúgio de náufragos e criminosos procurados. Muita gente odeia ele, então torce para ninguém o reconhecer.',
     rotina: 'cacador_veterano', casa: 'auto', chegada: '2026-11-06T17:02:00-04:00',
     visual: { tipo: 'humano', pele: '#9a6a48', cabelo: 'careca', corCabelo: '#b8b8b0', barba: '#cfcfc8', roupa: '#2e2e34', manto: true, detalhe: '#6a1e1e', calca: '#24242a', chapeu: 'tapaolho', corChapeu: '#141010', acessorio: 'corrente' }
+  },
+  {
+    id: 'jester', arroba: 'jester_12007', nome: 'Jester', profissao: 'Flautista encantador de animais',
+    historia: 'O Guardião da Sinfonia Selvagem: com uma flauta mágica ele acalma, chama e comanda animais. Manda aves vigiarem longe e usa os animais para achar gente perdida e proteger a vila.',
+    rotina: 'flautista', casa: 'auto', chegada: '2026-11-06T17:03:00-04:00',
+    visual: { tipo: 'humano', pele: '#f0c8a0', cabelo: 'curto', corCabelo: '#3a2a1a', roupa: '#6a3a8a', detalhe: '#2a8a5a', calca: '#2a2a3a', listras: '#ffd046', chapeu: 'bobo', corChapeu: '#8a2a4a', acessorio: 'flauta' }
+  },
+  {
+    id: 'reed', arroba: 'kayky.l.m', nome: 'Reed', profissao: 'Necromante',
+    historia: 'Chegou à meia-noite, sem barco que ninguém tenha visto. Diz que conversa com os mortos e que esta ilha guarda ossos muito antigos.',
+    rotina: 'necromante', casa: 'auto', chegada: '2026-11-06T17:04:00-04:00',
+    visual: { tipo: 'humano', pele: '#d8d4cc', cabelo: 'longo', corCabelo: '#101418', roupa: '#1e2a24', manto: true, detalhe: '#4ac07a', calca: '#141a16', acessorio: 'cranio', magia: '#7affa0' }
   }
 ];

@@ -175,6 +175,17 @@
         [19, 22, 'fogueira', 'Dando bênçãos na fogueira']],
       trabalho: ['Que o tempo seja gentil.', 'Purifique-se.', 'Cada grão tem sua hora.'], social: ['Um santuário no topo da ilha...', 'Eu cuido do tempo.']
     },
+    flautista: {
+      blocos: [[23, 5, 'casa', 'Dormindo', S], [5, 8, 'pasto', 'Tocando para as ovelhas acordarem'], [8, 11, 'floresta', 'Mandando aves vigiarem longe'],
+        [11, 13, 'cais', 'Acalmando o dragão com a flauta'], [13, 14, 'taverna', 'Almoçando'], [14, 17, 'floresta', 'Procurando gente perdida com os lobos'],
+        [17, 20, 'cais', 'Tocando para o dragão dormir'], [20, 23, 'taverna', 'Tocando na taverna']],
+      trabalho: ['♪ calma, calma... ♪', 'As aves viram algo no mar.', 'Os animais me escutam.'], social: ['Toda criatura tem uma canção.', 'Guardião da Sinfonia Selvagem, prazer!']
+    },
+    necromante: {
+      blocos: [[6, 13, 'casa', 'Dormindo de dia', S], [13, 16, 'biblioteca', 'Lendo livros proibidos'], [16, 18, 'torre', 'Trocando segredos com o Fernando'],
+        [18, 21, 'taverna', 'Sentado sozinho, sem beber nada'], [21, 1, 'santuario', 'Conversando com os mortos'], [1, 6, 'floresta', 'Procurando ossos antigos']],
+      trabalho: ['Os mortos falam... baixinho.', 'Não tenha medo.', 'Essa ilha guarda ossos antigos.'], social: ['Boa noite. Sempre boa noite.', 'O passado nunca vai embora.']
+    },
     // ---- Dia 6
     cuidador_dragoes: {
       blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 8, 'cais', 'Dando peixe para o dragão'], [8, 11, 'floresta', 'Colhendo ervas para o dragão'],

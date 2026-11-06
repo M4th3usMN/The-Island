@@ -15,14 +15,19 @@
     P(-7, -7, 1, 4, '#3a2418');                                            // rabo
     P(-4, -9, 6, 2, '#4a4e58'); P(-3, -10, 4, 1, '#6a6e7a');               // oficina portátil nas costas
   }
-  const COMP = { guilherme: { dx: -11, dy: 2, draw: touro } };
+  // passarinho que voa em volta do Jester (o flautista)
+  function ave(c, x, y, lado, passo, sec) {
+    const a = sec * 2.2, bx = Math.round(x + Math.cos(a) * 9), by = Math.round(y - 16 + Math.sin(a * 2) * 3);
+    c.fillStyle = '#e8483a'; c.fillRect(bx, by, 2, 1); c.fillStyle = '#3a6ac8'; c.fillRect(bx - 1, by - (Math.floor(sec * 8) % 2), 1, 1); c.fillRect(bx + 2, by - (Math.floor(sec * 8) % 2), 1, 1);
+  }
+  const COMP = { guilherme: { dx: -11, dy: 2, draw: touro }, jester: { dx: 0, dy: 0, draw: ave } };
   G.hooks.push((objs, c, info) => {
     Object.keys(COMP).forEach(id => {
       const m = G.BY[id]; if (!m || (G.jogados && G.jogados.has(id))) return;
       const q = G.posAt(m, info.t); if (!q || q.hidden || q.sleeping) return;
       const q2 = G.posAt(m, info.t - 400) || q, lado = q.x < q2.x ? -1 : 1, k = COMP[id];
       const x = q.x + k.dx * lado, y = q.y + k.dy;
-      objs.push({ y, f: () => k.draw(c, x, y, lado, q.walking && Math.floor(info.sec * 6) % 2) });
+      objs.push({ y: y + (id === 'jester' ? 20 : 0), f: () => k.draw(c, x, y, lado, q.walking && Math.floor(info.sec * 6) % 2, info.sec) });
     });
   });
 })();
