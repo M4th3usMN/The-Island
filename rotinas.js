@@ -61,9 +61,13 @@
         [20, 23, 'fogueira', 'Mostrando invenções']],
       trabalho: ['Eureca!', 'Quase funcionou...', 'Mais uma engrenagem.'], social: ['Olha o que eu fiz!', 'Lugar novo, ideias novas.']
     },
+    // Morato: volta completa pela orla todo dia às 09:00 e às 21:00 em ponto (pedido de um seguidor)
     marinheiro: {
-      blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 12, 'cais', 'Vigiando o horizonte'], [12, 13, 'taverna', 'Almoçando na taverna'],
-        [13, 18, 'cais', 'Procurando sinais de náufragos'], [18, 22, 'taverna', 'Contando histórias do mar']],
+      pontual: true,
+      blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 9, 'cais', 'Vigiando o horizonte'], [9, 10, 'orla', 'Ronda da manhã pela orla', { aviso: 'começou a ronda da manhã pela orla' }],
+        [10, 12, 'cais', 'Vigiando o horizonte'], [12, 13, 'taverna', 'Almoçando na taverna'],
+        [13, 18, 'cais', 'Procurando sinais de náufragos'], [18, 21, 'taverna', 'Contando histórias do mar'],
+        [21, 22, 'orla', 'Ronda da noite pela orla', { aviso: 'começou a ronda da noite pela orla' }]],
       trabalho: ['Terra à vista?', 'Nenhuma vela...', 'Eles estão lá fora.'], social: ['Vi navios sumirem.', 'O mar guarda segredos.']
     },
     gladiador: {

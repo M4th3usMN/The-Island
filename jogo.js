@@ -82,7 +82,7 @@
     { id: 'explorador', nome: 'Explorador', desc: 'Visite todos os lugares da ilha', xp: 150, ok: p => LUGARES.every(k => p.lugares[k]) },
     { id: 'papo', nome: 'Bom de papo', desc: 'Converse com 3 moradores', xp: 30, ok: p => conta(p.conversas) >= 3 },
     { id: 'amigo', nome: 'Amigo da vila', desc: 'Converse com 10 moradores diferentes', xp: 100, ok: p => conta(p.conversas) >= 10 },
-    { id: 'todos', nome: 'Conhece todo mundo', desc: 'Converse com todos os moradores da ilha', xp: 200, ok: p => chegados().every(m => p.conversas[m.id]) },
+    { id: 'todos', nome: 'Conhece todo mundo', desc: 'Converse com todos os moradores da ilha', xp: 200, ok: p => chegados().every(m => p.conversas[m.id] || m === moradorDe(S.eu.arroba)) },
     { id: 'andarilho', nome: 'Andarilho', desc: 'Caminhe 3.000 passos', xp: 80, ok: p => p.passos >= 3000 },
     { id: 'coruja', nome: 'Coruja da madrugada', desc: 'Fique na fogueira entre meia-noite e 4h', xp: 60 },
     { id: 'madrugador', nome: 'Madrugador', desc: 'Vá ao pasto entre 5h e 7h, quando as ovelhas saem', xp: 60 },
@@ -92,7 +92,7 @@
     { id: 'fiel', nome: 'Visitante fiel', desc: 'Entre na ilha em 3 dias diferentes', xp: 80, ok: p => p.dias.length >= 3 },
     { id: 'sociavel', nome: 'Sociável', desc: 'Cumprimente 5 viajantes de perto', xp: 60, ok: p => p.cumprimentos >= 5 },
     { id: 'apoiador', nome: 'Coração da ilha', desc: 'Tenha o selo de apoiador', xp: 100, ok: () => S.eu && eApoiador(S.eu.arroba) },
-    { id: 'colecao', nome: 'Colecionador', desc: 'Tenha a carta de todos os moradores da ilha', xp: 200, ok: p => chegados().every(m => (p.cartas || {})[m.id]) },
+    { id: 'colecao', nome: 'Colecionador', desc: 'Tenha a carta de todos os moradores da ilha', xp: 200, ok: p => chegados().every(m => (p.cartas || {})[m.id] || m === moradorDe(S.eu.arroba)) },
     { id: 'veterano', nome: 'Veterano', desc: 'Chegue ao nível 5', xp: 0, ok: p => nivel(p.xp) >= 5 }
   ];
 
@@ -100,7 +100,8 @@
     const r = k => G.rnd('missao', dia, k);
     const lug = ['taverna', 'forja', 'oficina', 'laboratorio', 'biblioteca', 'arena', 'fazenda', 'pasto', 'cais', 'torre', 'santuario', 'ponte'];
     const L = lug[Math.floor(r('l') * lug.length)];
-    const mor = G.MOR.filter(m => G.arrived(m, G.DIA2 + (dia - 1) * 864e5)), M = mor[Math.floor(r('m') * mor.length)] || G.MOR[0];
+    const eu = S.eu ? moradorDe(S.eu.arroba) : null; // ninguém recebe a missão de conversar consigo mesmo
+    const mor = G.MOR.filter(m => G.arrived(m, G.DIA2 + (dia - 1) * 864e5) && m !== eu), M = mor[Math.floor(r('m') * mor.length)] || G.MOR[0];
     const extra = [
       { k: 'conversar', meta: 3, xp: 40, txt: 'Converse com 3 moradores diferentes' },
       { k: 'passos', meta: 400, xp: 30, txt: 'Caminhe 400 passos pela ilha' },
@@ -310,6 +311,7 @@
     S.eu.lv = nivel(S.perfil.xp);
     if (!S.perfil.cartas) S.perfil.cartas = {};
     Object.keys(S.perfil.conversas || {}).forEach(id => { if (G.BY[id] && !S.perfil.cartas[id]) S.perfil.cartas[id] = { e: 0 }; });
+    { const eu = moradorDe(arroba); if (eu && !S.perfil.cartas[eu.id]) { S.perfil.cartas[eu.id] = { e: 0, eu: 1 }; S.mudou = true; } }
     S.niveis = Object.assign({}, m.niveis || {}); S.niveis[arroba] = S.eu.lv;
     (m.outros || []).forEach(o => { S.niveis[o.arroba] = o.lv || 1; });
     S.outros = new Map((m.outros || []).map(o => [o.id, Object.assign(o, { tx: o.x, ty: o.y, s: 1 })]));
@@ -573,13 +575,14 @@
   function abaCartas(corpo) {
     if (!C()) { corpo.innerHTML = '<p>As cartas estão carregando...</p>'; return; }
     const cs = S.perfil.cartas || {}, mor = C().ordem().filter(m => G.arrived(m, Date.now()));
-    const tem = mor.filter(m => cs[m.id]).length, viaj = Object.keys(cs).filter(k => k.indexOf('v:') === 0);
+    const tem = mor.filter(m => cs[m.id] || m === moradorDe(S.eu.arroba)).length, viaj = Object.keys(cs).filter(k => k.indexOf('v:') === 0);
     corpo.innerHTML = `<div class="ct-album-topo"><p style="margin:0">Você tem <b>${tem} de ${mor.length}</b> cartas de moradores. Converse com um morador, cumprimente um viajante de perto ou cumpra uma missão com alguém do lado para ganhar a carta dele.</p></div>
       <div class="m-botoes" style="margin-bottom:12px"><button type="button" class="b-ouro" id="ct-minha">VER MINHA CARTA</button></div>
       <h3>MORADORES</h3><div class="ct-album" id="ct-mor"></div>${viaj.length ? '<h3>VIAJANTES</h3><div class="ct-album" id="ct-via"></div>' : ''}`;
     corpo.querySelector('#ct-minha').onclick = () => abrirCarta('eu');
     const A = corpo.querySelector('#ct-mor');
-    mor.forEach(m => { const b = C().mini({ m }, !!cs[m.id]); b.onclick = () => abrirCarta(m.id); A.appendChild(b); });
+    const meu = moradorDe(S.eu.arroba);
+    mor.forEach(m => { const b = C().mini(m === meu ? fonteDe('eu') : { m }, !!cs[m.id] || m === meu); b.onclick = () => abrirCarta(m === meu ? 'eu' : m.id); A.appendChild(b); });
     const V = corpo.querySelector('#ct-via');
     if (V) viaj.forEach(k => { const b = C().mini(fonteDe(k), true); b.onclick = () => abrirCarta(k); V.appendChild(b); });
     if (tem === mor.length && mor.length) conquista('colecao');

@@ -32,6 +32,13 @@
   setInterval(() => {
     const t = Date.now();
     G.MOR.forEach(m => { if (m._ch > ultimo && m._ch <= t) push({ k: 'chegada', html: `<b>${esc(m.nome)}</b> desembarcou no cais (${esc(m.profissao.toLowerCase())})`, dur: 20000 }); });
+    // blocos de rotina com aviso (ex.: ronda do Morato pela orla às 9h e 21h)
+    const h0 = G.localHours(ultimo), h1 = G.localHours(t);
+    G.MOR.forEach(m => (m._blocos || []).forEach(b => {
+      if (!b[4] || !b[4].aviso || !G.arrived(m, t)) return;
+      const s = (b[0] + (m._jit || 0) + 24) % 24, passou = h0 <= h1 ? (h0 < s && s <= h1) : (h0 < s || s <= h1);
+      if (passou) push({ k: 'chegada', html: `<b>${esc(m.nome)}</b> ${esc(b[4].aviso)}`, dur: 30000 });
+    }));
     ultimo = t;
   }, 2000);
   window.IlhaFeed = { push, quem };

@@ -32,6 +32,24 @@
     return Math.hypot(dx, dy) / rad;
   }
 
+  // ---------------------------------------------------------------- orla: volta completa pela areia, começando e terminando no cais
+  const ORLA = (function () {
+    const pts = [], N = 240, a0 = Math.atan2((538 - CY) / RY, (392 - CX) / RX);
+    for (let i = 0; i <= N; i++) {
+      const a = a0 + i / N * Math.PI * 2; let lo = 0, hi = 2;
+      for (let k = 0; k < 30; k++) { const md = (lo + hi) / 2; if (idist(CX + Math.cos(a) * RX * md, CY + Math.sin(a) * RY * md) < 0.955) lo = md; else hi = md; }
+      pts.push({ x: CX + Math.cos(a) * RX * lo, y: CY + Math.sin(a) * RY * lo });
+    }
+    let len = 0; const acc = [0];
+    for (let i = 1; i < pts.length; i++) { len += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); acc.push(len); }
+    return { pts, acc, len, VEL: 3 };
+  })();
+  function naOrla(d) {
+    const A = ORLA.acc; let i = 1; while (i < A.length - 1 && A[i] < d) i++;
+    const f = (d - A[i - 1]) / ((A[i] - A[i - 1]) || 1), p = ORLA.pts;
+    return { x: p[i - 1].x + (p[i].x - p[i - 1].x) * f, y: p[i - 1].y + (p[i].y - p[i - 1].y) * f };
+  }
+
   // ---------------------------------------------------------------- lugares
   const LUG = {
     fogueira: { nome: 'Fogueira', x: 380, y: 300, sx: 380, sy: 304, r: 0, sempre: true },
@@ -82,7 +100,7 @@
       const R = ROT[m.rotina] || ROT.lenhador;
       m._R = R; m._blocos = R.blocos;
       const animal = m.visual.tipo === 'gato' || m.visual.tipo === 'cao';
-      m._jit = animal ? 0 : (rnd(m.id, 'jit') - 0.5) * 0.6;
+      m._jit = animal || R.pontual ? 0 : (rnd(m.id, 'jit') - 0.5) * 0.6;
       m._usa = new Set(m._blocos.map(b => b[2]));
       const c = m.casa || 'auto';
       const TODOS = SLOTS.concat(SLOTS_EXTRA);
@@ -134,6 +152,7 @@
       return { x: FIRE.x + Math.cos(a) * r, y: FIRE.y + 3 + Math.sin(a) * r * 0.72 };
     }
     if (pl === 'casa') return m._home;
+    if (pl === 'orla') return ORLA.pts[0];
     if (op && op.soneca && pl === 'taverna') return { x: LUG.taverna.x + 10, y: LUG.taverna.y - 23 };
     const L = LUG[pl] || LUG.fogueira;
     const a = rnd(m.id, pl, k || 0) * 6.2832, r = Math.sqrt(rnd(m.id, pl, 'r', k || 0)) * L.r;
@@ -186,6 +205,11 @@
     if (!PREVIEW && t - m._ch < ARR) { from = { x: 392 + (rnd(m.id, 'cx') - 0.5) * 6, y: 556 }; start = m._ch; arriving = true; }
     const rt = route(from, g.to), e = (t - start) / 1000, d = e * SPEED;
     if (d < rt.len) { const q = along(rt, d); return { x: q.x, y: q.y, walking: true, viagem: true, leg: g, arriving }; }
+    if (g.pl === 'orla') {
+      const od = (e - rt.len / SPEED) * ORLA.VEL;
+      if (od < ORLA.len) { const q = naOrla(od); return { x: q.x, y: q.y, walking: true, orla: true, leg: g, arriving }; }
+      const fim = ORLA.pts[0]; return { x: fim.x, y: fim.y, walking: false, leg: Object.assign({}, g, { act: 'Terminou a volta pela orla' }), arriving };
+    }
     if (g.op && (g.op.sono || g.op.soneca)) {
       return { x: g.to.x, y: g.to.y, walking: false, sleeping: true, hidden: !!g.op.sono && !!m._home.dentro, leg: g, arriving };
     }
@@ -199,6 +223,7 @@
   }
   function placeName(p, m) {
     if (p === 'casa') return m._home.lugar ? LUG[m._home.lugar].nome : 'Em casa';
+    if (p === 'orla') return 'Orla da ilha';
     return (LUG[p] || {}).nome || '';
   }
   function frase(m, p, t) {
