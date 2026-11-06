@@ -175,6 +175,23 @@
         [19, 22, 'fogueira', 'Dando bênçãos na fogueira']],
       trabalho: ['Que o tempo seja gentil.', 'Purifique-se.', 'Cada grão tem sua hora.'], social: ['Um santuário no topo da ilha...', 'Eu cuido do tempo.']
     },
+    // ---- Dia 6
+    cuidador_dragoes: {
+      blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 8, 'cais', 'Dando peixe para o dragão'], [8, 11, 'floresta', 'Colhendo ervas para o dragão'],
+        [11, 13, 'cais', 'Examinando as escamas do dragão'], [13, 14, 'taverna', 'Almoçando'], [14, 18, 'cais', 'Treinando o dragão com paciência'],
+        [18, 20, 'biblioteca', 'Estudando sobre dragões'], [20, 22, 'cais', 'Cantando para o dragão dormir']],
+      trabalho: ['Calma, grandão...', 'Peixe fresco!', 'Ele está aprendendo.'], social: ['Dragão também sente medo.', 'Confiança se constrói devagar.']
+    },
+    ferreiro_andarilho: {
+      blocos: [[21, 4, 'casa', 'Dormindo na cabana', S], [4, 8, 'floresta', 'Buscando materiais com o touro'], [8, 12, 'forja', 'Montando a oficina portátil'],
+        [12, 13, 'fogueira', 'Almoçando com o touro'], [13, 18, 'forja', 'Forjando com os melhores materiais'], [18, 21, 'taverna', 'Contando das viagens']],
+      trabalho: ['Material bom faz lâmina boa.', 'Segura, touro!', 'Oficina pronta em dois minutos.'], social: ['Volto em três dias... ou não.', 'O touro é meu ajudante.']
+    },
+    cacador_veterano: {
+      blocos: [[1, 7, 'casa', 'Dormindo com a corrente na mão', S], [7, 10, 'cais', 'Olhando quem desembarca'], [10, 13, 'passeio', 'Estudando o rosto dos moradores'],
+        [13, 15, 'taverna', 'Escutando conversas'], [15, 19, 'cais', 'Olhando a praia de longe'], [19, 23, 'taverna', 'Bebendo sozinho no canto'], [23, 1, 'floresta', 'Seguindo pegadas']],
+      trabalho: ['Todo mundo tem um preço.', 'Eu conheço essa cara...', 'Hmm.'], social: ['Ninguém aqui me reconhece... ainda.', 'Recompensa boa paga a viagem.']
+    },
     // ---- Dia 5
     contrabandista: {
       blocos: [[2, 9, 'casa', 'Dormindo (com um olho aberto)', S], [9, 11, 'cais', 'Fingindo ser ex-marinheiro'], [11, 13, 'mercearia', 'Pechinchando na mercearia'],

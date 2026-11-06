@@ -233,5 +233,24 @@ window.MORADORES = [
     historia: 'Veio ver se a ilha servia para os seus "negócios", mas encontrou gente perigosa demais e agora vive disfarçado no meio de todo mundo. Diz que é ex-marinheiro, mas mente mal, e os mais experientes desconfiam dele.',
     rotina: 'contrabandista', casa: 'auto', chegada: '2026-11-06T08:30:00-04:00',
     visual: { tipo: 'humano', pele: '#a8724a', cabelo: 'curto', corCabelo: '#141010', barba: '#141010', roupa: '#5a2a3a', detalhe: '#e8b830', calca: '#2a2420', chapeu: 'turbante', corChapeu: '#7a1e2a', acessorio: 'bau' }
+  },
+  // ---------------------------------------------------------------- Dia 6 (18h de Brasília)
+  {
+    id: 'werner', arroba: 'lucax_w23', nome: 'Werner', profissao: 'Cuidador de dragões',
+    historia: 'Cuida da alimentação, da saúde e do treino de dragões. Veio criar um laço de confiança entre a ilha e o dragão que pousou na praia.',
+    rotina: 'cuidador_dragoes', casa: 'auto', chegada: '2026-11-06T17:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#e0b48a', cabelo: 'rabo', corCabelo: '#7a4a2a', roupa: '#3f6a46', detalhe: '#d0342c', avental: '#6a4428', calca: '#3a3026', acessorio: 'balde' }
+  },
+  {
+    id: 'guilherme', arroba: 'guilhermemarianocavalcanti', nome: 'Guilherme', profissao: 'Ferreiro andarilho',
+    historia: 'Chegou montado num touro, com uma oficina portátil nas costas. Some por dias atrás dos melhores materiais e jura que é o ferreiro mais habilidoso do mundo.',
+    rotina: 'ferreiro_andarilho', casa: 'auto', chegada: '2026-11-06T17:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#c89064', cabelo: 'curto', corCabelo: '#d8b04a', barba: '#c89a3a', roupa: '#8a5a2a', avental: '#3a2a1e', calca: '#4a3a2a', acessorio: 'bigorna' }
+  },
+  {
+    id: 'velhomu', arroba: 'steve_standuser', nome: 'Velho Mu', profissao: 'Caçador de recompensas veterano',
+    historia: 'Veio de propósito: soube que a ilha virou refúgio de náufragos e criminosos procurados. Muita gente odeia ele, então torce para ninguém o reconhecer.',
+    rotina: 'cacador_veterano', casa: 'auto', chegada: '2026-11-06T17:02:00-04:00',
+    visual: { tipo: 'humano', pele: '#9a6a48', cabelo: 'careca', corCabelo: '#b8b8b0', barba: '#cfcfc8', roupa: '#2e2e34', manto: true, detalhe: '#6a1e1e', calca: '#24242a', chapeu: 'tapaolho', corChapeu: '#141010', acessorio: 'corrente' }
   }
 ];
