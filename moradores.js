@@ -226,5 +226,12 @@ window.MORADORES = [
     historia: 'Nasceu com um dom mágico de força que nenhum mestre soube explicar. Na ilha, derruba pinheiros com um golpe só e quer aprender a usar a magia que corre nos braços.',
     rotina: 'lenhador_magico', casa: 'auto', chegada: '2026-11-05T16:04:00-04:00',
     visual: { tipo: 'humano', pele: '#f0c8a0', cabelo: 'espetado', corCabelo: '#e8c860', roupa: '#3a6a3a', detalhe: '#ffaa3c', calca: '#4a3a26', acessorio: 'machado_runico' }
+  },
+  // ---------------------------------------------------------------- Dia 5 (17h de Brasília)
+  {
+    id: 'abdula', arroba: 'arkhancon', nome: 'Abdula', profissao: 'Contrabandista disfarçado',
+    historia: 'Veio ver se a ilha servia para os seus "negócios", mas encontrou gente perigosa demais e agora vive disfarçado no meio de todo mundo. Diz que é ex-marinheiro, mas mente mal, e os mais experientes desconfiam dele.',
+    rotina: 'contrabandista', casa: 'auto', chegada: '2026-11-06T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#a8724a', cabelo: 'curto', corCabelo: '#141010', barba: '#141010', roupa: '#5a2a3a', detalhe: '#e8b830', calca: '#2a2420', chapeu: 'turbante', corChapeu: '#7a1e2a', acessorio: 'bau' }
   }
 ];

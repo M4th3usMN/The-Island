@@ -175,6 +175,13 @@
         [19, 22, 'fogueira', 'Dando bênçãos na fogueira']],
       trabalho: ['Que o tempo seja gentil.', 'Purifique-se.', 'Cada grão tem sua hora.'], social: ['Um santuário no topo da ilha...', 'Eu cuido do tempo.']
     },
+    // ---- Dia 5
+    contrabandista: {
+      blocos: [[2, 9, 'casa', 'Dormindo (com um olho aberto)', S], [9, 11, 'cais', 'Fingindo ser ex-marinheiro'], [11, 13, 'mercearia', 'Pechinchando na mercearia'],
+        [13, 15, 'passeio', 'Disfarçado no meio do povo'], [15, 18, 'cais', 'Olhando os barcos que chegam'], [18, 22, 'taverna', 'Contando mentiras do mar'],
+        [22, 2, 'floresta', 'Escondendo umas caixas...']],
+      trabalho: ['Eu? Ex-marinheiro, claro.', 'Nada pra ver aqui.', 'Que caixas?'], social: ['Já naveguei os sete mares... acho.', 'Negócio bom é negócio quieto.']
+    },
     // ---- Dia 4 (segunda leva)
     mentalista: {
       blocos: [[0, 7, 'casa', 'Dormindo', S], [7, 9, 'santuario', 'Meditando em silêncio'], [9, 12, 'biblioteca', 'Lendo pensamentos... e livros'],
