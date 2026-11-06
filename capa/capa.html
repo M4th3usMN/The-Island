@@ -24,7 +24,7 @@ html, body { margin: 0; background: #0b1626; }
   <canvas id="fundo" width="180" height="320"></canvas>
   <canvas id="heroi" width="40" height="40"></canvas>
   <div class="txt" id="canto"></div>
-  <div class="txt" id="serie"><span>COMO CHEGUEI À ILHA</span></div>
+  <div class="txt" id="serie"><span id="selo">COMO CHEGUEI À ILHA</span></div>
   <div class="txt" id="gancho"></div>
   <div class="txt" id="nome"></div>
   <div class="txt" id="prof"></div>
@@ -57,15 +57,25 @@ for (let y = hz; y < 320; y++) P(0, y, 180, 1, `rgb(${10 + (y - hz) * 0.02 | 0},
 for (let i = 0; i < 120; i++) { const y = hz + 2 + rnd() * 184 | 0; P(rnd() * 180 | 0, y, 2 + (y - hz) / 30 | 0, 1, 'rgba(120,160,220,0.35)'); }
 P(124, hz + 2, 20, 1, 'rgba(255,190,90,0.45)'); P(128, hz + 5, 12, 1, 'rgba(255,190,90,0.3)');
 // barco (o heroi fica em cima)
-P(68, 192, 44, 4, '#7a4a26'); P(72, 196, 36, 3, '#5a3418'); P(68, 192, 44, 1, '#9a6234');
+if (!q.get('dragao')) { P(68, 192, 44, 4, '#7a4a26'); P(72, 196, 36, 3, '#5a3418'); P(68, 192, 44, 1, '#9a6234'); }
 P(62, 200, 56, 1, 'rgba(160,200,240,0.4)');
 // heroi
 const h = document.getElementById('heroi'), hc = h.getContext('2d');
-if (M) {
+if (q.get('dragao')) {
+  // dragão (episódios de evento): mesmo desenho do vídeo
+  const DM = ['..........RR............', '.........RrrR...........', '....W...RrrrrR.....W....', '...WWW..RrrrrR....WWW...', '..WWwWW.RrrrrR...WWwWW..', '.WWwwwWWRRrrRR..WWwwwWW.', 'WWwwwwwWRRRRRRRWWwwwwwWW', '.....eRRRRRRRRRRRRR.....', '....eRRRRRRRRRRRRRRRo...', '.....RRRRRRRRRRRRRR.oo..', '......RR.RR..RR.RR......', '......kk.kk..kk.kk......'];
+  const DC = { R: '#d0342c', r: '#ff6a4a', W: '#8a1e28', w: '#e0504a', e: '#fff27a', k: '#3a0a0a', o: '#ffb040' };
+  h.width = 26; h.height = 14;
+  DM.forEach((row, j) => [...row].forEach((ch, i) => { if (DC[ch]) { hc.fillStyle = DC[ch]; hc.fillRect(25 - i, j + 1, 1, 1); } }));
+  const k = 30; h.style.width = 26 * k + 'px'; h.style.height = 14 * k + 'px';
+  h.style.left = (540 - 13 * k) + 'px'; h.style.top = (192 * 6 - 13 * k) + 'px';
+  const gl = g.createRadialGradient(90, 120, 4, 90, 120, 120); gl.addColorStop(0, 'rgba(255,70,30,0.35)'); gl.addColorStop(1, 'rgba(255,70,30,0)'); g.fillStyle = gl; g.fillRect(0, 0, 180, 320);
+} else if (M) {
   window.IlhaSprites.drawCharacter(hc, 20, 30, M.visual, { t: 1, side: 1 });
   const k = 15; h.style.width = 40 * k + 'px'; h.style.height = 40 * k + 'px';
   h.style.left = (540 - 20 * k) + 'px'; h.style.top = (192 * 6 - 30 * k + 6) + 'px';
 }
+if (q.get('selo')) document.getElementById('selo').textContent = q.get('selo').toUpperCase();
 document.getElementById('canto').textContent = 'THE ISLAND · EP. ' + (q.get('ep') || '');
 document.getElementById('gancho').innerHTML = (q.get('gancho') || '').replace(/\*(.+?)\*/g, '<b>$1</b>');
 document.getElementById('nome').textContent = (q.get('nome') || (M ? M.nome : '')).toUpperCase();

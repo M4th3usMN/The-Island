@@ -13,3 +13,9 @@ Gerar (1080x1920, JPG):
 - gancho: frase curta; *palavra* fica em ouro
 - prof (opcional): texto em lilás embaixo do nome; sem ele usa "o <profissão>"
 - nome (opcional): troca o nome mostrado
+- selo (opcional): troca o selo "COMO CHEGUEI À ILHA" (ex.: selo=EPISÓDIO 4 · O DRAGÃO)
+- dragao=1 (opcional): desenha o dragão no lugar do morador (episódios de evento)
+
+Exemplo do Ep. 4:
+
+    node capa/grava.js "dragao=1&ep=4&selo=A ilha decide&gancho=Vocês escolheram o *dragão*&nome=O DRAGÃO&prof=episódio 4" capa_ep4.jpg
