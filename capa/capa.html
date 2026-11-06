@@ -32,6 +32,7 @@ html, body { margin: 0; background: #0b1626; }
 </div>
 <script src="../sprites.js"></script>
 <script src="../moradores.js"></script>
+<script src="dragao.js"></script>
 <script>
 // capa.html?id=jareel&ep=4&gancho=...&prof=...   (use *palavra* para destacar em ouro)
 const q = new URLSearchParams(location.search);
@@ -62,13 +63,10 @@ P(62, 200, 56, 1, 'rgba(160,200,240,0.4)');
 // heroi
 const h = document.getElementById('heroi'), hc = h.getContext('2d');
 if (q.get('dragao')) {
-  // dragão (episódios de evento): mesmo desenho do vídeo
-  const DM = ['..........RR............', '.........RrrR...........', '....W...RrrrrR.....W....', '...WWW..RrrrrR....WWW...', '..WWwWW.RrrrrR...WWwWW..', '.WWwwwWWRRrrRR..WWwwwWW.', 'WWwwwwwWRRRRRRRWWwwwwwWW', '.....eRRRRRRRRRRRRR.....', '....eRRRRRRRRRRRRRRRo...', '.....RRRRRRRRRRRRRR.oo..', '......RR.RR..RR.RR......', '......kk.kk..kk.kk......'];
-  const DC = { R: '#d0342c', r: '#ff6a4a', W: '#8a1e28', w: '#e0504a', e: '#fff27a', k: '#3a0a0a', o: '#ffb040' };
-  h.width = 26; h.height = 14;
-  DM.forEach((row, j) => [...row].forEach((ch, i) => { if (DC[ch]) { hc.fillStyle = DC[ch]; hc.fillRect(25 - i, j + 1, 1, 1); } }));
-  const k = 30; h.style.width = 26 * k + 'px'; h.style.height = 14 * k + 'px';
-  h.style.left = (540 - 13 * k) + 'px'; h.style.top = (192 * 6 - 13 * k) + 'px';
+  // dragão (episódios de evento): mesmo desenho do vídeo (dragao.js)
+  const sp = window.Dragao.sprite('cima'); h.width = sp.width; h.height = sp.height; hc.drawImage(sp, 0, 0);
+  const k = 12; h.style.width = sp.width * k + 'px'; h.style.height = sp.height * k + 'px';
+  h.style.left = (540 - sp.width / 2 * k) + 'px'; h.style.top = (1240 - sp.height * k) + 'px';
   const gl = g.createRadialGradient(90, 120, 4, 90, 120, 120); gl.addColorStop(0, 'rgba(255,70,30,0.35)'); gl.addColorStop(1, 'rgba(255,70,30,0)'); g.fillStyle = gl; g.fillRect(0, 0, 180, 320);
 } else if (M) {
   window.IlhaSprites.drawCharacter(hc, 20, 30, M.visual, { t: 1, side: 1 });
