@@ -100,6 +100,33 @@
 
   // ---------------------------------------------------------------- dados da carta
   // fonte: { m: morador } ou { arroba, look, lv } para viajante
+  // cartas especiais: não são de morador nem de viajante (só se ganha em missão)
+  const ESP = {
+    dragao: { id: 'esp:dragao', nome: 'O Dragão', prof: 'Vindo do outro lado do mar', lv: 15, at: [15, 10, 14, 9, 12], poder: 780,
+      hist: 'Pousou na praia fugindo de caçadores de um reino distante. A ilha decidiu cuidar dele.', hab: ['Chama Ancestral', '+5% de XP nas missões'] }
+  };
+  function cartaEspecial(k, extra) {
+    const d = ESP[k], el = document.createElement('div');
+    el.className = 'carta dragao';
+    el.innerHTML = `<div class="ct-miolo">
+      <div class="ct-topo"><b class="ct-nome">${esc(d.nome.toUpperCase())}</b><span class="ct-nv">NV<b>${d.lv}</b></span></div>
+      <div class="ct-arte"><canvas width="72" height="45"></canvas><span class="ct-rar">ÚNICA</span><span class="ct-selo" style="background:#7a1010">SÓ 1 NA ILHA</span></div>
+      <div class="ct-prof">${esc(d.prof.toUpperCase())}</div>
+      <div class="ct-poder"><span>⚔ PODER</span><b>${d.poder}</b><i><s style="width:${d.poder / 10}%"></s></i></div>
+      <div class="ct-atr">${ATR.map((a, i) => `<span>${a}<b>${d.at[i]}</b></span>`).join('')}</div>
+      <p class="ct-hist">${esc(d.hist)}</p>
+      <p class="ct-hab"><b>${esc(d.hab[0])}</b> · ${esc(d.hab[1])}</p>
+      <div class="ct-pe"><span>Nº <b>★</b> · Missão do Dragão</span><span>@the_island.lab</span></div>
+    </div>${extra && extra.carimbo ? `<div class="ct-carimbo">✦ ${esc(extra.carimbo)}</div>` : ''}`;
+    const g = el.querySelector('canvas').getContext('2d');
+    g.fillStyle = '#1a2a4a'; g.fillRect(0, 0, 72, 45); g.fillStyle = '#2a3a6a'; g.fillRect(0, 14, 72, 9);
+    for (let i = 0; i < 16; i++) { g.fillStyle = '#e8eefa'; g.fillRect((i * 29 + 3) % 72, (i * 7 + 1) % 13, 1, 1); }
+    g.fillStyle = '#d8c08a'; g.fillRect(0, 34, 72, 11); g.fillStyle = '#2a5a9a'; g.fillRect(0, 40, 72, 5); g.fillStyle = '#4a7ac0'; g.fillRect(0, 40, 72, 1);
+    const gr = g.createRadialGradient(36, 26, 1, 36, 26, 30); gr.addColorStop(0, 'rgba(255,140,60,.45)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 72, 45);
+    if (window.Dragao) window.Dragao.desenha(g, 38, 44, 'pousado', -1, 1);
+    return el;
+  }
+
   function dados(f) {
     const NIV = window.IlhaJogo && window.IlhaJogo.niveis ? window.IlhaJogo.niveis : {};
     if (f.m) {
@@ -125,6 +152,7 @@
 
   // ---------------------------------------------------------------- desenho
   function carta(f, extra) {
+    if (f.esp) return cartaEspecial(f.esp, extra);
     const d = dados(f), r = raridade(d.lv), el = document.createElement('div');
     el.className = 'carta'; el.style.setProperty('--r', r.cor); el.style.setProperty('--r2', r.fundo);
     const masc = d.apoio && K.MASCOTES[d.apoio.tipo];
@@ -145,6 +173,14 @@
     return el;
   }
   function mini(f, tem) {
+    if (f.esp) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'ct-mini ct-mini-esp' + (tem ? '' : ' falta');
+      const c = document.createElement('canvas'); c.width = 48; c.height = 46;
+      if (window.Dragao) { const g = c.getContext('2d'); g.drawImage(window.Dragao.sprite('pousado'), 0, 0); if (!tem) { g.globalCompositeOperation = 'source-in'; g.fillStyle = '#2c3b38'; g.fillRect(0, 0, 48, 46); } }
+      b.appendChild(c); b.insertAdjacentHTML('beforeend', tem ? '<small>O Dragão</small><i>ÚNICA</i>' : '<small>???</small><i>MISSÃO</i>');
+      b.setAttribute('aria-label', tem ? 'Carta única do Dragão' : 'Carta do Dragão: complete a Missão do Dragão');
+      return b;
+    }
     const b = document.createElement('button'); b.type = 'button'; b.className = 'ct-mini' + (tem ? '' : ' falta');
     if (!tem) { b.innerHTML = '<span class="ct-q">?</span><small>???</small>'; b.disabled = true; return b; }
     const d = dados(f), r = raridade(d.lv); b.style.setProperty('--r', r.cor);

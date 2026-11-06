@@ -53,8 +53,14 @@
       const w = Math.round(14 + 22 * e); c.fillRect(PRAIA.x - w, PRAIA.y + 1, w * 2, 2); c.restore();
       if (k < 1) D.desenha(c, PRAIA.x, PRAIA.y - alt, bate ? 'cima' : 'baixo', -1, 1);
       else {
-        const resp = Math.round(Math.sin(info.sec * 1.4) * 0.6);
-        D.desenha(c, PRAIA.x, PRAIA.y + resp, 'pousado', -1, 1);
+        const I = window.IlhaDragao, agora = Date.now(), mastiga = I && I.mastigaAte > agora, feliz = I && I.felizAte > agora;
+        const resp = mastiga ? (Math.floor(agora / 110) % 2) - 1 : Math.round(Math.sin(info.sec * 1.4) * 0.6);
+        D.desenha(c, PRAIA.x, PRAIA.y + resp, feliz && Math.floor(agora / 300) % 2 ? 'cima' : 'pousado', -1, 1);
+        // corações quando come um peixe (Missão do Dragão)
+        if (mastiga || feliz) for (let i = 0; i < (feliz ? 6 : 3); i++) {
+          const u = ((agora / 1400) + i / (feliz ? 6 : 3)) % 1, hx = PRAIA.x - 16 + i * 5 - u * 4, hy = PRAIA.y - 34 - u * 18;
+          c.fillStyle = `rgba(255,90,130,${(1 - u).toFixed(2)})`; c.fillRect(Math.round(hx), Math.round(hy), 1, 1); c.fillRect(Math.round(hx) + 2, Math.round(hy), 1, 1); c.fillRect(Math.round(hx), Math.round(hy) + 1, 3, 1); c.fillRect(Math.round(hx) + 1, Math.round(hy) + 2, 1, 1);
+        }
         // fumaça saindo do focinho a cada ~9 s
         const ciclo = (info.sec % 9) / 9;
         if (ciclo < 0.3) for (let i = 0; i < 4; i++) {
@@ -77,5 +83,5 @@
   setInterval(() => {
     if (!pousou && Date.now() >= POUSO) { pousou = true; if (F()) F().push({ k: 'chegada', html: '<b>O DRAGÃO POUSOU NA PRAIA!</b> Vote no Ep. 4: A ou B', dur: 40000 }); }
   }, 1000);
-  window.IlhaDragao = { POUSO, PRAIA };
+  window.IlhaDragao = { POUSO, PRAIA, mastigaAte: 0, felizAte: 0 };
 })();

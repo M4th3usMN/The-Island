@@ -261,7 +261,7 @@ window.MORADORES = [
   },
   {
     id: 'reed', arroba: 'kayky.l.m', nome: 'Reed', profissao: 'Necromante',
-    historia: 'Chegou à meia-noite, sem barco que ninguém tenha visto. Diz que conversa com os mortos e que esta ilha guarda ossos muito antigos.',
+    historia: 'Forasteiro de um reino distante, trazendo segredos ancestrais da morte: não para destruir, mas para reerguer as esperanças esquecidas desta terra.',
     rotina: 'necromante', casa: 'auto', chegada: '2026-11-06T17:04:00-04:00',
     visual: { tipo: 'humano', pele: '#d8d4cc', cabelo: 'longo', corCabelo: '#101418', roupa: '#1e2a24', manto: true, detalhe: '#4ac07a', calca: '#141a16', acessorio: 'cranio', magia: '#7affa0' }
   }

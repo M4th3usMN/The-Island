@@ -21,7 +21,7 @@
 
   // ---------------------------------------------------------------- estado
   const S = { niveis: {}, ws: null, on: false, eu: null, outros: new Map(), perfil: null, codigo: '', camLivre: false, conversa: null, falas: [], fim: false, tent: 0, ping: null, mudou: false };
-  window.IlhaJogo = { get on() { return S.on; }, get niveis() { return S.niveis; }, S };
+  window.IlhaJogo = { get on() { return S.on; }, get niveis() { return S.niveis; }, S, aoConversar: [], ocultos: new Map() };
 
   // ---------------------------------------------------------------- visual
   const PALETA = {
@@ -92,6 +92,7 @@
     { id: 'fiel', nome: 'Visitante fiel', desc: 'Entre na ilha em 3 dias diferentes', xp: 80, ok: p => p.dias.length >= 3 },
     { id: 'sociavel', nome: 'Sociável', desc: 'Cumprimente 5 viajantes de perto', xp: 60, ok: p => p.cumprimentos >= 5 },
     { id: 'apoiador', nome: 'Coração da ilha', desc: 'Tenha o selo de apoiador', xp: 100, ok: () => S.eu && eApoiador(S.eu.arroba) },
+    { id: 'amigo_dragao', nome: 'Amigo do Dragão', desc: 'Ganhe a confiança do dragão e a carta única dele', xp: 150, ok: p => !!(p.cartas || {})['esp:dragao'] },
     { id: 'colecao', nome: 'Colecionador', desc: 'Tenha a carta de todos os moradores da ilha', xp: 200, ok: p => chegados().every(m => (p.cartas || {})[m.id] || m === moradorDe(S.eu.arroba)) },
     { id: 'veterano', nome: 'Veterano', desc: 'Chegue ao nível 5', xp: 0, ok: p => nivel(p.xp) >= 5 }
   ];
@@ -121,6 +122,7 @@
     return p.diaria;
   }
   function ganhaXp(n) {
+    if ((S.perfil.cartas || {})['esp:dragao'] && n > 0) n = Math.round(n * 1.05); // Chama Ancestral: +5% de XP
     const p = S.perfil, antes = nivel(p.xp); p.xp += n; S.niveis[S.eu.arroba] = nivel(p.xp);
     const lv = nivel(p.xp);
     if (S.eu) S.eu.lv = lv;
@@ -154,7 +156,7 @@
     if (p.cartas[chave]) return;
     if (chave.indexOf('v:') === 0 && Object.keys(p.cartas).filter(k => k.indexOf('v:') === 0).length >= 40) return;
     p.cartas[chave] = Object.assign({ e: Date.now(), l: nomeLugar() }, extra || {}); S.mudou = true; envia({ t: 'feito', k: 'carta', v: chave }); feed({ k: 'carta', arroba: S.eu.arroba, v: chave });
-    const nome = chave.indexOf('v:') === 0 ? '@' + chave.slice(2) : (G.BY[chave] || {}).nome || chave;
+    const nome = chave === 'esp:dragao' ? 'o Dragão' : chave.indexOf('v:') === 0 ? '@' + chave.slice(2) : (G.BY[chave] || {}).nome || chave;
     anuncia({ titulo: 'NOVA CARTA!', texto: `Você ganhou a carta de ${nome}.`, acao: 'VER', fn: () => abrirCarta(chave), dur: 6000 });
   }
   function cartaDeOutro(o, como) {
@@ -164,14 +166,15 @@
   const pertos = () => [...S.outros.values()].filter(o => dist(o, S.eu) < 40);
   function fonteDe(chave) {
     if (chave === 'eu') { const m = moradorDe(S.eu.arroba); return m ? { m, lv: S.eu.lv } : { arroba: S.eu.arroba, look: S.eu.look, lv: S.eu.lv }; }
+    if (chave.indexOf('esp:') === 0) return { esp: chave.slice(4) };
     if (chave.indexOf('v:') === 0) { const c = S.perfil.cartas[chave] || {}, a = chave.slice(2); return { arroba: a, look: c.k, lv: S.niveis[a] || c.lv || 1 }; }
     return { m: G.BY[chave] };
   }
   function abrirCarta(chave) {
     if (!C()) return;
     const c = chave === 'eu' ? null : S.perfil.cartas[chave];
-    const carimbo = c ? (c.e ? `${c.c === 'missao' ? 'missão juntos' : 'conheceu'} · ${c.l} · ${C().dataCurta(c.e)}` : 'conhecido antes das cartas') : null;
-    abrir(chave === 'eu' ? 'SUA CARTA' : 'CARTA COLETADA', '<div class="ct-vista"></div><div class="ct-acoes"><button type="button" class="b-linha" id="ct-album">VER ÁLBUM</button></div>', el => {
+    const carimbo = c ? (c.c === 'dragao' ? `confiança conquistada · ${C().dataCurta(c.e)}` : c.e ? `${c.c === 'missao' ? 'missão juntos' : 'conheceu'} · ${c.l} · ${C().dataCurta(c.e)}` : 'conhecido antes das cartas') : null;
+    abrir(chave === 'eu' ? 'SUA CARTA' : chave === 'esp:dragao' ? 'CARTA ÚNICA' : 'CARTA COLETADA', '<div class="ct-vista"></div><div class="ct-acoes"><button type="button" class="b-linha" id="ct-album">VER ÁLBUM</button></div>', el => {
       el.querySelector('.ct-vista').appendChild(C().carta(fonteDe(chave), { carimbo }));
       el.querySelector('#ct-album').onclick = () => abrirPainel(2);
     });
@@ -246,8 +249,10 @@
       v.mor = m;
       if (m) J.set(m.id, v.arroba);
     });
+    (window.IlhaJogo.ocultos || new Map()).forEach((v, k) => { if (!J.has(k)) J.set(k, v); });
   }
   function conversar(m) {
+    if ((window.IlhaJogo.aoConversar || []).some(fn => fn(m))) { registra('conversa', m.id); return; }
     const R = ROT[m.rotina] || {}, linhas = (R.social || []).concat(R.trabalho || []);
     const txt = linhas.length ? linhas[Math.floor(Math.random() * linhas.length)] : '...';
     S.falas = S.falas.filter(f => f.quem !== m.id);
@@ -265,7 +270,7 @@
     else if (a.k === 'nivel') F.push({ k: 'nivel', html: `${q} chegou ao <b>nível ${a.v | 0}</b>`, t: a.em });
     else if (a.k === 'conquista') { const c = CONQ.find(x => x.id === a.v); if (c) F.push({ k: 'conquista', html: `${q} conquistou <b>${esc(c.nome)}</b>`, t: a.em }); }
     else if (a.k === 'carta') {
-      const v = String(a.v || ''), nome = v.indexOf('v:') === 0 ? '@' + v.slice(2) : (G.BY[v] || {}).nome;
+      const v = String(a.v || ''), nome = v === 'esp:dragao' ? 'o DRAGÃO 🐉' : v.indexOf('v:') === 0 ? '@' + v.slice(2) : (G.BY[v] || {}).nome;
       if (nome) F.push({ k: 'carta', html: `${q} ganhou a carta de <b>${esc(nome)}</b>`, t: a.em });
     }
   }
@@ -568,6 +573,7 @@
       }).join('')}</ol>
       <p class="m-nota">${d.bonus ? 'Você completou o dia! +50 XP de bônus.' : 'Complete as 3 para ganhar +50 XP de bônus.'}</p>
       <p class="m-nota">Dica: toque num morador para ir até ele e puxar conversa. No computador, ande com as setas ou W A S D.</p>`;
+    if (window.IlhaMissaoDragao) window.IlhaMissaoDragao.bloco(corpo);
   }
   function abaConquistas(corpo) {
     corpo.innerHTML = `<ul class="jg-conq">${CONQ.map(c => { const ok = S.perfil.conquistas[c.id]; return `<li class="${ok ? 'ok' : ''}"><i aria-hidden="true">${ok ? '★' : '?'}</i><div><b>${esc(c.nome)}</b><small>${esc(c.desc)}${c.xp ? ` · +${c.xp} XP` : ''}</small></div></li>`; }).join('')}</ul>`;
@@ -578,8 +584,11 @@
     const tem = mor.filter(m => cs[m.id] || m === moradorDe(S.eu.arroba)).length, viaj = Object.keys(cs).filter(k => k.indexOf('v:') === 0);
     corpo.innerHTML = `<div class="ct-album-topo"><p style="margin:0">Você tem <b>${tem} de ${mor.length}</b> cartas de moradores. Converse com um morador, cumprimente um viajante de perto ou cumpra uma missão com alguém do lado para ganhar a carta dele.</p></div>
       <div class="m-botoes" style="margin-bottom:12px"><button type="button" class="b-ouro" id="ct-minha">VER MINHA CARTA</button></div>
+      <h3>ESPECIAIS</h3><div class="ct-album" id="ct-esp"></div>
       <h3>MORADORES</h3><div class="ct-album" id="ct-mor"></div>${viaj.length ? '<h3>VIAJANTES</h3><div class="ct-album" id="ct-via"></div>' : ''}`;
     corpo.querySelector('#ct-minha').onclick = () => abrirCarta('eu');
+    const E = corpo.querySelector('#ct-esp'), bd = C().mini({ esp: 'dragao' }, !!cs['esp:dragao']);
+    bd.disabled = false; bd.onclick = () => cs['esp:dragao'] ? abrirCarta('esp:dragao') : (window.IlhaMissaoDragao && window.IlhaMissaoDragao.abrir()); E.appendChild(bd);
     const A = corpo.querySelector('#ct-mor');
     const meu = moradorDe(S.eu.arroba);
     mor.forEach(m => { const b = C().mini(m === meu ? fonteDe('eu') : { m }, !!cs[m.id] || m === meu); b.onclick = () => abrirCarta(m === meu ? 'eu' : m.id); A.appendChild(b); });
@@ -608,4 +617,6 @@
     setTimeout(() => conectar(salvo.arroba, store.get('codigo:' + salvo.arroba, ''), salvo.look, motivo => { if (motivo) store.set('jogando', 0); }), 800);
   }
   window.addEventListener('pagehide', () => { if (S.on && S.mudou) { salvaLocal(); envia({ t: 'perfil', perfil: S.perfil }); } });
+  // para módulos como a Missão do Dragão (missao-dragao.js)
+  Object.assign(window.IlhaJogo, { ganhaXp, conquista, revisa, ganhaCarta, abrirCarta, anuncia, abrirPainel, envia, atualizaUI, salvar: () => { S.mudou = true; } });
 })();
