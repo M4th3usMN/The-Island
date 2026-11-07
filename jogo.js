@@ -497,7 +497,7 @@
     let arroba = salvo ? salvo.arroba : limpaArroba(store.get('arroba', ''));
     abrir('ENTRAR NA ILHA', `
       <p class="m-lead">Vire um viajante: monte seu personagem, ande pela ilha, converse com os moradores e cumpra missões. Quem estiver jogando vê você também.</p>
-      <label class="m-campo"><span>Seu @ do Instagram</span><input id="jg-arroba" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="@seu_usuario" value="${esc(arroba ? '@' + arroba : '')}"></label>
+      <label class="m-campo"><span>Seu @ do Instagram ou do YouTube</span><input id="jg-arroba" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="@seu_usuario" value="${esc(arroba ? '@' + arroba : '')}"></label>
       <label class="m-campo" id="jg-cod-box" hidden><span>Código de acesso ou de convite</span><input id="jg-codigo" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX"></label>
       <button type="button" class="jg-link" id="jg-tenho">Já joguei em outro aparelho (tenho um código)</button>
       <p class="m-nota">Primeira vez? Entre com o seu @ e guarde o código que aparece: ele protege o seu @ e serve para jogar em outro aparelho. Se você já recebeu um código no direct, use ele.</p>

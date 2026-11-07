@@ -20,7 +20,17 @@
     const a = sec * 2.2, bx = Math.round(x + Math.cos(a) * 9), by = Math.round(y - 16 + Math.sin(a * 2) * 3);
     c.fillStyle = '#e8483a'; c.fillRect(bx, by, 2, 1); c.fillStyle = '#3a6ac8'; c.fillRect(bx - 1, by - (Math.floor(sec * 8) % 2), 1, 1); c.fillRect(bx + 2, by - (Math.floor(sec * 8) % 2), 1, 1);
   }
-  const COMP = { guilherme: { dx: -11, dy: 2, draw: touro }, jester: { dx: 0, dy: 0, draw: ave } };
+  // Mick, o gato fiel do Felk (laranja, cauda listrada)
+  function mick(c, x, y, lado, passo, sec) {
+    const P = (dx, dy, w, h, cor) => { c.fillStyle = cor; c.fillRect(Math.round(x + (lado < 0 ? -dx - w : dx)), Math.round(y + dy), w, h); };
+    const p = passo ? 1 : 0;
+    P(-3, -4, 6, 3, '#e88a2a'); P(-3, -4, 6, 1, '#f4a84a');               // corpo
+    P(2, -7, 3, 3, '#e88a2a'); P(2, -8, 1, 1, '#e88a2a'); P(4, -8, 1, 1, '#e88a2a'); // cabeça e orelhas
+    P(3, -6, 1, 1, '#2a8a3a');                                             // olho verde
+    P(-2, -1, 1, 1 + p, '#b8661a'); P(2, -1, 1, 2 - p, '#b8661a');        // patas
+    const w = Math.round(Math.sin(sec * 4)); P(-4, -7 + w, 1, 4, '#e88a2a'); P(-4, -6 + w, 1, 1, '#b8661a'); // cauda listrada
+  }
+  const COMP = { guilherme: { dx: -11, dy: 2, draw: touro }, jester: { dx: 0, dy: 0, draw: ave }, felk: { dx: -8, dy: 1, draw: mick } };
   G.hooks.push((objs, c, info) => {
     Object.keys(COMP).forEach(id => {
       const m = G.BY[id]; if (!m || (G.jogados && G.jogados.has(id))) return;

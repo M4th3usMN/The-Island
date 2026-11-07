@@ -229,6 +229,67 @@
         [19, 22, 'taverna', 'Queda de braço na taverna']],
       trabalho: ['Um golpe. Uma árvore.', 'Força de sobra!', 'Madeira!'], social: ['Minha força é magia.', 'Alguém precisa levantar algo pesado?']
     },
+    // ---- Dia 7
+    fazendeiro_rico: {
+      blocos: [[21, 4, 'casa', 'Dormindo', S], [4, 9, 'fazenda', 'Ensinando o plantio do continente'], [9, 11, 'mercearia', 'Discutindo preço com o merceeiro'],
+        [11, 13, 'pasto', 'Escolhendo o melhor gado'], [13, 14, 'taverna', 'Almoçando'], [14, 18, 'fazenda', 'Abrindo uma fazenda nova'], [18, 21, 'fogueira', 'Contando que era famoso no continente']],
+      trabalho: ['Aqui o preço é justo!', 'Terra boa, essa.', 'No continente eu era famoso.'], social: ['Saí de lá por causa dos preços.', 'Quer uma dica de plantio?']
+    },
+    mestre_ferreiro: {
+      blocos: [[20, 4, 'casa', 'Dormindo', S], [4, 12, 'forja', 'Forjando como há 40 anos'], [12, 13, 'fogueira', 'Almoçando devagar'],
+        [13, 17, 'forja', 'Corrigindo os aprendizes'], [17, 20, 'taverna', 'Contando do tempo antigo']],
+      trabalho: ['Ferro não mente.', 'Mais forte. De novo.', 'Sessenta anos de forja.'], social: ['No meu tempo era tudo na mão.', 'Respeite o fogo, garoto.']
+    },
+    encantador: {
+      blocos: [[23, 6, 'casa', 'Dormindo', S], [6, 10, 'forja', 'Forjando com o Kasseki'], [10, 12, 'biblioteca', 'Estudando runas antigas'],
+        [12, 13, 'taverna', 'Almoçando'], [13, 17, 'torre', 'Encantando armas com o Fernando'], [17, 20, 'arena', 'Testando uma espada encantada'], [20, 23, 'forja', 'Gravando runas de madrugada']],
+      trabalho: ['Essa runa brilha!', 'Lâmina encantada.', 'Cuidado, está quente.'], social: ['Armadura encantada? Faço.', 'Toda arma tem alma.']
+    },
+    pesquisador: {
+      blocos: [[0, 7, 'casa', 'Dormindo', S], [7, 10, 'floresta', 'Estudando formigas com a lupa'], [10, 13, 'laboratorio', 'Anotando tudo no caderno'],
+        [13, 14, 'taverna', 'Almoçando e anotando'], [14, 18, 'oficina', 'Inventando uma engenhoca'], [18, 21, 'fogueira', 'Tocando guitarra elétrica'], [21, 24, 'biblioteca', 'Lendo até tarde']],
+      trabalho: ['Formiga é genial.', 'Anotado!', 'Hipótese confirmada.'], social: ['Quer ouvir um solo?', 'Formigas trabalham juntas. Nós também.']
+    },
+    curandeiro: {
+      blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 9, 'floresta', 'Colhendo ervas de cura'], [9, 12, 'arena', 'Cuidando dos feridos do treino'],
+        [12, 13, 'taverna', 'Almoçando'], [13, 17, 'laboratorio', 'Preparando remédios'], [17, 19, 'cais', 'Examinando o dragão'], [19, 22, 'fogueira', 'Ouvindo as dores de todo mundo']],
+      trabalho: ['Isso vai sarar.', 'Erva certa, dose certa.', 'Respira fundo.'], social: ['Machucou? Me chama.', 'Remédio bom é chá quente.']
+    },
+    padeiro: {
+      blocos: [[19, 2, 'mercearia', 'Dormindo', S], [2, 7, 'mercearia', 'Assando o pão do dia'], [7, 10, 'fogueira', 'Entregando pão quentinho'],
+        [10, 12, 'fazenda', 'Buscando trigo'], [12, 15, 'mercearia', 'Fazendo salgados e bolos'], [15, 19, 'taverna', 'Levando bolo para a taverna']],
+      trabalho: ['Pão quentinho!', 'Olha o bolo!', 'Salgado saindo!'], social: ['Prova esse.', 'Aqui ninguém passa fome.']
+    },
+    aspirante_heroi: {
+      blocos: [[23, 6, 'casa', 'Dormindo', S], [6, 10, 'arena', 'Treinando para ser herói'], [10, 12, 'cais', 'Fazendo pose de herói pro dragão'],
+        [12, 13, 'taverna', 'Almoçando (sem pimenta!)'], [13, 17, 'passeio', 'Procurando alguém para salvar'], [17, 20, 'arena', 'Treinando mais'], [20, 23, 'fogueira', 'Sonhando com uma aventura']],
+      trabalho: ['Alguém precisa de ajuda?', 'Um herói nunca descansa!', 'Atchim! Tem pimenta aqui?'], social: ['Sempre quis ser herói.', 'Pimenta é minha única fraqueza.']
+    },
+    padre: {
+      blocos: [[21, 5, 'casa', 'Dormindo', S], [5, 8, 'santuario', 'Rezando ao amanhecer'], [8, 11, 'fogueira', 'Conversando com quem precisa'],
+        [11, 13, 'cais', 'Olhando o mar de onde veio'], [13, 14, 'taverna', 'Almoçando'], [14, 17, 'biblioteca', 'Procurando quem mandou a carta'], [17, 21, 'santuario', 'Acendendo velas']],
+      trabalho: ['Paz para esta ilha.', 'Quem mandou aquela carta?', 'Fique com Deus.'], social: ['Vim porque uma carta me chamou.', 'Todo mundo merece uma segunda chance.']
+    },
+    explorador_luz: {
+      blocos: [[1, 8, 'casa', 'Dormindo com o gato Mick', S], [8, 11, 'oficina', 'Ajustando os inventos'], [11, 13, 'ponte', 'Procurando a luz no leste'],
+        [13, 14, 'taverna', 'Almoçando com o Mick'], [14, 18, 'santuario', 'Vigiando o leste'], [18, 21, 'laboratorio', 'Desenhando mapas da luz'], [21, 1, 'ponte', 'Esperando a luz misteriosa', { aviso: 'foi esperar a luz misteriosa no leste' }]],
+      trabalho: ['Você viu aquela luz?', 'Mick, olha!', 'Meu cachecol ajuda.'], social: ['A luz vem do leste.', 'Esse cachecol tem quatro braços, sim.']
+    },
+    guarda: {
+      blocos: [[23, 5, 'casa', 'Dormindo', S], [5, 7, 'orla', 'Ronda na orla'], [7, 11, 'arena', 'Treinando os recrutas'],
+        [11, 13, 'fogueira', 'Vigiando a praça'], [13, 14, 'taverna', 'Almoçando'], [14, 17, 'arena', 'Treinando os recrutas'], [17, 20, 'cais', 'Vigiando o caçador e o dragão'], [20, 23, 'fogueira', 'Guarda da noite']],
+      trabalho: ['Postura, recruta!', 'De novo!', 'Ninguém passa.'], social: ['Meu avô me ensinou tudo.', 'A vila está segura.']
+    },
+    crianca_curiosa: {
+      blocos: [[20, 7, 'casa', 'Dormindo', S], [7, 9, 'mercearia', 'Pedindo pão ao Lucas'], [9, 11, 'arena', 'Imitando os guerreiros'],
+        [11, 13, 'cais', 'Olhando o dragão de longe'], [13, 14, 'casa', 'Almoçando'], [14, 17, 'passeio', 'Correndo pela ilha'], [17, 20, 'fogueira', 'Ouvindo histórias']],
+      trabalho: ['Eu vou ser guerreiro!', 'O dragão olhou pra mim!', 'Pega eu!'], social: ['Tenho seis anos!', 'Me conta uma história?']
+    },
+    pintor: {
+      blocos: [[2, 9, 'casa', 'Dormindo', S], [9, 12, 'cais', 'Pintando o mar'], [12, 13, 'taverna', 'Almoçando'],
+        [13, 16, 'floresta', 'Pintando a floresta'], [16, 19, 'cais', 'Pintando o dragão'], [19, 22, 'fogueira', 'Pintando rostos'], [22, 2, 'casa', 'Pintando sozinho, sem dormir']],
+      trabalho: ['Não se mexe!', 'Que luz bonita.', 'Mais azul...'], social: ['Meu nome é Leonardo. Não Jim.', 'Já fui outra pessoa.']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

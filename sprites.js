@@ -104,10 +104,21 @@
     if (ch === 'bobo') { P(x - 3, HY - 1, 6, 2, cc); P(x - 4, HY - 4, 2, 3, cc); P(x + 2, HY - 4, 2, 3, '#2a8a5a'); P(x - 5, HY - 5, 1, 1, '#ffd046'); P(x + 4, HY - 5, 1, 1, '#ffd046'); }
     if (ch === 'bardo') { P(x - 3, HY - 2, 6, 2, cc); P(x - 4, HY - 1, 1, 1, cc); P(side > 0 ? x + 2 : x - 3, HY - 5, 1, 3, '#e8483a'); P(side > 0 ? x + 3 : x - 4, HY - 6, 1, 1, '#f2c040'); }
 
+    // ---- Dia 7
+    if (ch === 'sombreiro') { P(x - 6, HY, 12, 1, cc); P(x - 3, HY - 3, 6, 3, cc); P(x - 3, HY - 1, 6, 1, '#3a2414'); P(x - 6, HY, 1, 1, shade(cc, 0.7)); P(x + 5, HY, 1, 1, shade(cc, 0.7)); }
+    if (ch === 'lupa_testa') { P(x - 3, HY, 6, 1, '#3a3a46'); if (!back) { P(x - 1, HY - 3, 3, 3, '#c9a14a'); P(x, HY - 2, 1, 1, '#bfe8ff'); } }
+    if (ch === 'coroa_folhas') { P(x - 3, HY - 1, 6, 1, '#4a8a3a'); P(x - 4, HY, 1, 1, '#4a8a3a'); P(x + 3, HY, 1, 1, '#4a8a3a'); P(x - 2, HY - 2, 1, 1, '#6abf4a'); P(x + 1, HY - 2, 1, 1, '#6abf4a'); }
+    if (ch === 'toque') { P(x - 3, HY - 1, 6, 1, '#e8e4dc'); P(x - 3, HY - 5, 6, 4, '#fbfaf6'); P(x - 4, HY - 5, 8, 2, '#fbfaf6'); P(x - 3, HY - 1, 6, 1, '#d4d0c8'); }
+    if (ch === 'elmo_alado') { P(x - 3, HY - 1, 6, 2, '#c9ced8'); P(x - 1, HY - 2, 2, 1, '#dfe3ea'); P(x - 5, HY - 3, 2, 3, '#f4f4f4'); P(x + 3, HY - 3, 2, 3, '#f4f4f4'); P(x - 5, HY - 3, 1, 1, '#c9ced8'); P(x + 4, HY - 3, 1, 1, '#c9ced8'); if (back) P(x - 3, HY, 6, 3, '#aab0ba'); }
+    if (ch === 'aviador') { P(x - 3, HY - 1, 6, 2, cc); if (!back) { P(x - 3, HY - 1, 6, 1, '#3a2a1a'); P(x - 2, HY - 1, 2, 1, '#ffb347'); P(x + 1, HY - 1, 2, 1, '#ffb347'); } P(side > 0 ? x - 4 : x + 3, HY + 1, 1, 3, cc); }
+    if (ch === 'chapeu_ferro') { P(x - 5, HY, 10, 1, '#7d828e'); P(x - 3, HY - 2, 6, 2, '#9aa0aa'); P(x - 2, HY - 3, 4, 1, '#9aa0aa'); P(x - 5, HY, 10, 1, '#6a6e7a'); P(x - 1, HY - 2, 1, 1, '#dfe3ea'); }
+    if (ch === 'chapeu_pintor') { P(x - 4, HY - 2, 8, 2, cc); P(side > 0 ? x + 3 : x - 5, HY - 1, 2, 2, cc); P(x - 2, HY - 2, 1, 1, '#e84a4a'); P(x, HY - 2, 1, 1, '#4ab0ff'); P(x + 2, HY - 2, 1, 1, '#ffd046'); }
+    if (ch === 'solideu') { P(x - 2, HY - 1, 4, 1, cc); if (!back) P(x - 1, HY + 5, 2, 1, '#f4f4f4'); }
+
     // acessorio (mao do lado "side")
     const M = (dx, dy, w, h, col) => P(side > 0 ? x + dx : x - dx - w, Y + dy, w, h, col);
     const a = v.acessorio;
-    if (!back || a === 'bau' || a === 'bigorna' || a === 'corrente' || a === 'machado' || a === 'montante' || a === 'machado_runico' || a === 'cajado' || a === 'cajado_magico' || a === 'vara' || a === 'escudo_lanca') {
+    if (!back || a === 'bau' || a === 'bigorna' || a === 'corrente' || a === 'machado' || a === 'montante' || a === 'machado_runico' || a === 'cajado' || a === 'cajado_magico' || a === 'vara' || a === 'escudo_lanca' || a === 'forcado' || a === 'martelo_grande' || a === 'alabarda' || a === 'guitarra' || a === 'cachecol_bracos') {
       if (a === 'machado') { M(4, -3, 1, 8, '#7a5230'); M(5, -3, 2, 3, '#b8bcc8'); M(5, -3, 1, 3, '#dfe3ea'); }
       if (a === 'cajado') { M(4, -6, 1, 11, '#8a6234'); M(4, -7, 3, 1, '#8a6234'); M(6, -6, 1, 2, '#8a6234'); }
       if (a === 'cajado_magico') { M(4, -5, 1, 10, '#4a3a5a'); M(3, -8, 3, 3, v.magia || '#9b6bff'); M(4, -7, 1, 1, '#ffffff'); }
@@ -143,6 +154,21 @@
       if (a === 'montante') { M(4, -7, 1, 10, '#3a3a46'); M(4, -7, 1, 1, '#6a6a7a'); M(2, 3, 5, 1, '#8a1c22'); M(4, 4, 1, 2, '#2a1a14'); }
       if (a === 'machado_runico') { const g = 0.6 + 0.4 * Math.sin(t * 3); M(4, -5, 1, 10, '#5a3a1e'); M(5, -5, 3, 4, '#8a8e9a'); M(2, -5, 2, 4, '#8a8e9a'); M(6, -4, 1, 2, `rgba(255,170,60,${g.toFixed(2)})`); M(2, -4, 1, 2, `rgba(255,170,60,${g.toFixed(2)})`); }
       if (a === 'orbe_mental') { const fy = Math.round(Math.sin(t * 1.8)); M(4, -2 + fy, 3, 3, v.magia || '#ff7ad9'); M(5, -2 + fy, 1, 1, '#ffffff'); M(3, -1 + fy, 1, 1, 'rgba(255,122,217,0.45)'); M(7, -1 + fy, 1, 1, 'rgba(255,122,217,0.45)'); }
+      // ---- Dia 7
+      if (a === 'forcado') { M(4, -6, 1, 11, '#8a6234'); M(3, -8, 3, 1, '#9aa0aa'); M(3, -10, 1, 2, '#9aa0aa'); M(5, -10, 1, 2, '#9aa0aa'); M(4, -9, 1, 1, '#9aa0aa'); }
+      if (a === 'martelo_grande') { M(4, -5, 1, 10, '#5a3e26'); M(2, -8, 5, 3, '#5a5e68'); M(2, -8, 5, 1, '#8a8e9a'); M(6, -7, 1, 1, '#ff8a3a'); }
+      if (a === 'espada_runica') { const g = 0.55 + 0.45 * Math.sin(t * 4); M(4, -5, 1, 8, '#bfe8ff'); M(4, -5, 1, 8, `rgba(90,208,255,${g.toFixed(2)})`); M(3, 2, 3, 1, '#c9a14a'); M(4, 3, 1, 1, '#3a2410'); M(5, -3, 1, 1, `rgba(255,255,255,${g.toFixed(2)})`); }
+      if (a === 'guitarra') { if (back) { P(x - 2, Y, 4, 5, '#c0262e'); } else { M(2, 1, 4, 3, '#c0262e'); M(3, 2, 1, 1, '#f4f4f4'); M(6, -3, 1, 5, '#2a2a2a'); M(6, -4, 2, 1, '#9aa0aa'); } if (!back && Math.floor(t * 3) % 2) M(9, -2, 1, 1, '#ffd046'); }
+      if (a === 'cajado_folhas') { M(4, -6, 1, 11, '#7a5a30'); M(3, -8, 3, 2, '#5aa84a'); M(5, -9, 1, 1, '#8ad86a'); M(2, -7, 1, 1, '#8ad86a'); M(4, -10 + Math.round(Math.sin(t * 2)), 1, 1, 'rgba(160,255,160,0.7)'); }
+      if (a === 'pao') { M(2, 1, 6, 1, '#8a6234'); M(2, 0, 2, 1, '#d89a4a'); M(4, -1, 2, 2, '#c8843a'); M(6, 0, 2, 1, '#e0a85a'); }
+      if (a === 'escudo_redondo') { M(4, -4, 1, 7, '#dfe3ea'); M(3, 2, 3, 1, '#8a6a2a'); if (!back) { M(-8, 0, 4, 5, '#2a5aa8'); M(-7, -1, 2, 1, '#2a5aa8'); M(-7, 5, 2, 1, '#2a5aa8'); M(-7, 2, 2, 1, '#e8b830'); } }
+      if (a === 'livro_sagrado') { M(3, 1, 3, 4, '#1e1a2a'); M(3, 1, 3, 1, '#c9a14a'); M(4, 2, 1, 2, '#c9a14a'); }
+      if (a === 'cachecol_bracos') { const w = Math.round(Math.sin(t * 3)), w2 = Math.round(Math.cos(t * 2.4)); const cs = v.detalhe || '#e84a4a';
+        P(bx - 3, Y - 2 + w, 2, 1, cs); P(bx - 4, Y - 4 + w, 1, 2, cs); P(bx + bw + 1, Y - 2 - w, 2, 1, cs); P(bx + bw + 3, Y - 4 - w, 1, 2, cs);
+        P(bx - 2, Y + 3 + w2, 1, 3, cs); P(bx - 3, Y + 6 + w2, 1, 1, cs); P(bx + bw + 1, Y + 3 - w2, 1, 3, cs); P(bx + bw + 2, Y + 6 - w2, 1, 1, cs); }
+      if (a === 'alabarda') { M(4, -10, 1, 15, '#6b4a2b'); M(5, -9, 2, 3, '#b8bcc8'); M(5, -9, 1, 3, '#dfe3ea'); M(4, -12, 1, 2, '#cfd3da'); M(3, -8, 1, 1, '#b8bcc8'); }
+      if (a === 'espada_madeira') { M(4, -2, 1, 5, '#c89a5a'); M(3, 2, 3, 1, '#7a5230'); }
+      if (a === 'pincel_paleta') { M(4, -3, 1, 5, '#8a6234'); M(4, -4, 1, 1, '#4ab0ff'); if (!back) { M(-6, 1, 4, 3, '#d8b878'); M(-5, 1, 1, 1, '#e84a4a'); M(-4, 2, 1, 1, '#4ab0ff'); M(-6, 2, 1, 1, '#ffd046'); M(-5, 3, 1, 1, '#4ac07a'); } }
       if (a === 'cesta') { M(3, 2, 3, 2, '#a0773f'); M(3, 1, 1, 1, '#a0773f'); M(5, 1, 1, 1, '#a0773f'); }
     }
     if (a === 'espirito') {

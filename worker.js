@@ -55,7 +55,7 @@ const CORES = /^#[0-9a-f]{6}$/i;
 const CABELOS = ['curto', 'longo', 'rabo', 'espetado', 'coque', 'careca'];
 const CHAPEUS = ['', 'palha', 'capuz', 'gorro', 'bandana', 'faixa', 'oculos', 'marinheiro'];
 const nivel = xp => 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 60));
-const limpaArroba = s => String(s || '').trim().replace(/^@+/, '').toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 30);
+const limpaArroba = s => String(s || '').trim().replace(/^@+/, '').toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 30);
 const num = (v, a, b) => (typeof v === 'number' && isFinite(v) ? Math.max(a, Math.min(b, Math.round(v * 10) / 10)) : null);
 
 function limpaLook(v) {

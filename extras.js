@@ -21,7 +21,7 @@
     set(k, v) { try { localStorage.setItem('grande-ilha-' + k, JSON.stringify(v)); } catch (e) { } }
   };
   const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-  const limpaArroba = s => String(s || '').trim().replace(/^@+/, '').toLowerCase().replace(/[^a-z0-9._]/g, '').slice(0, 30);
+  const limpaArroba = s => String(s || '').trim().replace(/^@+/, '').toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 30);
   const br = t => new Date(t + TZ);
   const dd = n => String(n).padStart(2, '0');
   const hora = t => { const d = br(t); return dd(d.getUTCHours()) + ':' + dd(d.getUTCMinutes()); };
@@ -530,7 +530,7 @@
       <ol class="m-dicas">
         <li><i>☞</i><div><b>Toque num morador</b><span>Você vê a história dele e passa a segui-lo pela ilha.</span></div></li>
         <li><i>⚓</i><div><b>Fique de olho no cais</b><span>Os moradores novos chegam de barco, um por um, ao vivo.</span></div></li>
-        <li><i>✎</i><div><b>Vire morador</b><span>Comente <b>nome + profissão + história</b> nos vídeos do @${esc(IG)}.</span></div></li>
+        <li><i>✎</i><div><b>Vire morador</b><span>Comente <b>nome + profissão + história</b> nos vídeos do @${esc(IG)} no Instagram ou no YouTube.</span></div></li>
       </ol>
       <div class="m-botoes"><button type="button" class="b-ouro" id="bv-ok">EXPLORAR A ILHA</button><a class="b-linha" href="https://www.instagram.com/${encodeURIComponent(IG)}/" target="_blank" rel="noopener">QUERO SER MORADOR</a></div>`,
     el => { el.querySelector('#bv-ok').onclick = fechar; },

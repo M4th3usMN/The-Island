@@ -43,7 +43,19 @@ window.LIVRO = {
     guilherme: ['Eu sou o Guilherme, ferreiro. Cheguei com um touro e a minha oficina portátil. Às vezes saio para pegar materiais e fico fora dois ou três dias, mas só volto com os melhores.', 'Sou o ferreiro mais habilidoso do mundo.'],
     velhomu: ['Velho Mu, caçador de recompensas. Viajou para a ilha de propósito, porque sabia que o lugar estava virando refúgio de criminosos e náufragos perigosos: a chance perfeita para faturar alto.', 'Muita gente odeia ele, então torce para que ninguém na ilha o reconheça.'],
     jester: ['Jester, o Flautista Encantador de Animais. Protetor dos animais da ilha, com uma flauta mágica capaz de atrair, acalmar e comandar qualquer criatura.', 'Fala com os animais, protege a vila com a ajuda deles, manda aves vigiarem lugares distantes, encontra gente perdida e acalma animais agressivos com suas melodias. Seu título na ilha: o Guardião da Sinfonia Selvagem.'],
-    reed: ['Reed, necromante. Veio de um reino distante, um forasteiro trazendo segredos ancestrais da morte.', 'Não para destruir, mas para reerguer as esperanças esquecidas desta terra.']
+    reed: ['Reed, necromante. Veio de um reino distante, um forasteiro trazendo segredos ancestrais da morte.', 'Não para destruir, mas para reerguer as esperanças esquecidas desta terra.'],
+    luis: ['Luis, fundador da fazenda. No continente eu era famoso: todo mundo comprava da minha terra.', 'Mas os preços subiram tanto que ninguém mais podia pagar. Vim para cá abrir uma fazenda onde o preço é justo.'],
+    kasseki: ['Kasseki, mestre ferreiro. Tenho sessenta anos, e mais de quarenta deles na frente de uma forja.', 'Já vi muito aprendiz chegar achando que sabe tudo. O ferro ensina. O ferro não mente.'],
+    joao: ['João, ferreiro encantador. Eu forjo, mas o que eu gosto mesmo é de gravar runas.', 'Uma espada comum corta. Uma espada encantada protege quem a carrega.'],
+    octo: ['Octo, pesquisador e inventor. De dia eu sigo formigas com a lupa e anoto tudo no meu caderno.', 'De noite, pego a guitarra elétrica. Ninguém nessa ilha tinha ouvido um solo antes de mim.'],
+    daniel: ['Daniel, curandeiro. Conheço cada erva da floresta e o que ela cura.', 'Quem se machuca no treino, quem não consegue dormir, até o dragão: todo mundo passa por mim.'],
+    lucas: ['Lucas, padeiro, vinte e três anos. Acordo antes de todo mundo para o forno estar quente.', 'Pão, salgado, bolo. Enquanto eu estiver aqui, ninguém nessa ilha passa fome.'],
+    benjain: ['Benjain, guerreiro. Desde criança eu sonho em ser herói.', 'Treino todo dia esperando alguém precisar de mim. Só não me ofereçam pimenta: é minha única fraqueza.'],
+    wander: ['Wander, padre. Uma carta chegou à minha igreja pedindo ajuda para esta ilha.', 'Peguei o primeiro navio. Até hoje não descobri quem escreveu aquela carta.'],
+    felk: ['Felk, inventor e aventureiro. Uma luz misteriosa brilha no leste, e eu vou descobrir o que é.', 'Meu cachecol funciona como quatro braços extras. E o Mick, meu gato, vai comigo para onde eu for.'],
+    andre: ['André, guarda da vila. Trinta e dois anos. Tudo o que sei de luta, aprendi com o meu avô.', 'Agora sou eu quem treina os recrutas. Enquanto eu estiver de guarda, a vila dorme tranquila.'],
+    arthurzinho: ['Arthurzinho. Tenho seis anos!', 'Quando eu crescer vou ser guerreiro. E o dragão olhou pra mim, é sério!'],
+    leonardo: ['Leonardo, pintor. Fugi de um sanatório graças a um homem igualzinho a mim, que fingiu ser o "Jim".', 'Agora pinto o mar, a floresta e o dragão. E faço questão de lembrar: meu nome é Leonardo.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],

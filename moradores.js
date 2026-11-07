@@ -264,5 +264,78 @@ window.MORADORES = [
     historia: 'Forasteiro de um reino distante, trazendo segredos ancestrais da morte: não para destruir, mas para reerguer as esperanças esquecidas desta terra.',
     rotina: 'necromante', casa: 'auto', chegada: '2026-11-06T17:04:00-04:00',
     visual: { tipo: 'humano', pele: '#d8d4cc', cabelo: 'longo', corCabelo: '#101418', roupa: '#1e2a24', manto: true, detalhe: '#4ac07a', calca: '#141a16', acessorio: 'cranio', magia: '#7affa0' }
+  },
+  // ---------------------------------------------------------------- Dia 7 (comentários do Instagram e do YouTube)
+  {
+    id: 'luis', arroba: 'eu_luis_otv', nome: 'Luis', profissao: 'Fundador da fazenda',
+    historia: 'Fazendeiro famoso no continente. Quando os preços por lá subiram demais, largou tudo e veio abrir fazenda na ilha, onde a terra é boa e o preço é justo.',
+    rotina: 'fazendeiro_rico', casa: 'auto', chegada: '2026-11-07T19:20:00-04:00',
+    visual: { tipo: 'humano', pele: '#d8a878', cabelo: 'curto', corCabelo: '#5a3a1e', barba: '#5a3a1e', roupa: '#a83a2a', listras: '#e8d8b0', calca: '#3a4a6a', chapeu: 'sombreiro', corChapeu: '#8a5a2a', acessorio: 'forcado' }
+  },
+  {
+    id: 'kasseki', arroba: 'TSSHARK-lr2dc', nome: 'Kasseki', profissao: 'Mestre ferreiro',
+    historia: 'Tem 60 anos e mais de 40 de forja. É o mestre dos mestres: corrige todo aprendiz que passa perto da bigorna e diz que ferro não mente.',
+    rotina: 'mestre_ferreiro', casa: 'auto', chegada: '2026-11-07T19:21:00-04:00',
+    visual: { tipo: 'humano', pele: '#b07a52', cabelo: 'careca', corCabelo: '#e8e8e0', barba: '#f0f0ea', roupa: '#4a4a52', avental: '#6a3a1e', calca: '#2a2a2e', acessorio: 'martelo_grande' }
+  },
+  {
+    id: 'joao', arroba: 'joaomiguel4063', nome: 'João', profissao: 'Ferreiro encantador',
+    historia: 'Ferreiro que encanta armas e armaduras com runas. Divide a forja com o mestre Kasseki e passa as tardes na torre trocando segredos de magia.',
+    rotina: 'encantador', casa: 'com:kasseki', chegada: '2026-11-07T19:22:00-04:00',
+    visual: { tipo: 'humano', pele: '#f0c8a0', cabelo: 'espetado', corCabelo: '#2a3a6a', roupa: '#1e4a7a', detalhe: '#5ad0ff', calca: '#2a2a3a', acessorio: 'espada_runica' }
+  },
+  {
+    id: 'octo', arroba: 'MariaSolangeMaximiano', nome: 'Octo', profissao: 'Pesquisador e inventor',
+    historia: 'Pesquisador e inventor que estuda formigas com a lupa e anota tudo num caderno. À noite troca a ciência por uma guitarra elétrica.',
+    rotina: 'pesquisador', casa: 'auto', chegada: '2026-11-07T19:23:00-04:00',
+    visual: { tipo: 'humano', pele: '#8a5a3a', cabelo: 'longo', corCabelo: '#141010', roupa: '#f2efe6', detalhe: '#3a8a5a', calca: '#3a3a46', chapeu: 'lupa_testa', acessorio: 'guitarra' }
+  },
+  {
+    id: 'daniel', arroba: 'DanielFritsch-w7m', nome: 'Daniel', profissao: 'Curandeiro',
+    historia: 'Curandeiro que conhece cada erva da floresta. Cuida dos feridos do treino, prepara remédios e até examina o dragão.',
+    rotina: 'curandeiro', casa: 'auto', chegada: '2026-11-07T19:24:00-04:00',
+    visual: { tipo: 'humano', pele: '#e8c0a0', cabelo: 'rabo', corCabelo: '#a8a090', roupa: '#5a7a3a', manto: true, detalhe: '#d8c890', chapeu: 'coroa_folhas', acessorio: 'cajado_folhas' }
+  },
+  {
+    id: 'lucas', arroba: 'SamuelSilva-nd4yp', nome: 'Lucas', profissao: 'Padeiro',
+    historia: 'Padeiro de 23 anos. Acorda de madrugada para fazer pão, salgados e bolos, e mora nos fundos da mercearia, onde fica o forno.',
+    rotina: 'padeiro', casa: 'mercearia', chegada: '2026-11-07T19:25:00-04:00',
+    visual: { tipo: 'humano', pele: '#f4d0b0', cabelo: 'curto', corCabelo: '#c87a3a', roupa: '#fbfaf6', avental: '#e8dcc0', calca: '#6a5a4a', chapeu: 'toque', acessorio: 'pao' }
+  },
+  {
+    id: 'benjain', arroba: 'raphamoraes8799', nome: 'Benjain', profissao: 'Guerreiro (aspirante a herói)',
+    historia: 'Guerreiro de 28 anos e 1,86 m que sempre quis ser herói. Treina todo dia procurando alguém para salvar. Única fraqueza: é alérgico a pimenta.',
+    rotina: 'aspirante_heroi', casa: 'auto', chegada: '2026-11-07T19:26:00-04:00',
+    visual: { tipo: 'humano', pele: '#c89064', cabelo: 'curto', corCabelo: '#e8c060', roupa: '#2a5aa8', detalhe: '#e8b830', calca: '#3a3a46', chapeu: 'elmo_alado', acessorio: 'escudo_redondo' }
+  },
+  {
+    id: 'wander', arroba: 'Kurama.j', nome: 'Wander', profissao: 'Padre',
+    historia: 'Chegou de navio depois que alguém mandou uma carta para a igreja dele pedindo ajuda para a ilha. Até hoje procura quem escreveu aquela carta.',
+    rotina: 'padre', casa: 'santuario', chegada: '2026-11-07T19:27:00-04:00',
+    visual: { tipo: 'humano', pele: '#e0b48a', cabelo: 'curto', corCabelo: '#6a6a6a', roupa: '#1a1a22', manto: true, detalhe: '#1a1a22', chapeu: 'solideu', corChapeu: '#1a1a22', acessorio: 'livro_sagrado' }
+  },
+  {
+    id: 'felk', arroba: 'felipeboyz3521', nome: 'Felk', profissao: 'Inventor e aventureiro',
+    historia: 'Inventor aventureiro que segue uma luz misteriosa vinda do leste. Usa um cachecol que funciona como quatro braços extras e nunca se separa do gato Mick.',
+    rotina: 'explorador_luz', casa: 'auto', chegada: '2026-11-07T19:28:00-04:00',
+    visual: { tipo: 'humano', pele: '#f0c8a0', cabelo: 'espetado', corCabelo: '#8a3a1e', roupa: '#5a4a3a', detalhe: '#e84a4a', calca: '#3a3026', chapeu: 'aviador', corChapeu: '#6a4428', acessorio: 'cachecol_bracos' }
+  },
+  {
+    id: 'andre', arroba: 'lucassilvahohne3323', nome: 'André', profissao: 'Guarda da vila',
+    historia: 'Guarda da vila, 32 anos. Aprendeu tudo com o avô e agora treina os recrutas da ilha. De olho no caçador e no dragão.',
+    rotina: 'guarda', casa: 'auto', chegada: '2026-11-07T19:29:00-04:00',
+    visual: { tipo: 'humano', pele: '#a8724a', cabelo: 'curto', corCabelo: '#141010', barba: '#141010', roupa: '#7a1e22', detalhe: '#9aa0aa', calca: '#3a3a46', chapeu: 'chapeu_ferro', acessorio: 'alabarda' }
+  },
+  {
+    id: 'arthurzinho', arroba: 'Felipe-u2m3t', nome: 'Arthurzinho', profissao: 'Criança curiosa',
+    historia: 'Tem 6 anos e quer ser guerreiro. Fica sob os cuidados do guarda André, imita os treinos com uma espada de madeira e jura que o dragão olhou para ele.',
+    rotina: 'crianca_curiosa', casa: 'com:andre', chegada: '2026-11-07T19:30:00-04:00',
+    visual: { tipo: 'crianca', pele: '#e8b890', cabelo: 'espetado', corCabelo: '#4a2a14', roupa: '#3a9a6a', calca: '#2a3a5a', acessorio: 'espada_madeira' }
+  },
+  {
+    id: 'leonardo', arroba: 'Architect_Studio', nome: 'Leonardo', profissao: 'Pintor',
+    historia: 'Pintor que fugiu de um sanatório graças a um sósia que fingiu ser "Jim". Pinta o mar, a floresta e o dragão, e lembra a todos: o nome dele é Leonardo.',
+    rotina: 'pintor', casa: 'auto', chegada: '2026-11-07T19:31:00-04:00',
+    visual: { tipo: 'humano', pele: '#f2d8c0', cabelo: 'longo', corCabelo: '#2a1a10', roupa: '#e8e4dc', listras: '#4ab0ff', calca: '#4a3a5a', chapeu: 'chapeu_pintor', corChapeu: '#6a2a5a', acessorio: 'pincel_paleta' }
   }
 ];
