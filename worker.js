@@ -381,6 +381,9 @@ export default {
   },
   // a cada 5 minutos: confere os comentários novos no Instagram e manda os códigos
   async scheduled(event, env, ctx) {
+    // PAUSADO em 07/11/2026: a Meta restringiu o portfólio empresarial do @the_island.lab.
+    // As mensagens automáticas no direct só voltam se a variável IG_AUTOMACAO for "ligado" no Cloudflare.
+    if (env.IG_AUTOMACAO !== "ligado") return;
     const vila = env.VILA.get(env.VILA.idFromName("grande-ilha"));
     ctx.waitUntil(vila.fetch(new Request("https://ilha/interno/instagram")));
   },
