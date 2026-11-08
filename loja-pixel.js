@@ -92,22 +92,39 @@
   }
   // ---------------------------------------------------------------- 3. asas de dragão (par, como a referência)
   const ASA = tom('#f07a2a', '#b8481a', '#ffb060'), MEMB = tom('#a8401a', '#6a2410', '#c85a2a');
-  function asaGrade(bate) {
-    const G = new Grade(28, 20), b = bate;
-    G.poli([[27, 18], [24, 8 + b], [16, 3 + b], [6, 3 + b], [0, 7 + b], [3, 9 + b], [5, 14 + b], [9, 11 + b], [12, 17], [16, 13], [19, 19], [23, 15]], ASA);
-    G.acabamento(false);
-    // gomos escuros entre os dedos
-    G.poli([[22, 9 + b], [15, 5 + b], [7, 5 + b], [6, 9 + b], [9, 9 + b], [11, 14 + b], [14, 11 + b], [17, 16], [20, 13]], MEMB);
-    // ossos claros
-    G.linha(26, 17, 23, 8 + b, '#ffb060'); G.linha(23, 8 + b, 15, 4 + b, '#ffb060'); G.linha(15, 4 + b, 4, 4 + b, '#ffb060');
-    G.linha(23, 8 + b, 9, 10 + b, RAMPA[ASA][2]); G.linha(23, 8 + b, 15, 12 + b, RAMPA[ASA][2]); G.linha(23, 8 + b, 21, 15, RAMPA[ASA][2]);
+  // asa desenhada à mão (pixel por pixel) e "fechada" comprimindo as colunas em direção ao ombro
+  const ASA_MAPA = [
+    'LL......................',
+    'LOLL....................',
+    'LOOOLL..................',
+    'LOMOOOLLL...............',
+    'LOMDMOOOOLLL............',
+    'LOMDDMOMOOOOLLL.........',
+    'LOMDDDOMDMOOOOOLLL......',
+    'OMDDDOMDDDOMOOOOOOLL....',
+    'OMDDDOMDDDOMDDMOOOOOL...',
+    'OMDDOMDDDDOMDDDOMDDOOL..',
+    'OMDDOMDDDOMDDDDOMDDDOOO.',
+    'OODDOMDDDOMDDDOMDDDDDOO.',
+    'O.OOOODDOOODDOOODDDDOO..',
+    '....O..OO...OO..OOOO....',
+    '........................'];
+  const ASA_COR = { L: '#ffb060', O: '#f07a2a', M: '#b8501e', D: '#7a2e14' };
+  function asaGrade(abre) {
+    const w0 = ASA_MAPA[0].length, h0 = ASA_MAPA.length, ombro = w0 - 2;
+    const G = new Grade(w0 + 2, h0 + 8), sobe = Math.round((1 - abre) * 5);
+    for (let x = 0; x < w0; x++) {
+      const src = Math.round(ombro - (ombro - x) / abre); if (src < 0) continue;
+      for (let y = 0; y < h0; y++) { const ch = ASA_MAPA[y][src]; if (ch && ch !== '.') G.set(x + 1, y + 3 - Math.round(sobe * (1 - x / w0)), ASA_COR[ch]); }
+    }
     G.acabamento();
     return G;
   }
+  const CICLO = [1, 0.62, 0.28, 0.62];
   function asas(g, t) {
     fundo(g, '#d4d8dc');
-    const bate = Math.floor(t * 4) % 2 ? -2 : 0, G = asaGrade(bate);
-    G.pinta(g, 32, 26); G.pinta(g, 60, 26, true);
+    const q = CICLO[Math.floor(t * 6) % 4], G = asaGrade(q);
+    G.pinta(g, 35, 22); G.pinta(g, 59, 22, true);
   }
   // ---------------------------------------------------------------- 4. aura de brasas (anel de chamas)
   function chama(G, x, y, s, f) {
@@ -240,5 +257,5 @@
   function teste(g, t) { fundo(g, '#d4d8dc'); const G = new Grade(30, 12); G.ret(1, 1, 28, 10, OURO); G.acabamento(); G.pinta(g, 45, 30); g.fillStyle = K; g.font = '8px Silkscreen, monospace'; g.textAlign = 'center'; g.fillText('R$ 1', 60, 39); }
 
   const ARTES = { tricornio, capa, asas, aura, brasinha, nome, moldura, bandeira, teste };
-  window.IlhaLojaPixel = { W, H, desenha: (g, id, t, arroba) => { g.save(); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W, H); (ARTES[id] || teste)(g, t, arroba); g.restore(); } };
+  window.IlhaLojaPixel = { asaGrade, W, H, desenha: (g, id, t, arroba) => { g.save(); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W, H); (ARTES[id] || teste)(g, t, arroba); g.restore(); } };
 })();
