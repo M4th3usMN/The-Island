@@ -93,31 +93,22 @@
   }
   // ---------------------------------------------------------------- 3. asas de dragão (par, como a referência)
   const ASA = tom('#f07a2a', '#b8481a', '#ffb060'), MEMB = tom('#a8401a', '#6a2410', '#c85a2a');
-  // asa desenhada à mão (pixel por pixel) e "fechada" comprimindo as colunas em direção ao ombro
-  const ASA_MAPA = [
-    '......LLLLLLLL.........',
-    '...LLLOOOOOOOOL........',
-    '.LLOOOOKDDMOOOOL.......',
-    'LOOOKDDDMOOKMOOOL......',
-    'LOKDDDMOOKDDMOOOOL.....',
-    '.LDDMOOKDDDMOOKOOOL....',
-    '..LMOOKDDDMOOKDDOOOL...',
-    '...LOKDDDMOOKDDDMOOOL..',
-    '....LDDDMOOKDDDMOOOOL..',
-    '......LDMOOKDDDMOOOOOL.',
-    '........LOKDDDMOOOOOOL.',
-    '..........LDDMOOOOOOOL.',
-    '............LMOOOOOOOL.',
-    '..............LOOOOOOL.',
-    '................LLOOOL.'];
-  const ASA_COR = { L: '#ffa858', O: '#f07a2a', M: '#c0541e', D: '#7a2a14', K: '#3a0e08' };
+  // asa fina (como a referência): membrana escura entre ossos finos laranja, borda de baixo recortada.
+  // "abre" de 1 (aberta) a ~0.3 (fechada): os pontos se aproximam da junta.
   function asaGrade(abre) {
-    const w0 = Math.max(...ASA_MAPA.map(l => l.replace(/\.+$/, '').length)), h0 = ASA_MAPA.length, ombro = w0 - 1;
-    const G = new Grade(w0 + 1, h0 + 8), sobe = Math.round((1 - abre) * 5);
-    for (let x = 0; x < w0; x++) {
-      const src = Math.round(ombro - (ombro - x) / abre); if (src < 0) continue;
-      for (let y = 0; y < h0; y++) { const ch = ASA_MAPA[y][src]; if (ch && ch !== '.') G.set(x, y + 3 - Math.round(sobe * (1 - x / w0)), ASA_COR[ch]); }
-    }
+    const G = new Grade(34, 24), J = [31, 21];
+    const P = ([x, y]) => [Math.round(J[0] - (J[0] - x) * abre), Math.round(y + (1 - abre) * (J[1] - y) * 0.25 - (1 - abre) * 3 * (1 - (J[0] - x) / 30))];
+    const W = P([24, 4]), T = P([2, 7]), A = P([13, 2]);
+    const F = [P([3, 13]), P([10, 17]), P([18, 19])], C = [P([6, 10]), P([12, 14]), P([19, 16]), P([25, 17])];
+    // membrana
+    G.poli([J, W, A, T, C[0], F[0], C[1], F[1], C[2], F[2], C[3]], '#5e1e10');
+    G.poli([W, A, T, C[0], P([12, 9]), P([20, 9])], '#8a3418');
+    // ossos finos
+    G.linha(J[0], J[1], W[0], W[1], '#f07a2a', 2);
+    G.linha(W[0], W[1], A[0], A[1], '#ffa858'); G.linha(A[0], A[1], T[0], T[1], '#ffa858');
+    F.forEach(f => G.linha(W[0], W[1], f[0], f[1], '#ff8a3a'));
+    G.linha(W[0], W[1] - 1, A[0], A[1] - 1, '#ffd08a');
+    G.set(T[0] - 1, T[1] - 1, '#f4e4c8'); G.set(W[0], W[1] - 2, '#f4e4c8');
     G.acabamento();
     return G;
   }
@@ -125,7 +116,7 @@
   function asas(g, t) {
     fundo(g, '#d4d8dc');
     const q = (window.__lojaQuadro != null ? CICLO[window.__lojaQuadro] : CICLO[Math.floor(t * 5) % 4]), G = asaGrade(q);
-    G.pinta(g, 64 - G.w * 2, 17, false, 2); G.pinta(g, 56, 17, true, 2);
+    G.pinta(g, 61 - G.w, 18); G.pinta(g, 59, 18, true);
   }
   // ---------------------------------------------------------------- 4. aura de brasas (anel de chamas)
   function chama(G, x, y, s, f) {
