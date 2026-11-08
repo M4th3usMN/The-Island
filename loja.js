@@ -188,9 +188,26 @@
     if (anima.length === 1) requestAnimationFrame(loopPrevias);
   }
   // ilustração em alta resolução (loja-arte.js) para os cards da loja
+  // ilustração (loja-arte.js) desenhada em alta e reduzida para pixel art: 96x60 pixels, paleta reduzida
+  const PX = { w: 120, h: 75 };
+  let hdTela = null;
+  function quantiza(d) {
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 8) continue;
+      for (let k = 0; k < 3; k++) d[i + k] = Math.min(255, Math.round(d[i + k] / 22) * 22);
+      d[i + 3] = 255;
+    }
+  }
   function arteHD(cv, id) {
-    const g = cv.getContext('2d'), A = window.IlhaLojaArte; if (!A) return;
-    anima.push({ cv, draw: sec => A.desenha(g, id, sec, S.eu && S.eu.arroba) });
+    const A = window.IlhaLojaArte; if (!A) return;
+    cv.width = PX.w; cv.height = PX.h; cv.classList.remove('lj-hd');
+    const g = cv.getContext('2d');
+    if (!hdTela) { hdTela = document.createElement('canvas'); hdTela.width = A.W; hdTela.height = A.H; }
+    anima.push({ cv, draw: sec => {
+      const h = hdTela.getContext('2d'); A.desenha(h, id, sec, S.eu && S.eu.arroba);
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.clearRect(0, 0, PX.w, PX.h); g.drawImage(hdTela, 0, 0, PX.w, PX.h);
+      const img = g.getImageData(0, 0, PX.w, PX.h); quantiza(img.data); g.putImageData(img, 0, 0);
+    } });
     if (anima.length === 1) requestAnimationFrame(loopPrevias);
   }
   function casinha(g) {

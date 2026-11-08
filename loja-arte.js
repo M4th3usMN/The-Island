@@ -11,7 +11,7 @@
   function fundo(g, t, c1, c2, luz) {
     g.fillStyle = grad(g, 0, 0, 0, H, [[0, c1], [1, c2]]); g.fillRect(0, 0, W, H);
     g.save(); g.translate(W / 2, H * 0.48); g.rotate(t * 0.12);
-    for (let i = 0; i < 12; i++) { g.rotate(TAU / 12); g.fillStyle = luz.replace('A', i % 2 ? 0.05 : 0.09); g.beginPath(); g.moveTo(0, 0); g.lineTo(-18, -220); g.lineTo(18, -220); g.fill(); }
+    for (let i = 0; i < 12; i++) { g.rotate(TAU / 12); g.fillStyle = luz.replace('A', i % 2 ? 0 : 0.07); g.beginPath(); g.moveTo(0, 0); g.lineTo(-18, -220); g.lineTo(18, -220); g.fill(); }
     g.restore();
     brilho(g, W / 2, H * 0.48, 110, luz, 0.35);
     for (let i = 0; i < 18; i++) { const u = (t * 0.08 + i / 18) % 1; g.fillStyle = `rgba(255,255,255,${(0.5 * (1 - u)).toFixed(2)})`; g.beginPath(); g.arc((i * 61) % W, H - u * H, 1 + (i % 3) * 0.5, 0, TAU); g.fill(); }
