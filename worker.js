@@ -68,6 +68,10 @@ function limpaLook(v) {
   if (v.manto === true) o.manto = true;
   return o;
 }
+// Loja da Ilha: preços conferidos no servidor (o site nunca decide o preço). Só itens visuais.
+const LOJA = { tricornio: [3, "Tricórnio pirata"], capa: [5, "Capa de veludo"], asas: [8, "Asas de dragão"], aura: [6, "Aura de brasas"],
+  brasinha: [10, "Mascote Brasinha"], nome: [3, "Nome dourado"], moldura: [4, "Moldura de ouro"], bandeira: [5, "Bandeira na casa"], teste: [1, "Item de teste"] };
+const SITE = "https://the-island.theisland-app.workers.dev";
 // Barra da comunidade do episódio (Ofícios). Troque o id/título quando mudar o objetivo.
 const COM = { id: "ep7", titulo: "Ep. 7 · Preparar a ilha contra o Reino do Sul", meta: 300 };
 const ITENS_COM = new Set(["trigo", "madeira", "minerio", "erva", "pao", "lamina", "lamina_enc", "remedio"]);
@@ -101,6 +105,14 @@ export class Vila extends DurableObject {
 
   async fetch(request) {
     const rota = new URL(request.url).pathname;
+    if (rota === "/loja/webhook") {
+      const u = new URL(request.url); let id = u.searchParams.get("data.id") || u.searchParams.get("id") || "";
+      try { if (!id && request.method === "POST") { const j = await request.json(); id = String((j.data && j.data.id) || j.resource || "").split("/").pop(); } } catch (e) { }
+      id = String(id).replace(/\D/g, "");
+      if (id) await this.confere(id);
+      return new Response("ok");
+    }
+    if (rota === "/loja/bandeiras") return Response.json((await this.ctx.storage.get("loja:bandeiras")) || [], { headers: { "cache-control": "no-store" } });
     if (rota === "/comunidade") return Response.json(await this.resumoComunidade(), { headers: { "cache-control": "no-store" } });
     if (rota === "/interno/instagram") { await this.verificaInstagram(); return new Response("ok"); }
     if (rota === "/instagram/status") return Response.json(await this.statusInstagram(), { headers: { "cache-control": "no-store" } });
@@ -116,6 +128,43 @@ export class Vila extends DurableObject {
     return new Response(null, { status: 101, webSocket: client });
   }
 
+  // ---------------------------------------------------------------- Loja (Mercado Pago, Pix)
+  async criaPix(arroba, item) {
+    if (!this.env.MP_TOKEN) return { erro: "A loja ainda não está configurada." };
+    const [valor, nome] = LOJA[item], ref = arroba + "|" + item + "|" + crypto.randomUUID().slice(0, 8);
+    const expira = new Date(Date.now() + 30 * 60e3 - 4 * 3600e3).toISOString().replace("Z", "-04:00");
+    try {
+      const r = await fetch("https://api.mercadopago.com/v1/payments", { method: "POST", headers: { "Authorization": "Bearer " + this.env.MP_TOKEN, "Content-Type": "application/json", "X-Idempotency-Key": crypto.randomUUID() },
+        body: JSON.stringify({ transaction_amount: valor, description: "A Grande Ilha: " + nome, payment_method_id: "pix", external_reference: ref,
+          notification_url: SITE + "/loja/webhook", date_of_expiration: expira,
+          payer: { email: arroba.replace(/[^a-z0-9]/g, "") + "@ilha.theisland-app.workers.dev", first_name: "Viajante" } }) });
+      const j = await r.json();
+      const td = j && j.point_of_interaction && j.point_of_interaction.transaction_data;
+      if (!r.ok || !td) return { erro: "O Mercado Pago não gerou o Pix agora. Tente de novo em instantes.", detalhe: (j && (j.message || j.error)) || r.status };
+      await this.ctx.storage.put("pix:" + j.id, { arroba, item, valor, criado: Date.now(), pago: false });
+      return { id: String(j.id), valor, qr: td.qr_code, img: td.qr_code_base64, expira: Date.now() + 30 * 60e3 };
+    } catch (e) { return { erro: "Não deu para falar com o Mercado Pago agora." }; }
+  }
+  async confere(id) {
+    const rec = await this.ctx.storage.get("pix:" + id);
+    if (!rec) return { status: "desconhecido" };
+    if (rec.pago) return { status: "approved", item: rec.item };
+    try {
+      const r = await fetch("https://api.mercadopago.com/v1/payments/" + id, { headers: { "Authorization": "Bearer " + this.env.MP_TOKEN } });
+      const j = await r.json();
+      if (j && j.status === "approved" && Number(j.transaction_amount) >= rec.valor) { await this.entrega(id, rec); return { status: "approved", item: rec.item }; }
+      return { status: (j && j.status) || "pending" };
+    } catch (e) { return { status: "pending" }; }
+  }
+  async entrega(id, rec) {
+    rec.pago = true; rec.pagoEm = Date.now(); await this.ctx.storage.put("pix:" + id, rec);
+    const k = "loja:" + rec.arroba, itens = (await this.ctx.storage.get(k)) || [];
+    if (!itens.includes(rec.item)) itens.push(rec.item);
+    await this.ctx.storage.put(k, itens);
+    if (rec.item === "bandeira") { const b = (await this.ctx.storage.get("loja:bandeiras")) || []; if (!b.includes(rec.arroba)) { b.push(rec.arroba); await this.ctx.storage.put("loja:bandeiras", b); } }
+    const cr = (await this.ctx.storage.get("loja:creditos")) || []; cr.push({ arroba: rec.arroba, item: rec.item, valor: rec.valor, em: rec.pagoEm }); await this.ctx.storage.put("loja:creditos", cr.slice(-500));
+    for (const [ws, b] of this.viajantes()) if (b.arroba === rec.arroba) { b.loja = itens; ws.serializeAttachment(b); this.todos({ t: "loja", id: b.id, itens }); }
+  }
   async comunidade() {
     if (!this.com) this.com = (await this.ctx.storage.get("com:" + COM.id)) || { total: 0, por: {}, hoje: { dia: "", por: {} } };
     return this.com;
@@ -129,7 +178,7 @@ export class Vila extends DurableObject {
   envia(ws, m) { try { ws.send(JSON.stringify(m)); } catch (e) { } }
   todos(m, exceto) { const s = JSON.stringify(m); for (const [ws] of this.viajantes()) if (ws !== exceto) { try { ws.send(s); } catch (e) { } } }
   aviso(m, exceto) { this.hist = (this.hist || []).concat(m).slice(-10); this.todos(m, exceto); }
-  publico(a) { return { id: a.id, arroba: a.arroba, look: a.look, x: a.x, y: a.y, lv: a.lv || 1 }; }
+  publico(a) { return { id: a.id, arroba: a.arroba, look: a.look, x: a.x, y: a.y, lv: a.lv || 1, loja: a.loja || [] }; }
 
   // lista de @ bloqueados: arquivo banidos.json do próprio site (atualiza a cada 60 s)
   async banidos() {
@@ -180,6 +229,16 @@ export class Vila extends DurableObject {
       if ((k === "conquista" || k === "carta") && /^[a-z0-9_.:]{1,48}$/.test(v) && agora - (a.ft || 0) > 1500) {
         a.ft = agora; this.aviso({ t: "aviso", k, v, arroba: a.arroba, em: agora }, ws);
       }
+    } else if (m.t === "pix") {
+      // cria a cobrança Pix no Mercado Pago para o @ desta sessão (já autenticado pelo código)
+      const item = String(m.item || "");
+      if (!LOJA[item] || agora - (a.px || 0) < 15e3) { ws.serializeAttachment(a); return this.envia(ws, { t: "pix", erro: "Espere alguns segundos e tente de novo." }); }
+      a.px = agora; ws.serializeAttachment(a);
+      const r = await this.criaPix(a.arroba, item);
+      return this.envia(ws, Object.assign({ t: "pix", item }, r));
+    } else if (m.t === "pixstatus") {
+      const id = String(m.id || "").replace(/\D/g, "").slice(0, 20);
+      if (id) this.envia(ws, Object.assign({ t: "pixstatus", id }, await this.confere(id)));
     } else if (m.t === "entrega") {
       // Ofícios: cada entrega de pedido enche a barra da comunidade do episódio (limite por pessoa por dia)
       const item = String(m.item || ""), q = Math.max(1, Math.min(5, m.q | 0));
@@ -264,6 +323,7 @@ export class Vila extends DurableObject {
       const velho = b.id; b.id = null; w.serializeAttachment(b); this.todos({ t: "saiu", id: velho }, w);
       try { w.close(4001, "outra sessão"); } catch (e) { }
     }
+    a.loja = (await this.ctx.storage.get("loja:" + arroba)) || [];
     Object.assign(a, { id: crypto.randomUUID().slice(0, 8), arroba, look, x: 392, y: 512, lv: nivel((rec.perfil && rec.perfil.xp) || 0), falhas: 0 });
     ws.serializeAttachment(a);
     const outros = this.viajantes().filter(([w]) => w !== ws).map(([, b]) => this.publico(b));
@@ -398,6 +458,10 @@ export default {
       const vila = env.VILA.get(env.VILA.idFromName("grande-ilha"));
       return vila.fetch(request);
     }
+    if (url.pathname === "/loja/webhook") {
+      return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/loja/webhook" + url.search, { method: request.method, headers: request.headers, body: request.method === "POST" ? await request.text() : undefined }));
+    }
+    if (url.pathname === "/loja/bandeiras") return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/loja/bandeiras"));
     if (url.pathname === "/instagram/status" || url.pathname === "/instagram/verificar" || url.pathname === "/comunidade") {
       return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha" + url.pathname));
     }

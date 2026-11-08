@@ -175,7 +175,9 @@
     const c = chave === 'eu' ? null : S.perfil.cartas[chave];
     const carimbo = c ? (c.c === 'dragao' ? `confiança conquistada · ${C().dataCurta(c.e)}` : c.e ? `${c.c === 'missao' ? 'missão juntos' : 'conheceu'} · ${c.l} · ${C().dataCurta(c.e)}` : 'conhecido antes das cartas') : null;
     abrir(chave === 'eu' ? 'SUA CARTA' : chave === 'esp:dragao' ? 'CARTA ÚNICA' : 'CARTA COLETADA', '<div class="ct-vista"></div><div class="ct-acoes"><button type="button" class="b-linha" id="ct-album">VER ÁLBUM</button></div>', el => {
-      el.querySelector('.ct-vista').appendChild(C().carta(fonteDe(chave), { carimbo }));
+      const ct = C().carta(fonteDe(chave), { carimbo });
+      if (chave === 'eu' && window.IlhaLoja && window.IlhaLoja.temMoldura()) ct.classList.add('moldura-ouro');
+      el.querySelector('.ct-vista').appendChild(ct);
       el.querySelector('#ct-album').onclick = () => abrirPainel(2);
     });
   }
@@ -422,7 +424,7 @@
     if (!S.on) return;
     // passos pequenos: mesmo com poucos quadros por segundo, ninguém atravessa parede
     for (let r = dt; r > 0; r -= 0.05) { const d = Math.min(0.05, r); passo(S.eu, d, true); S.outros.forEach(o => passo(o, d, false)); }
-    [S.eu, ...S.outros.values()].forEach(v => objs.push({ y: v.y, f: () => SP.drawCharacter(c, v.x, v.y, visualDe(v), { t: info.sec + fase(v.id), walking: v.anda, side: v.s, dir: v.dir || 'down' }) }));
+    [S.eu, ...S.outros.values()].forEach(v => objs.push({ y: v.y, f: () => SP.drawCharacter(c, v.x, v.y, window.IlhaLoja ? window.IlhaLoja.visual(v, visualDe(v)) : visualDe(v), { t: info.sec + fase(v.id), walking: v.anda, side: v.s, dir: v.dir || 'down' }) }));
     if (S.marca && S.marca.ate > info.t) { const k = (S.marca.ate - info.t) / 600 * 3; objs.push({ y: S.marca.y - 1, f: () => { G.P(c, S.marca.x - k, S.marca.y, 1, 1, '#ffd046'); G.P(c, S.marca.x + k, S.marca.y, 1, 1, '#ffd046'); G.P(c, S.marca.x, S.marca.y - k / 2, 1, 1, '#ffd046'); G.P(c, S.marca.x, S.marca.y + k / 2, 1, 1, '#ffd046'); } }); }
     if (!S.camLivre && !G.cam.follow) { G.cam.x += (S.eu.x - G.cam.x) * 0.15; G.cam.y += (S.eu.y - 8 - G.cam.y) * 0.15; }
   });
@@ -441,12 +443,15 @@
     // o meu nome primeiro; os outros sobem um degrau quando encostariam num nome já escrito
     [S.eu, ...[...S.outros.values()].sort((a, b) => b.y - a.y)].forEach(v => {
       let [sx, sy] = scr(v.x, v.y - 19);
-      const label = (eApoiador(v.arroba) ? '★ ' : '') + nomeDe(v) + ' · NV ' + (v.lv || 1);
+      const ouro = !!(window.IlhaLoja && window.IlhaLoja.temNome(v));
+      const label = (ouro ? '✦ ' : '') + (eApoiador(v.arroba) ? '★ ' : '') + nomeDe(v) + ' · NV ' + (v.lv || 1);
       ctx.font = `${fs}px Silkscreen, monospace`; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(10,12,16,0.9)'; ctx.lineJoin = 'round';
       const w = ctx.measureText(label).width, h = fs + 4;
       for (let k = 0; k < 6 && ocupados.some(o => Math.abs(o.x - sx) < (o.w + w) / 2 + 4 && Math.abs(o.y - sy) < h); k++) sy -= h;
       ocupados.push({ x: sx, y: sy, w });
-      ctx.strokeText(label, sx, sy); ctx.fillStyle = v === S.eu ? '#ffd046' : '#bea0ff'; ctx.fillText(label, sx, sy);
+      ctx.strokeText(label, sx, sy);
+      if (ouro) { ctx.save(); ctx.shadowColor = 'rgba(255,208,70,.9)'; ctx.shadowBlur = 8; ctx.fillStyle = '#ffd046'; ctx.fillText(label, sx, sy); ctx.restore(); }
+      else { ctx.fillStyle = v === S.eu ? '#ffd046' : '#bea0ff'; ctx.fillText(label, sx, sy); }
       if (v.emote && v.emote.ate > agora) bolha(ctx, sx, sy - fs - 6, v.emote.txt, fs);
     });
     S.falas.forEach(f => {

@@ -359,3 +359,31 @@
 .of-lista li.pode b { color: #7ee0a0; }
 .of-lista li.ok { opacity: .6; }
 .of-lista .of-ir { padding: 4px 8px; font-size: 11px; flex: none; }
+/* Loja da Ilha */
+.lj-lead { margin-top: 0; }
+.lj-grade { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; }
+.lj-carta { --r: #ffd046; --r2: #b8862e; position: relative; background: var(--r2); border: 4px solid #1a1008; box-shadow: 0 0 0 3px var(--r), 5px 5px 0 #05080f, 0 0 24px color-mix(in srgb, var(--r) 30%, transparent); padding: 6px; }
+.lj-miolo { background: #111a22; border: 3px solid #2c3b38; display: flex; flex-direction: column; padding-bottom: 8px; }
+.lj-topo { display: flex; justify-content: space-between; align-items: center; gap: 6px; background: #1a1008; padding: 6px 8px; }
+.lj-topo b { font-size: 11px; color: #f1ead8; line-height: 1.2; }
+.lj-topo span { font-size: 10px; color: #1a1008; background: var(--r); border: 2px solid #1a1008; padding: 2px 5px; text-align: center; line-height: 1; }
+.lj-topo span i { display: block; font-style: normal; font-size: 16px; }
+.lj-arte { position: relative; margin: 0 6px; border: 3px solid #1a1008; aspect-ratio: 72 / 45; }
+.lj-arte canvas, .lj-eu canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.lj-arte em { position: absolute; left: 4px; top: 4px; font-style: normal; font-size: 8px; color: #1a1008; background: var(--r); border: 2px solid #1a1008; padding: 1px 4px; }
+.lj-arte small { position: absolute; right: 4px; top: 4px; font-size: 8px; color: #fff; background: #3a6a8a; border: 2px solid #1a1008; padding: 1px 4px; }
+.lj-tipo { margin: -9px auto 0; position: relative; z-index: 1; font-size: 9px; color: #3a2410; background: #d3a55a; border: 2px solid #3a2410; padding: 3px 8px 2px; }
+.lj-carta p { font-size: 12px; margin: 8px 8px 8px; min-height: 30px; }
+.lj-carta .lj-comprar { margin: 0 8px; font-size: 11px; padding: 8px 4px; }
+.lj-eu { display: flex; align-items: center; gap: 10px; background: #111a22; border: 3px solid #d3a55a; padding: 6px; margin: 8px 0; }
+.lj-eu canvas { width: 160px; height: 100px; flex: none; border: 3px solid #1a1008; }
+.lj-eu b { display: block; color: #ffd046; font-size: 13px; } .lj-eu small { font-size: 12px; opacity: .85; }
+.lj-eu.lj-grande canvas { width: 100%; height: auto; aspect-ratio: 72 / 45; }
+.lj-pix { text-align: center; } .lj-pix img { width: 220px; height: 220px; image-rendering: pixelated; background: #fff; padding: 8px; border: 4px solid #d3a55a; }
+.lj-pix textarea { width: 100%; font-size: 11px; box-sizing: border-box; }
+.lj-status { font-size: 13px; color: #ffd046; }
+@media (max-width: 520px) { .lj-grade { grid-template-columns: 1fr 1fr; gap: 8px; } .lj-carta p { font-size: 11px; } }
+/* Moldura de ouro (item da loja) na sua carta */
+.carta.moldura-ouro { box-shadow: 0 0 0 4px #e8b830, 0 0 0 8px #7a4a10, 0 0 36px rgba(255,208,70,.7) !important; position: relative; }
+.carta.moldura-ouro::before, .carta.moldura-ouro::after { content: ''; position: absolute; width: 14px; height: 14px; background: #e84a4a; border: 3px solid #e8b830; z-index: 3; }
+.carta.moldura-ouro::before { left: -10px; top: -10px; } .carta.moldura-ouro::after { right: -10px; bottom: -10px; background: #3a9ae8; }
