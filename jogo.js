@@ -500,7 +500,8 @@
       <label class="m-campo"><span>Seu @ do Instagram ou do YouTube</span><input id="jg-arroba" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="@seu_usuario" value="${esc(arroba ? '@' + arroba : '')}"></label>
       <label class="m-campo" id="jg-cod-box" hidden><span>Código de acesso ou de convite</span><input id="jg-codigo" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX"></label>
       <button type="button" class="jg-link" id="jg-tenho">Já joguei em outro aparelho (tenho um código)</button>
-      <p class="m-nota">Primeira vez? Entre com o seu @ e guarde o código que aparece: ele protege o seu @ e serve para jogar em outro aparelho. Se você já recebeu um código no direct, use ele.</p>
+      <p class="m-nota">Primeira vez? Entre com o seu @ e guarde o código que aparece: ele protege o seu @ e serve para jogar em outro aparelho.</p>
+      <p class="m-nota">Veio do YouTube? Use o seu @ do canal (aparece embaixo do seu nome no canal, ex.: @seucanal1234). Não lembra? Digite o nome do seu personagem que a gente acha.</p>
       <p class="m-nota">Seu @ aparece em cima do personagem para todos. Nomes ofensivos são bloqueados.</p>
       <div class="jg-ed-box"><h3>SEU VISUAL</h3><div id="jg-ed"></div></div>
       <p class="m-erro" id="jg-erro" role="alert" hidden></p>
@@ -511,17 +512,24 @@
       const mostraCod = () => { box.hidden = false; el.querySelector('#jg-tenho').hidden = true; };
       el.querySelector('#jg-tenho').onclick = () => { mostraCod(); cod.focus(); };
       const dica = document.createElement('p'); dica.className = 'jg-dica'; dica.hidden = true; el.querySelector('#jg-cod-box').before(dica);
+      const semAcento = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
       const confere = () => {
-        const m = moradorDe(limpaArroba(el.querySelector('#jg-arroba').value));
-        dica.hidden = !m;
-        if (m) { dica.innerHTML = `Esse @ é do morador <b>${esc(m.nome)}</b> (${esc(m.profissao.toLowerCase())})! Você vai jogar com ele.`; }
+        const bruto = el.querySelector('#jg-arroba').value, m = moradorDe(limpaArroba(bruto));
         el.querySelector('#jg-ed').closest('.jg-ed-box').hidden = !!m;
+        if (m) { dica.hidden = false; dica.innerHTML = `Esse @ é do morador <b>${esc(m.nome)}</b> (${esc(m.profissao.toLowerCase())})! Você vai jogar com ele.`; return; }
+        // não achou pelo @: procura pelo nome do personagem (ajuda quem veio do YouTube)
+        const q = semAcento(bruto.replace(/^@+/, '').trim());
+        const achados = q.length >= 3 ? G.MOR.filter(x => x.arroba && (semAcento(x.nome).includes(q) || semAcento(x.arroba).includes(q))).slice(0, 4) : [];
+        dica.hidden = !achados.length;
+        if (!achados.length) return;
+        dica.innerHTML = 'É um destes? Toque para usar o @ dele:<br>' + achados.map(x => `<button type="button" class="jg-link" data-a="${esc(x.arroba)}"><b>${esc(x.nome)}</b> (${esc(x.profissao.toLowerCase())}) · @${esc(x.arroba)}</button>`).join('<br>');
+        dica.querySelectorAll('button[data-a]').forEach(b => b.onclick = () => { el.querySelector('#jg-arroba').value = '@' + b.dataset.a; confere(); });
       };
       el.querySelector('#jg-arroba').addEventListener('input', confere);
       el.querySelector('#jg-assistir').onclick = fechar;
       const vai = () => {
         arroba = limpaArroba(el.querySelector('#jg-arroba').value);
-        if (arroba.length < 2) { err.textContent = 'Digite o seu @ do Instagram.'; err.hidden = false; return; }
+        if (arroba.length < 2) { err.textContent = 'Digite o seu @ do Instagram ou do YouTube.'; err.hidden = false; return; }
         const codigo = cod.value.trim() || store.get('codigo:' + arroba, '');
         err.hidden = true; btn.disabled = true; btn.textContent = 'ENTRANDO...';
         conectar(arroba, codigo, look, (motivo, precisaCodigo) => {

@@ -338,3 +338,4 @@
 .md-bloco { margin: 0 0 14px; padding: 10px 12px; background: #1a1008; border: 2px solid #b8862e; }
 .md-bloco h3 { margin: 0 0 6px !important; color: #ff8a5a !important; } .md-bloco p { margin: 0 0 8px !important; font-size: 14px; }
 @media (max-width: 760px) { .dlg { bottom: 120px; } .dlg canvas { width: 48px; height: 60px; } .dlg-c p { font-size: 14.5px; min-height: 80px; } }
+.jg-dica .jg-link { color: #5a2a0a; font-size: 14px; text-align: left; margin: 4px 0 0; padding: 0; }
