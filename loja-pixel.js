@@ -154,44 +154,38 @@
     // faíscas subindo
     for (let i = 0; i < 8; i++) { const u = (t * 0.7 + i / 8) % 1; g.fillStyle = u < 0.5 ? '#ffe04a' : '#ff7a1a'; g.fillRect(34 + (i * 13) % 52, Math.round(46 - u * 30), 1, 1 + (u < 0.3 ? 1 : 0)); }
   }
-  // ---------------------------------------------------------------- 5. Brasinha (dragãozinho em pé, de perfil, olhar bravo)
-  const DR = tom('#d8302a', '#8a1418', '#f05a4a'), DRE = '#8a1418', BAR = tom('#f8a830', '#d87a18', '#ffd060'), CHIF = tom('#f08a2a', '#b8501a', '#ffb860'), UNHA = '#f4e8cc';
+  // ---------------------------------------------------------------- 5. Brasinha (dragãozinho chibi, cabeção quadrado, pixels grandes)
+  // mapa feito à mão; cada pixel vira 3x3 na carta
+  const BR_MAPA = [
+    '..KK...KK.......',
+    '.KCCK.KCCK......',
+    '.KRRRKRRRK......',
+    'KRRRRRRRRRK.....',
+    'KRRKRRKRRRKB....',
+    'KRRKRRKRRRRKB...',
+    'KRRRRRRRRRRKBB..',
+    '.KRRRRRRRRRRKBK.',
+    '..KRRKKRRRRRRKBK',
+    '..KRPPKRRRRRRRK.',
+    '.KPPPKRRRKRRRK..',
+    '.KPPPKRRKKPPK...',
+    '..KKK.KKK.KKK...'];
+  const BR_COR = { K: '#140c10', R: '#e8483a', C: '#8a8e9c', B: '#5a8ad8', P: '#f8c49a' };
   function brasinha(g, t) {
-    fundo(g, '#f2f0ec');
-    const G = new Grade(48, 50), b = Math.floor(t * 3) % 2, cauda = Math.round(Math.sin(t * 2.4)), resp = Math.floor(t * 1.5) % 2, pisca = (t % 5) < 0.12;
-    // asa (atrás, à esquerda)
-    G.poli([[20, 22], [12, 7 - b], [6, 8 - b], [3, 15 - b], [1, 25], [7, 23], [9, 29], [13, 27], [17, 31]], DR);
-    // rabo enrolado
-    G.linha(17, 37, 10, 42, DR, 4); G.linha(10, 42, 4, 40 + cauda, DR, 3); G.linha(4, 40 + cauda, 2, 35 + cauda, DR, 2); G.poli([[1, 35 + cauda], [3, 31 + cauda], [5, 35 + cauda]], CHIF);
-    // corpo e pernas
-    G.elipse(23, 32 - resp, 9, 10, DR);
-    G.elipse(16, 42, 4.5, 4.5, DR); G.elipse(28, 42, 4.5, 4.5, DR);
-    G.ret(12, 45, 8, 3, DR); G.ret(25, 45, 8, 3, DR);
-    // braço para frente
-    G.linha(29, 30 - resp, 35, 34, DR, 3);
-    // pescoço e cabeça (olhando para a direita)
-    G.poli([[21, 24], [25, 14], [31, 15], [30, 26]], DR);
-    G.poli([[25, 11], [33, 8], [39, 11], [44, 13], [45, 18], [39, 21], [31, 21], [26, 17]], DR);
-    // chifres
-    G.poli([[26, 11], [23, 1], [29, 9]], CHIF); G.poli([[30, 9], [31, 0], [34, 8]], CHIF);
-    // espinhos no pescoço
-    [[23, 15], [21, 20], [19, 25]].forEach(([x, y]) => G.poli([[x, y], [x - 3, y + 1], [x, y + 3]], CHIF));
-    // barriga listrada
-    G.poli([[27, 23], [31, 25], [32, 37], [28, 40], [25, 35]], BAR);
-    G.acabamento(false);
-    // detalhes escuros: dedos da asa, listras da barriga, boca, sobrancelha
-    G.linha(17, 15, 3, 15 - b, DRE); G.linha(17, 15, 7, 23, DRE); G.linha(17, 15, 13, 27, DRE); G.linha(20, 22, 12, 7 - b, DRE);
-    for (let y = 27; y < 39; y += 3) G.linha(26, y, 31, y, RAMPA[BAR][0]);
-    G.linha(33, 19, 44, 18, DRE); G.set(43, 15, '#3a0808');
-    G.linha(31, 12, 37, 14, DRE); // sobrancelha baixa (cara de bravo)
-    if (pisca) G.linha(33, 15, 36, 15, '#140c10'); else { G.ret(33, 14, 3, 2, UNHA); G.set(35, 15, '#140c10'); }
-    // garras
-    [[12, 47], [14, 47], [17, 47], [25, 47], [27, 47], [30, 47], [35, 35], [36, 33]].forEach(([x, y]) => G.set(x, y, UNHA));
-    G.set(38, 20, UNHA); G.set(41, 20, UNHA); // presas
-    G.acabamento();
-    G.pinta(g, 37, 13);
-    // fumaça pelo nariz
-    const f = (t % 3.5) / 3.5; if (f < 0.35) { const k = f / 0.35; g.fillStyle = k < 0.4 ? '#ff7a2a' : '#a0a0a8'; g.fillRect(Math.round(83 + k * 8), Math.round(27 - k * 5), 2, 2); g.fillRect(Math.round(85 + k * 10), Math.round(25 - k * 7), 1, 1); }
+    fundo(g, '#f4f4f2');
+    const z = 3, pulo = Math.floor(t * 2.4) % 2, pisca = (t % 4) < 0.15, w = BR_MAPA[0].length, h = BR_MAPA.length;
+    const ox = Math.round(60 - w * z / 2), oy = 58 - h * z - pulo * z;
+    // sombra no chão
+    g.fillStyle = '#d4d4d4'; g.fillRect(ox - 6, 58, w * z + 12, 3); g.fillRect(ox - 10, 59, 3, 2);
+    BR_MAPA.forEach((l, y) => [...l].forEach((ch, x) => {
+      if (ch === '.') return;
+      let c = BR_COR[ch];
+      if (ch === 'K' && pisca && y === 4 || ch === 'K' && pisca && y === 5 && (x === 3 || x === 6)) c = (y === 5) ? '#140c10' : BR_COR.R;
+      g.fillStyle = c; g.fillRect(ox + x * z, oy + y * z, z, z);
+    }));
+    // sombra mais escura embaixo do vermelho e brilho no topo da cabeça
+    // fumacinha
+    const f = (t % 3) / 3; if (f < 0.3) { const k = f / 0.3; g.fillStyle = '#b0b0b8'; g.fillRect(Math.round(ox - 4 - k * 8), Math.round(oy + 6 * z - k * 6), 3, 3); }
   }
   // fonte de pixel própria (3x5) para o nome dourado: legível em qualquer aparelho
   const FONTE = {
