@@ -388,3 +388,4 @@
 .carta.moldura-ouro::before, .carta.moldura-ouro::after { content: ''; position: absolute; width: 14px; height: 14px; background: #e84a4a; border: 3px solid #e8b830; z-index: 3; }
 .carta.moldura-ouro::before { left: -10px; top: -10px; } .carta.moldura-ouro::after { right: -10px; bottom: -10px; background: #3a9ae8; }
 .lj-arte canvas.lj-hd { image-rendering: auto; }
+.lj-arte { overflow: hidden; } .lj-arte canvas.lj-px { position: absolute; left: -16.67%; top: -16.67%; width: 133.34%; height: 133.34%; image-rendering: pixelated; } .lj-arte em, .lj-arte small { z-index: 2; }

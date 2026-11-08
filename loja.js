@@ -199,15 +199,10 @@
     }
   }
   function arteHD(cv, id) {
-    const A = window.IlhaLojaArte; if (!A) return;
-    cv.width = PX.w; cv.height = PX.h; cv.classList.remove('lj-hd');
+    const A = window.IlhaLojaPixel; if (!A) return;
+    cv.width = A.W; cv.height = A.H; cv.classList.remove('lj-hd'); cv.classList.add('lj-px');
     const g = cv.getContext('2d');
-    if (!hdTela) { hdTela = document.createElement('canvas'); hdTela.width = A.W; hdTela.height = A.H; }
-    anima.push({ cv, draw: sec => {
-      const h = hdTela.getContext('2d'); A.desenha(h, id, sec, S.eu && S.eu.arroba);
-      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.clearRect(0, 0, PX.w, PX.h); g.drawImage(hdTela, 0, 0, PX.w, PX.h);
-      const img = g.getImageData(0, 0, PX.w, PX.h); quantiza(img.data); g.putImageData(img, 0, 0);
-    } });
+    anima.push({ cv, draw: sec => A.desenha(g, id, sec, S.eu && S.eu.arroba) });
     if (anima.length === 1) requestAnimationFrame(loopPrevias);
   }
   function casinha(g) {
