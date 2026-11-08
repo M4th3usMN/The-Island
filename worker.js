@@ -71,7 +71,6 @@ function limpaLook(v) {
 // Loja da Ilha: preços conferidos no servidor (o site nunca decide o preço). Só itens visuais.
 const LOJA = { tricornio: [3, "Tricórnio pirata"], capa: [5, "Capa de veludo"], asas: [8, "Asas de dragão"], aura: [6, "Aura de brasas"],
   brasinha: [10, "Mascote Brasinha"], nome: [3, "Nome dourado"], moldura: [4, "Moldura de ouro"], bandeira: [5, "Bandeira na casa"], teste: [1, "Item de teste"] };
-const SITE = "https://the-island.theisland-app.workers.dev";
 // Barra da comunidade do episódio (Ofícios). Troque o id/título quando mudar o objetivo.
 const COM = { id: "ep7", titulo: "Ep. 7 · Preparar a ilha contra o Reino do Sul", meta: 300 };
 const ITENS_COM = new Set(["trigo", "madeira", "minerio", "erva", "pao", "lamina", "lamina_enc", "remedio"]);
@@ -136,7 +135,7 @@ export class Vila extends DurableObject {
     try {
       const r = await fetch("https://api.mercadopago.com/v1/payments", { method: "POST", headers: { "Authorization": "Bearer " + this.env.MP_TOKEN, "Content-Type": "application/json", "X-Idempotency-Key": crypto.randomUUID() },
         body: JSON.stringify({ transaction_amount: valor, description: "A Grande Ilha: " + nome, payment_method_id: "pix", external_reference: ref,
-          notification_url: SITE + "/loja/webhook", date_of_expiration: expira,
+          notification_url: "https://" + SITE + "/loja/webhook", date_of_expiration: expira,
           payer: { email: arroba.replace(/[^a-z0-9]/g, "") + "@ilha.theisland-app.workers.dev", first_name: "Viajante" } }) });
       const j = await r.json();
       const td = j && j.point_of_interaction && j.point_of_interaction.transaction_data;
