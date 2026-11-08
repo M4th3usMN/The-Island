@@ -148,15 +148,42 @@
     anima.forEach(a => a.draw(sec));
     if (anima.length) requestAnimationFrame(loopPrevias);
   }
+  // fundo limpo por item: degradê + brilho na cor da raridade + chão, para o item "saltar" da carta
+  const FUNDO = [['#f8a85a', '#c8503a', '#6a3a24'], ['#3a2a5a', '#1a1230', '#2a2040'], ['#4a1a4a', '#1a0a20', '#2a1424'], ['#1a2a4a', '#0a1020', '#1a2418'],
+    ['#2a3a6a', '#141c34', '#c8a870'], ['#1a4a4a', '#0a1a20', '#24343a'], ['#5a3a24', '#24160c', '#3a2618'], ['#8ac8f0', '#5a9ad0', '#5aa84a']];
+  const GLOW = ['#ffd046', '#ffd046', '#ff6a3a', '#ff9a3a', '#ff7a4a', '#ffd046', '#ffd046', '#ffffff'];
+  function fundo(g, idx, sec) {
+    const [a, b, chao] = FUNDO[idx] || FUNDO[0];
+    const lg = g.createLinearGradient(0, 0, 0, 45); lg.addColorStop(0, a); lg.addColorStop(1, b); g.fillStyle = lg; g.fillRect(0, 0, 72, 45);
+    const rg = g.createRadialGradient(36, 24, 1, 36, 24, 26); rg.addColorStop(0, GLOW[idx] + '66'); rg.addColorStop(1, GLOW[idx] + '00'); g.fillStyle = rg; g.fillRect(0, 0, 72, 45);
+    // raios girando devagar atrás do item
+    g.save(); g.translate(36, 24); g.rotate(sec * 0.15); g.fillStyle = GLOW[idx] + '14';
+    for (let i = 0; i < 8; i++) { g.rotate(Math.PI / 4); g.beginPath(); g.moveTo(0, 0); g.lineTo(-4, -40); g.lineTo(4, -40); g.fill(); }
+    g.restore();
+    g.fillStyle = chao; g.fillRect(0, 38, 72, 7); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(0, 38, 72, 1);
+    for (let i = 0; i < 10; i++) { const u = (sec * 0.12 + i / 10) % 1; g.fillStyle = `rgba(255,255,255,${(0.35 * (1 - u)).toFixed(2)})`; g.fillRect((i * 23) % 72, Math.round(36 - u * 34), 1, 1); }
+  }
+  let tela = null;
   function previa(cv, idx, itens, look) {
     const g = cv.getContext('2d'); g.imageSmoothingEnabled = false;
-    anima.push({ cv, draw: sec => { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 72, 45); cena(g, idx); g.translate(36, 38); g.scale(1.45, 1.45);
+    if (!tela) { tela = document.createElement('canvas'); tela.width = 72; tela.height = 45; }
+    const sil = document.createElement('canvas'); sil.width = 72; sil.height = 45;
+    anima.push({ cv, draw: sec => {
+      // 1) o item/personagem numa tela separada
+      const t = tela.getContext('2d'); t.imageSmoothingEnabled = false; t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, 72, 45);
+      t.translate(36, 40); t.scale(1.42, 1.42);
       const anda = Math.floor(sec / 3) % 2 === 1;
-      if (itens.includes('brasinha')) { g.save(); g.translate(-11, 0); comItens(g, look, itens.filter(i => i !== 'brasinha'), sec, anda, false); g.restore(); g.save(); g.translate(8, 0); g.scale(-1, 1); dragaoBebe(g, sec, anda); g.restore(); }
-      else if (itens.includes('bandeira')) { casinha(g); g.save(); g.translate(10, 4); bandeira(g, sec); g.restore(); }
-      else comItens(g, look, itens, sec, anda, false);
-      if (itens.includes('nome')) { g.font = 'bold 6px Silkscreen, monospace'; g.textAlign = 'center'; g.fillStyle = '#7a4a10'; g.fillText('@' + ((S.eu && S.eu.arroba) || 'você'), 0.6, -18.6); g.fillStyle = '#ffd046'; g.fillText('@' + ((S.eu && S.eu.arroba) || 'você'), 0, -19.2); }
-      if (itens.includes('moldura')) { g.strokeStyle = '#e8b830'; g.lineWidth = 2; g.strokeRect(-11, -24, 22, 27); P(g, -12, -25, 2, 2, '#e84a4a'); P(g, 10, -25, 2, 2, '#3a9ae8'); P(g, -12, 2, 2, 2, '#3a9ae8'); P(g, 10, 2, 2, 2, '#e84a4a'); }
+      if (itens.includes('brasinha')) { t.save(); t.translate(-9, 0); comItens(t, look, itens.filter(i => i !== 'brasinha'), sec, anda, false); t.restore(); t.save(); t.translate(9, 0); t.scale(-1, 1); dragaoBebe(t, sec, anda); t.restore(); }
+      else if (itens.includes('bandeira')) { t.translate(-2, 0); t.scale(0.78, 0.78); casinha(t); t.save(); t.translate(10, 4); bandeira(t, sec); t.restore(); }
+      else comItens(t, look, itens, sec, anda, false);
+      if (itens.includes('nome')) { const nm = '@' + ((S.eu && S.eu.arroba) || 'você'); t.font = 'bold 5px Silkscreen, monospace'; t.textAlign = 'center'; t.fillStyle = '#7a4a10'; t.fillText(nm, 0.5, -16.5); t.fillStyle = '#ffd046'; t.fillText(nm, 0, -17); }
+      if (itens.includes('moldura')) { t.strokeStyle = '#e8b830'; t.lineWidth = 1.5; t.strokeRect(-9, -20, 18, 22); P(t, -10, -21, 2, 2, '#e84a4a'); P(t, 8, -21, 2, 2, '#3a9ae8'); P(t, -10, 1, 2, 2, '#3a9ae8'); P(t, 8, 1, 2, 2, '#e84a4a'); }
+      // 2) contorno escuro (silhueta deslocada) para destacar do fundo
+      const sg = sil.getContext('2d'); sg.globalCompositeOperation = 'source-over'; sg.clearRect(0, 0, 72, 45); sg.drawImage(tela, 0, 0); sg.globalCompositeOperation = 'source-in'; sg.fillStyle = '#0a0608'; sg.fillRect(0, 0, 72, 45);
+      g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 72, 45); fundo(g, idx, sec);
+      g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(36, 39.5, 12, 2, 0, 0, 7); g.fill();
+      [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => g.drawImage(sil, dx, dy));
+      g.drawImage(tela, 0, 0);
     } });
     if (anima.length === 1) requestAnimationFrame(loopPrevias);
   }
@@ -165,6 +192,7 @@
     P(g, -16, -18, 24, 6, '#b8402a'); P(g, -15, -19, 22, 1, '#d85a3a'); P(g, -16, -13, 24, 1, '#8a2a1a');
     P(g, -6, -6, 5, 7, '#4a2c18'); P(g, -12, -8, 4, 4, '#ffd87a'); P(g, 1, -8, 4, 4, '#ffd87a');
   }
+  const VITRINE = { tipo: 'humano', pele: '#e0b08a', cabelo: 'curto', corCabelo: '#4a2a14', roupa: '#e8e4dc', calca: '#3a4a6a' };
   const BASE = { tipo: 'humano', pele: '#d8a878', cabelo: 'curto', corCabelo: '#3a2414', roupa: '#4a6a8a', calca: '#3a3a46' };
   const meuLook = () => (S.eu && (S.eu.mor ? S.eu.mor.visual : S.eu.look)) || BASE;
   const meus = () => (S.eu && S.eu.loja) || [];
@@ -183,7 +211,7 @@
       <p class="m-nota">${quem}</p>
       ${S.on ? `<div class="lj-eu"><canvas width="72" height="45"></canvas><div><b>SEU PERSONAGEM</b><small>${meus().length ? meus().length + ' item(ns) da loja' : 'Nenhum item ainda'}</small></div></div>` : ''}
       <div class="lj-grade">${ITENS.map(cartaItem).join('')}</div>`, el => {
-      el.querySelectorAll('.lj-arte canvas').forEach(cv => { const it = ITENS[+cv.dataset.i]; previa(cv, Math.min(7, +cv.dataset.i), [it.id], meuLook()); });
+      el.querySelectorAll('.lj-arte canvas').forEach(cv => { const it = ITENS[+cv.dataset.i]; previa(cv, Math.min(7, +cv.dataset.i), [it.id], VITRINE); });
       const eu = el.querySelector('.lj-eu canvas'); if (eu) previa(eu, 4, meus(), meuLook());
       el.querySelectorAll('.lj-comprar').forEach(b => b.onclick = () => comprar(ITENS.find(x => x.id === b.dataset.id)));
     });
