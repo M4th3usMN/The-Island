@@ -387,3 +387,4 @@
 .carta.moldura-ouro { box-shadow: 0 0 0 4px #e8b830, 0 0 0 8px #7a4a10, 0 0 36px rgba(255,208,70,.7) !important; position: relative; }
 .carta.moldura-ouro::before, .carta.moldura-ouro::after { content: ''; position: absolute; width: 14px; height: 14px; background: #e84a4a; border: 3px solid #e8b830; z-index: 3; }
 .carta.moldura-ouro::before { left: -10px; top: -10px; } .carta.moldura-ouro::after { right: -10px; bottom: -10px; background: #3a9ae8; }
+.lj-arte canvas.lj-hd { image-rendering: auto; }

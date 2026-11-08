@@ -187,6 +187,12 @@
     } });
     if (anima.length === 1) requestAnimationFrame(loopPrevias);
   }
+  // ilustração em alta resolução (loja-arte.js) para os cards da loja
+  function arteHD(cv, id) {
+    const g = cv.getContext('2d'), A = window.IlhaLojaArte; if (!A) return;
+    anima.push({ cv, draw: sec => A.desenha(g, id, sec, S.eu && S.eu.arroba) });
+    if (anima.length === 1) requestAnimationFrame(loopPrevias);
+  }
   function casinha(g) {
     P(g, -14, -12, 20, 13, '#9a7a54'); for (let y = -10; y < 1; y += 3) P(g, -14, y, 20, 1, '#86663e');
     P(g, -16, -18, 24, 6, '#b8402a'); P(g, -15, -19, 22, 1, '#d85a3a'); P(g, -16, -13, 24, 1, '#8a2a1a');
@@ -200,7 +206,7 @@
     const r = RAR[it.r], ja = meus().includes(it.id);
     return `<div class="lj-carta" style="--r:${r[0]};--r2:${r[1]}"><div class="lj-miolo">
       <div class="lj-topo"><b>${esc(it.n.toUpperCase())}</b><span>R$<i>${it.v}</i></span></div>
-      <div class="lj-arte"><canvas width="72" height="45" data-i="${i}"></canvas><em>${r[2]}</em><small>SÓ VISUAL</small></div>
+      <div class="lj-arte"><canvas class="lj-hd" width="288" height="180" data-i="${i}"></canvas><em>${r[2]}</em><small>SÓ VISUAL</small></div>
       <div class="lj-tipo">${it.tipo}</div><p>${esc(it.d)}.</p>
       <button type="button" class="${ja ? 'b-linha' : 'b-ouro'} lj-comprar" data-id="${it.id}" ${ja ? 'disabled' : ''}>${ja ? '✓ JÁ É SEU' : 'COMPRAR · R$ ' + it.v + ',00'}</button></div></div>`;
   }
@@ -211,7 +217,7 @@
       <p class="m-nota">${quem}</p>
       ${S.on ? `<div class="lj-eu"><canvas width="72" height="45"></canvas><div><b>SEU PERSONAGEM</b><small>${meus().length ? meus().length + ' item(ns) da loja' : 'Nenhum item ainda'}</small></div></div>` : ''}
       <div class="lj-grade">${ITENS.map(cartaItem).join('')}</div>`, el => {
-      el.querySelectorAll('.lj-arte canvas').forEach(cv => { const it = ITENS[+cv.dataset.i]; previa(cv, Math.min(7, +cv.dataset.i), [it.id], VITRINE); });
+      el.querySelectorAll('.lj-arte canvas').forEach(cv => { const it = ITENS[+cv.dataset.i]; arteHD(cv, it.id); });
       const eu = el.querySelector('.lj-eu canvas'); if (eu) previa(eu, 4, meus(), meuLook());
       el.querySelectorAll('.lj-comprar').forEach(b => b.onclick = () => comprar(ITENS.find(x => x.id === b.dataset.id)));
     });
