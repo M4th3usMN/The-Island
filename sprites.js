@@ -113,12 +113,17 @@
     if (ch === 'aviador') { P(x - 3, HY - 1, 6, 2, cc); if (!back) { P(x - 3, HY - 1, 6, 1, '#3a2a1a'); P(x - 2, HY - 1, 2, 1, '#ffb347'); P(x + 1, HY - 1, 2, 1, '#ffb347'); } P(side > 0 ? x - 4 : x + 3, HY + 1, 1, 3, cc); }
     if (ch === 'chapeu_ferro') { P(x - 5, HY, 10, 1, '#7d828e'); P(x - 3, HY - 2, 6, 2, '#9aa0aa'); P(x - 2, HY - 3, 4, 1, '#9aa0aa'); P(x - 5, HY, 10, 1, '#6a6e7a'); P(x - 1, HY - 2, 1, 1, '#dfe3ea'); }
     if (ch === 'chapeu_pintor') { P(x - 4, HY - 2, 8, 2, cc); P(side > 0 ? x + 3 : x - 5, HY - 1, 2, 2, cc); P(x - 2, HY - 2, 1, 1, '#e84a4a'); P(x, HY - 2, 1, 1, '#4ab0ff'); P(x + 2, HY - 2, 1, 1, '#ffd046'); }
+    // ---- Dia 8
+    if (ch === 'kabuto') { P(x - 3, HY - 2, 6, 2, cc); P(x - 4, HY, 1, 3, cc); P(x + 3, HY, 1, 3, cc); P(x - 4, HY - 1, 8, 1, shade(cc, 0.75)); if (!back) { P(x - 3, HY - 4, 1, 2, '#e8b830'); P(x + 2, HY - 4, 1, 2, '#e8b830'); P(x - 1, HY - 3, 2, 1, '#e8b830'); } else P(x - 3, HY, 6, 3, cc); }
+    if (ch === 'bicorne') { P(x - 5, HY - 2, 10, 2, cc); P(x - 5, HY - 3, 1, 1, cc); P(x + 4, HY - 3, 1, 1, cc); P(x - 2, HY - 3, 4, 1, cc); P(x - 5, HY - 1, 10, 1, '#c9a14a'); if (!back) P(x, HY - 2, 1, 1, '#c0392b'); }
+    if (ch === 'flor_cabelo') { const fx = side > 0 ? x + 2 : x - 4; P(fx, HY - 2, 2, 2, cc); P(fx + (side > 0 ? 1 : 0), HY - 1, 1, 1, '#ffe27a'); P(fx + (side > 0 ? -1 : 2), HY - 1, 1, 1, '#4a9a4a'); }
+    if (ch === 'cartola') { P(x - 4, HY - 1, 8, 1, cc); P(x - 2, HY - 5, 4, 4, cc); P(x - 2, HY - 2, 4, 1, '#c0392b'); }
     if (ch === 'solideu') { P(x - 2, HY - 1, 4, 1, cc); if (!back) P(x - 1, HY + 5, 2, 1, '#f4f4f4'); }
 
     // acessorio (mao do lado "side")
     const M = (dx, dy, w, h, col) => P(side > 0 ? x + dx : x - dx - w, Y + dy, w, h, col);
     const a = v.acessorio;
-    if (!back || a === 'bau' || a === 'bigorna' || a === 'corrente' || a === 'machado' || a === 'montante' || a === 'machado_runico' || a === 'cajado' || a === 'cajado_magico' || a === 'vara' || a === 'escudo_lanca' || a === 'forcado' || a === 'martelo_grande' || a === 'alabarda' || a === 'guitarra' || a === 'cachecol_bracos') {
+    if (!back || a === 'bau' || a === 'bigorna' || a === 'corrente' || a === 'machado' || a === 'montante' || a === 'machado_runico' || a === 'cajado' || a === 'cajado_magico' || a === 'vara' || a === 'escudo_lanca' || a === 'forcado' || a === 'martelo_grande' || a === 'alabarda' || a === 'guitarra' || a === 'cachecol_bracos' || a === 'katana') {
       if (a === 'machado') { M(4, -3, 1, 8, '#7a5230'); M(5, -3, 2, 3, '#b8bcc8'); M(5, -3, 1, 3, '#dfe3ea'); }
       if (a === 'cajado') { M(4, -6, 1, 11, '#8a6234'); M(4, -7, 3, 1, '#8a6234'); M(6, -6, 1, 2, '#8a6234'); }
       if (a === 'cajado_magico') { M(4, -5, 1, 10, '#4a3a5a'); M(3, -8, 3, 3, v.magia || '#9b6bff'); M(4, -7, 1, 1, '#ffffff'); }
@@ -169,6 +174,11 @@
       if (a === 'alabarda') { M(4, -10, 1, 15, '#6b4a2b'); M(5, -9, 2, 3, '#b8bcc8'); M(5, -9, 1, 3, '#dfe3ea'); M(4, -12, 1, 2, '#cfd3da'); M(3, -8, 1, 1, '#b8bcc8'); }
       if (a === 'espada_madeira') { M(4, -2, 1, 5, '#c89a5a'); M(3, 2, 3, 1, '#7a5230'); }
       if (a === 'pincel_paleta') { M(4, -3, 1, 5, '#8a6234'); M(4, -4, 1, 1, '#4ab0ff'); if (!back) { M(-6, 1, 4, 3, '#d8b878'); M(-5, 1, 1, 1, '#e84a4a'); M(-4, 2, 1, 1, '#4ab0ff'); M(-6, 2, 1, 1, '#ffd046'); M(-5, 3, 1, 1, '#4ac07a'); } }
+      // ---- Dia 8
+      if (a === 'katana') { M(4, -6, 1, 9, '#e8ecf2'); M(5, -7, 1, 2, '#e8ecf2'); M(3, 3, 3, 1, '#c9a14a'); M(4, 4, 1, 2, '#1a1418'); M(4, 5, 1, 1, '#c0392b'); }
+      if (a === 'bussola') { M(3, 1, 4, 4, '#b8862e'); M(4, 2, 2, 2, '#f2ead8'); M(4, 2, 1, 1, '#c0392b'); M(5, 3, 1, 1, '#2a3a5a'); }
+      if (a === 'caderno') { M(3, 1, 3, 4, '#a8402a'); M(4, 1, 2, 4, '#f4ecd8'); M(4, 2, 2, 1, '#8a8a9a'); M(6, -1, 1, 4, '#e8b830'); }
+      if (a === 'moeda') { const fy = Math.floor(t * 3) % 3 === 0 ? -1 : 0; M(4, 1 + fy, 2, 2, '#ffd046'); M(4, 1 + fy, 1, 1, '#fff2a8'); M(3, 3, 3, 2, '#7a5a3a'); }
       if (a === 'cesta') { M(3, 2, 3, 2, '#a0773f'); M(3, 1, 1, 1, '#a0773f'); M(5, 1, 1, 1, '#a0773f'); }
     }
     if (a === 'espirito') {

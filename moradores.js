@@ -337,5 +337,29 @@ window.MORADORES = [
     historia: 'Pintor que fugiu de um sanatório graças a um sósia que fingiu ser "Jim". Pinta o mar, a floresta e o dragão, e lembra a todos: o nome dele é Leonardo.',
     rotina: 'pintor', casa: 'auto', chegada: '2026-11-07T19:31:00-04:00',
     visual: { tipo: 'humano', pele: '#f2d8c0', cabelo: 'longo', corCabelo: '#2a1a10', roupa: '#e8e4dc', listras: '#4ab0ff', calca: '#4a3a5a', chapeu: 'chapeu_pintor', corChapeu: '#6a2a5a', acessorio: 'pincel_paleta' }
+  },
+  {
+    id: 'yamanaka', arroba: 'kamikazeofbreak', nome: 'Yamanaka', profissao: 'Samurai',
+    historia: 'Samurai de um reino distante, enviado pela Rainha Amisul atrás de um velho Mu que partiu numa missão e nunca voltou. Veio descobrir o que aconteceu com ele.',
+    rotina: 'samurai', casa: 'auto', chegada: '2026-11-08T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#d8a878', cabelo: 'rabo', corCabelo: '#0e0c10', roupa: '#2e3a5e', detalhe: '#e8e0cc', calca: '#4a2a3a', chapeu: 'kabuto', corChapeu: '#3a1418', acessorio: 'katana' }
+  },
+  {
+    id: 'matheus', arroba: 'MatheusCreucreuCarvalho', nome: 'Matheus Carvalho', profissao: 'Cartógrafo e navegador',
+    historia: 'Tem 15 anos e veio de longe trazendo o que sabe de navegação e os mapas do resto do mundo.',
+    rotina: 'cartografo', casa: 'auto', chegada: '2026-11-08T16:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#b07850', cabelo: 'espetado', corCabelo: '#d8c8a0', roupa: '#2a7a7a', detalhe: '#e8c870', calca: '#7a6a52', chapeu: 'bicorne', corChapeu: '#1e2a4a', acessorio: 'bussola' }
+  },
+  {
+    id: 'fernanda', arroba: 'fernandagodoy786', nome: 'Fernanda', profissao: 'Psicóloga',
+    historia: 'Psicóloga que chegou à ilha com o filho, Omar. Escuta quem precisa desabafar.',
+    rotina: 'psicologa', casa: 'auto', chegada: '2026-11-08T16:02:00-04:00',
+    visual: { tipo: 'humano', pele: '#f6dcc4', cabelo: 'longo', corCabelo: '#b8402a', roupa: '#8a5ab0', detalhe: '#f2ead8', calca: '#4a4a5a', chapeu: 'flor_cabelo', corChapeu: '#ff8ab4', acessorio: 'caderno' }
+  },
+  {
+    id: 'omar', nome: 'Omar', profissao: 'Criança (futuro empresário)',
+    historia: 'Filho da psicóloga Fernanda. Sonha em ser empresário.',
+    rotina: 'crianca_empresario', casa: 'com:fernanda', chegada: '2026-11-08T16:03:00-04:00',
+    visual: { tipo: 'crianca', pele: '#8a5a3a', cabelo: 'curto', corCabelo: '#1a1210', roupa: '#d8a020', calca: '#2a2a3a', chapeu: 'cartola', corChapeu: '#22222a', acessorio: 'moeda' }
   }
 ];

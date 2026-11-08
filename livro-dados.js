@@ -55,7 +55,11 @@ window.LIVRO = {
     felk: ['Felk, inventor e aventureiro. Uma luz misteriosa brilha no leste, e eu vou descobrir o que é.', 'Meu cachecol funciona como quatro braços extras. E o Mick, meu gato, vai comigo para onde eu for.'],
     andre: ['André, guarda da vila. Trinta e dois anos. Tudo o que sei de luta, aprendi com o meu avô.', 'Agora sou eu quem treina os recrutas. Enquanto eu estiver de guarda, a vila dorme tranquila.'],
     arthurzinho: ['Arthurzinho. Tenho seis anos!', 'Quando eu crescer vou ser guerreiro. E o dragão olhou pra mim, é sério!'],
-    leonardo: ['Leonardo, pintor. Fugi de um sanatório graças a um homem igualzinho a mim, que fingiu ser o "Jim".', 'Agora pinto o mar, a floresta e o dragão. E faço questão de lembrar: meu nome é Leonardo.']
+    leonardo: ['Leonardo, pintor. Fugi de um sanatório graças a um homem igualzinho a mim, que fingiu ser o "Jim".', 'Agora pinto o mar, a floresta e o dragão. E faço questão de lembrar: meu nome é Leonardo.'],
+    yamanaka: ['Yamanaka, samurai. Vim de um reino distante atrás de um velho Mu que saiu do nosso reino para uma missão e nunca voltou.', 'Foi a nossa Rainha Amisul quem me mandou descobrir o que aconteceu com ele.'],
+    matheus: ['Matheus Carvalho, 15 anos, cartógrafo e navegador.', 'Vim de longe trazendo o que sei de navegação e os mapas do resto do mundo.'],
+    fernanda: ['Fernanda, psicóloga. Cheguei à ilha com o meu filho, Omar.', 'Se alguém precisar conversar, é só me procurar na fogueira.'],
+    omar: ['Eu sou o Omar, filho da Fernanda.', 'Meu sonho é ser empresário.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],

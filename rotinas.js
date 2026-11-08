@@ -290,6 +290,27 @@
         [13, 16, 'floresta', 'Pintando a floresta'], [16, 19, 'cais', 'Pintando o dragão'], [19, 22, 'fogueira', 'Pintando rostos'], [22, 2, 'casa', 'Pintando sozinho, sem dormir']],
       trabalho: ['Não se mexe!', 'Que luz bonita.', 'Mais azul...'], social: ['Meu nome é Leonardo. Não Jim.', 'Já fui outra pessoa.']
     },
+    samurai: {
+      blocos: [[22, 5, 'casa', 'Dormindo', S], [5, 7, 'cais', 'Meditando diante do mar'], [7, 11, 'arena', 'Treinando com a katana'],
+        [11, 12, 'taverna', 'Almoçando em silêncio'], [12, 16, 'passeio', 'Perguntando pelo velho Mu'], [16, 18, 'floresta', 'Seguindo pistas na floresta'], [18, 22, 'fogueira', 'Ouvindo as histórias da ilha']],
+      trabalho: ['Hai!', 'Um corte, uma vida.', 'Disciplina.'], social: ['Viram um velho chamado Mu?', 'A Rainha Amisul me enviou.', 'Honra acima de tudo.']
+    },
+    cartografo: {
+      blocos: [[22, 6, 'casa', 'Dormindo', S], [6, 8, 'cais', 'Lendo o vento e as marés'], [8, 12, 'orla', 'Medindo a costa da ilha'],
+        [12, 13, 'taverna', 'Almoçando'], [13, 16, 'biblioteca', 'Desenhando o mapa da ilha'], [16, 18, 'ponte', 'Marcando o riacho no mapa'], [18, 22, 'fogueira', 'Mostrando os mapas do mundo']],
+      trabalho: ['Norte é pra lá.', 'Mais um trecho no mapa.', 'Vento leste hoje.'], social: ['Já vi o mundo todo no papel.', 'Quer ver onde fica seu reino?', 'Tenho 15 anos, mas sei navegar.']
+    },
+    psicologa: {
+      blocos: [[22, 6, 'casa', 'Dormindo', S], [6, 8, 'casa', 'Tomando café com o Omar'], [8, 11, 'fogueira', 'Escutando quem precisa desabafar'],
+        [11, 12, 'cais', 'Conversando com quem chegou de barco'], [12, 13, 'taverna', 'Almoçando'], [13, 16, 'passeio', 'Visitando os moradores'],
+        [16, 18, 'santuario', 'Atendendo em silêncio no santuário'], [18, 22, 'fogueira', 'Ouvindo as histórias da noite']],
+      trabalho: ['E como você se sente?', 'Pode falar, estou ouvindo.', 'Respira, um passo de cada vez.'], social: ['O Omar quer ser empresário!', 'Todo mundo aqui carrega uma história.', 'Conversar ajuda.']
+    },
+    crianca_empresario: {
+      blocos: [[20, 7, 'casa', 'Dormindo', S], [7, 9, 'mercearia', 'Aprendendo a vender com o Felipão'], [9, 11, 'passeio', 'Oferecendo negócios pela ilha'],
+        [11, 13, 'cais', 'Contando os barcos que chegam'], [13, 14, 'casa', 'Almoçando com a mãe'], [14, 17, 'taverna', 'Vendo como a taverna dá lucro'], [17, 20, 'fogueira', 'Ouvindo histórias']],
+      trabalho: ['Quer comprar?', 'Faço preço bom!', 'Uma moeda, por favor.'], social: ['Vou ser empresário!', 'Um dia vou ter uma loja.', 'Minha mãe é psicóloga.']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],
