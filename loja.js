@@ -86,7 +86,7 @@
   function bandeira(c, sec) {
     P(c, 0, -28, 1, 30, '#5a3e26'); P(c, 0, -29, 1, 1, '#e8b830');
     const o = Math.round(Math.sin(sec * 4));
-    P(c, 1, -28, 9, 6, '#2a5aa8'); P(c, 2, -27, 3, 1, '#3a7ad8'); P(c, 9, -27 + o, 1, 4, '#22489a'); P(c, 3, -26, 4, 2, '#ffd046'); P(c, 4, -27, 2, 1, '#ffd046');
+    P(c, 1, -28, 9, 6, '#1aa84a'); P(c, 9, -27 + o, 1, 4, '#0e7a32'); P(c, 4, -27, 3, 1, '#ffd21a'); P(c, 3, -26, 5, 2, '#ffd21a'); P(c, 4, -24, 3, 1, '#ffd21a'); P(c, 5, -26, 1, 2, '#1a3a9a');
     [[-14, 2, '#e84a8a'], [-11, 2, '#ffd046'], [-7, 2, '#e84a8a'], [3, 2, '#ffd046']].forEach(([x, y, f]) => { P(c, x, y, 2, 1, f); P(c, x, y + 1, 2, 1, '#4a8a3a'); });
   }
   // personagem completo com os itens (para a prévia grande e para o mapa)
