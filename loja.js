@@ -55,7 +55,10 @@
     });
   }
   function auraChao(c, sec) {
-    for (let r = 9; r > 3; r--) { c.fillStyle = `rgba(255,${120 + r * 8},40,${(0.04 + (9 - r) * 0.025 + 0.02 * Math.sin(sec * 3)).toFixed(3)})`; c.beginPath(); c.ellipse(0, 1, r, r * 0.35, 0, 0, 7); c.fill(); }
+    const q = Math.floor(sec * 7) % 3;
+    P(c, -8, 0, 16, 2, '#a8261a'); P(c, -6, -1, 12, 1, '#c8301e'); P(c, -6, 2, 12, 1, '#c8301e'); P(c, -3, 0, 6, 2, '#8a1c12');
+    P(c, -9, 0, 1, 2, '#ff7a1a'); P(c, 8, 0, 1, 2, '#ff7a1a'); P(c, -7, -2, 14, 1, '#ff9a1a'); P(c, -7, 3, 14, 1, '#ff9a1a');
+    [-7, -4, -1, 2, 5].forEach((x, i) => { const h = 1 + ((i + q) % 3 === 0 ? 2 : 1); P(c, x, -2 - h, 1, h, '#ffb83a'); P(c, x, -3 - h, 1, 1, '#ffe04a'); });
   }
   function auraFaiscas(c, sec, anda) {
     const n = anda ? 10 : 6;

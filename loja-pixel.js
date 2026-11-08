@@ -133,17 +133,34 @@
     G.poli([[x - s + 1, y], [x - s + 1, y - h * 0.4], [x, y - h + 2], [x + s - 1, y - h * 0.4], [x + s - 1, y]], '#ffb83a');
     if (s > 2) G.poli([[x - 1, y], [x - 1, y - h * 0.3], [x, y - h * 0.55], [x + 1, y - h * 0.3], [x + 1, y]], '#fff0a0');
   }
+  // círculo de fogo no chão: miolo vermelho em anéis + borda de chamas que tremulam (3 quadros)
   function aura(g, t) {
-    fundo(g, '#2a2e4c');
-    const G = new Grade(60, 50);
-    for (let i = 0; i < 10; i++) {
-      const a = i / 10 * Math.PI * 2 + t * 1.2, x = 30 + Math.round(Math.cos(a) * 20), y = 42 + Math.round(Math.sin(a) * 5);
-      chama(G, x, y, Math.sin(a) > 0 ? 4 : 3, Math.sin(t * 8 + i * 1.9));
+    fundo(g, '#8a8c90');
+    const G = new Grade(66, 36), cx = 33, cy = 24, rx = 28, ry = 9, q = Math.floor(t * 7) % 3;
+    // miolo em anéis
+    G.elipse(cx, cy, rx, ry, '#c8301e'); G.elipse(cx, cy, rx - 4, ry - 2, '#a8261a'); G.elipse(cx, cy, rx - 9, ry - 3.5, '#c8301e'); G.elipse(cx, cy, rx - 14, ry - 5, '#8a1c12');
+    for (let k = -1; k <= 1; k++) G.linha(cx - 10, cy + k * 2, cx + 10, cy + k * 2, '#a8261a');
+    // borda: anel laranja e amarelo
+    for (let i = 0; i < 360; i += 2) {
+      const a = i * Math.PI / 180, x = cx + Math.cos(a) * rx, y = cy + Math.sin(a) * ry;
+      G.set(x, y, '#ff6a1a'); G.set(cx + Math.cos(a) * (rx + 0.8), cy + Math.sin(a) * (ry + 0.6), '#e8481a'); G.set(cx + Math.cos(a) * (rx - 1.2), cy + Math.sin(a) * (ry - 1), '#ffb83a'); G.set(cx + Math.cos(a) * (rx - 2.2), cy + Math.sin(a) * (ry - 1.8), '#ffe04a');
     }
-    chama(G, 30, 42, 7, Math.sin(t * 6)); chama(G, 23, 40, 4, Math.sin(t * 7 + 1)); chama(G, 37, 40, 4, Math.sin(t * 7 + 2));
-    G.acabamento(K);
-    G.pinta(g, 30, 14);
-    for (let i = 0; i < 10; i++) { const u = (t * 0.6 + i / 10) % 1; g.fillStyle = ['#fff0a0', '#ffb83a', '#ff6a1a'][i % 3]; g.fillRect(40 + (i * 7) % 40, Math.round(52 - u * 40), 1, u < 0.5 ? 2 : 1); }
+    // chamas em pé na borda de trás (variam a cada quadro)
+    const CH = [[6, 4], [12, 7], [18, 5], [24, 9], [31, 6], [37, 10], [43, 6], [49, 8], [55, 5], [59, 4]];
+    CH.forEach(([x, h], i) => {
+      const hh = h + ((i + q) % 3 === 0 ? 2 : (i + q) % 3 === 1 ? 0 : -1), y = Math.round(cy - ry * Math.sqrt(Math.max(0, 1 - ((x - cx) / rx) ** 2)));
+      for (let k = 0; k < hh; k++) { G.set(x, y - k, k > hh - 3 ? '#ffe04a' : '#ffb83a'); if (k < hh * 0.65) { G.set(x - 1, y - k, '#ff6a1a'); G.set(x + 1, y - k, '#ff8a1a'); } if (k < hh * 0.3) { G.set(x - 2, y - k, '#e8481a'); G.set(x + 2, y - k, '#e8481a'); } }
+      G.set(x, y - hh, '#fff0a0');
+    });
+    // chamas baixas na frente
+    [[10, 2], [20, 3], [32, 2], [44, 3], [54, 2]].forEach(([x, h], i) => {
+      const y = Math.round(cy + ry * Math.sqrt(Math.max(0, 1 - ((x - cx) / rx) ** 2))) - 1, hh = h + ((i + q) % 2);
+      for (let k = 0; k < hh + 1; k++) { G.set(x, y - k, k >= hh - 1 ? '#ffe04a' : '#ffb83a'); if (k < hh - 1) { G.set(x - 1, y - k, '#ff6a1a'); G.set(x + 1, y - k, '#ff6a1a'); } }
+    });
+    G.acabamento(false);
+    G.pinta(g, 27, 22);
+    // faíscas subindo
+    for (let i = 0; i < 8; i++) { const u = (t * 0.7 + i / 8) % 1; g.fillStyle = u < 0.5 ? '#ffe04a' : '#ff7a1a'; g.fillRect(34 + (i * 13) % 52, Math.round(46 - u * 30), 1, 1 + (u < 0.3 ? 1 : 0)); }
   }
   // ---------------------------------------------------------------- 5. Brasinha voando (pose da referência), vermelha
   const DR = tom('#e84a2a', '#a8261a', '#ff7a4a'), DR2 = tom('#c8361e', '#8a1c12', '#e8582e'), BAR = tom('#f8c890', '#e09a5a', '#ffe4c0'), CHIF = tom('#b8bccc', '#7a7e90', '#e8ecf4'), ASAD = tom('#f8c890', '#e09a5a', '#ffe4c0');
