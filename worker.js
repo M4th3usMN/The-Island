@@ -68,6 +68,10 @@ function limpaLook(v) {
   if (v.manto === true) o.manto = true;
   return o;
 }
+// Barra da comunidade do episódio (Ofícios). Troque o id/título quando mudar o objetivo.
+const COM = { id: "ep7", titulo: "Ep. 7 · Preparar a ilha contra o Reino do Sul", meta: 300 };
+const ITENS_COM = new Set(["trigo", "madeira", "minerio", "erva", "pao", "lamina", "lamina_enc", "remedio"]);
+const LIMITE_DIA = 30;
 function limpaPerfil(p) {
   if (!p || typeof p !== 'object' || Array.isArray(p)) return null;
   const s = JSON.stringify(p);
@@ -97,6 +101,7 @@ export class Vila extends DurableObject {
 
   async fetch(request) {
     const rota = new URL(request.url).pathname;
+    if (rota === "/comunidade") return Response.json(await this.resumoComunidade(), { headers: { "cache-control": "no-store" } });
     if (rota === "/interno/instagram") { await this.verificaInstagram(); return new Response("ok"); }
     if (rota === "/instagram/status") return Response.json(await this.statusInstagram(), { headers: { "cache-control": "no-store" } });
     if (rota === "/instagram/verificar") { // verificação manual, no máximo uma por minuto
@@ -111,6 +116,15 @@ export class Vila extends DurableObject {
     return new Response(null, { status: 101, webSocket: client });
   }
 
+  async comunidade() {
+    if (!this.com) this.com = (await this.ctx.storage.get("com:" + COM.id)) || { total: 0, por: {}, hoje: { dia: "", por: {} } };
+    return this.com;
+  }
+  async resumoComunidade() {
+    const c = await this.comunidade();
+    const top = Object.entries(c.por).sort((x, y) => y[1] - x[1]).slice(0, 5).map(([arroba, n]) => ({ arroba, n }));
+    return { id: COM.id, titulo: COM.titulo, meta: COM.meta, total: c.total, top };
+  }
   viajantes() { return this.ctx.getWebSockets().map(ws => [ws, ws.deserializeAttachment() || {}]).filter(([, a]) => a.id); }
   envia(ws, m) { try { ws.send(JSON.stringify(m)); } catch (e) { } }
   todos(m, exceto) { const s = JSON.stringify(m); for (const [ws] of this.viajantes()) if (ws !== exceto) { try { ws.send(s); } catch (e) { } } }
@@ -165,6 +179,23 @@ export class Vila extends DurableObject {
       const k = m.k, v = String(m.v || "");
       if ((k === "conquista" || k === "carta") && /^[a-z0-9_.:]{1,48}$/.test(v) && agora - (a.ft || 0) > 1500) {
         a.ft = agora; this.aviso({ t: "aviso", k, v, arroba: a.arroba, em: agora }, ws);
+      }
+    } else if (m.t === "entrega") {
+      // Ofícios: cada entrega de pedido enche a barra da comunidade do episódio (limite por pessoa por dia)
+      const item = String(m.item || ""), q = Math.max(1, Math.min(5, m.q | 0));
+      if (ITENS_COM.has(item) && agora - (a.en || 0) > 1200) {
+        a.en = agora;
+        const c = await this.comunidade(), dia = new Date(agora - 3 * 3600e3).toISOString().slice(0, 10);
+        if (c.hoje.dia !== dia) c.hoje = { dia, por: {} };
+        const ja = c.hoje.por[a.arroba] || 0, vale = Math.max(0, Math.min(q, LIMITE_DIA - ja));
+        if (vale > 0) {
+          const antes = c.total;
+          c.total += vale; c.hoje.por[a.arroba] = ja + vale; c.por[a.arroba] = (c.por[a.arroba] || 0) + vale;
+          await this.ctx.storage.put("com:" + COM.id, c);
+          this.todos({ t: "comunidade", total: c.total, meta: COM.meta });
+          const marco = [0.25, 0.5, 0.75, 1].find(f => antes < COM.meta * f && c.total >= COM.meta * f);
+          if (marco) this.aviso({ t: "aviso", k: "comunidade", v: String(Math.round(marco * 100)), arroba: a.arroba, em: agora });
+        }
       }
     } else if (m.t === "perfil") {
       const p = limpaPerfil(m.perfil);
@@ -367,7 +398,7 @@ export default {
       const vila = env.VILA.get(env.VILA.idFromName("grande-ilha"));
       return vila.fetch(request);
     }
-    if (url.pathname === "/instagram/status" || url.pathname === "/instagram/verificar") {
+    if (url.pathname === "/instagram/status" || url.pathname === "/instagram/verificar" || url.pathname === "/comunidade") {
       return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha" + url.pathname));
     }
     if (url.pathname === "/ao-vivo") {

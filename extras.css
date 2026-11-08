@@ -339,3 +339,23 @@
 .md-bloco h3 { margin: 0 0 6px !important; color: #ff8a5a !important; } .md-bloco p { margin: 0 0 8px !important; font-size: 14px; }
 @media (max-width: 760px) { .dlg { bottom: 120px; } .dlg canvas { width: 48px; height: 60px; } .dlg-c p { font-size: 14.5px; min-height: 80px; } }
 .jg-dica .jg-link { color: #5a2a0a; font-size: 14px; text-align: left; margin: 4px 0 0; padding: 0; }
+/* Ofícios: mochila, pedidos e barra da comunidade */
+.of-com { background: var(--pergaminho); color: var(--tinta); border: 2px solid #8a5a22; padding: 8px 10px; margin: 0 0 10px; }
+.of-com b { display: block; font-size: 13px; margin-bottom: 6px; }
+.of-com small { display: block; font-size: 12px; margin-top: 4px; }
+.of-h { font-size: 12px; letter-spacing: .08em; color: #d3a55a; margin: 12px 0 6px; }
+.of-inv { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.of-inv li { background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.12); text-align: center; padding: 6px 2px; }
+.of-inv li.vazio { opacity: .45; }
+.of-inv i { display: block; font-style: normal; font-size: 20px; }
+.of-inv b { display: block; font-size: 15px; }
+.of-inv span { display: block; font-size: 10px; }
+.of-lista { list-style: none; padding: 0; margin: 0; }
+.of-lista li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+.of-lista li > i { font-style: normal; font-size: 18px; width: 24px; text-align: center; }
+.of-lista li > div { flex: 1; min-width: 0; }
+.of-lista li b { display: block; font-size: 13px; }
+.of-lista li small { display: block; font-size: 11px; opacity: .8; }
+.of-lista li.pode b { color: #7ee0a0; }
+.of-lista li.ok { opacity: .6; }
+.of-lista .of-ir { padding: 4px 8px; font-size: 11px; flex: none; }

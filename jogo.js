@@ -21,7 +21,7 @@
 
   // ---------------------------------------------------------------- estado
   const S = { niveis: {}, ws: null, on: false, eu: null, outros: new Map(), perfil: null, codigo: '', camLivre: false, conversa: null, falas: [], fim: false, tent: 0, ping: null, mudou: false };
-  window.IlhaJogo = { get on() { return S.on; }, get niveis() { return S.niveis; }, S, aoConversar: [], ocultos: new Map() };
+  window.IlhaJogo = { get on() { return S.on; }, get niveis() { return S.niveis; }, S, aoConversar: [], aoMsg: [], ocultos: new Map() };
 
   // ---------------------------------------------------------------- visual
   const PALETA = {
@@ -273,6 +273,7 @@
       const v = String(a.v || ''), nome = v === 'esp:dragao' ? 'o DRAGÃO 🐉' : v.indexOf('v:') === 0 ? '@' + v.slice(2) : (G.BY[v] || {}).nome;
       if (nome) F.push({ k: 'carta', html: `${q} ganhou a carta de <b>${esc(nome)}</b>`, t: a.em });
     }
+    else if (a.k === 'comunidade') F.push({ k: 'conquista', html: `A ilha chegou a <b>${a.v | 0}%</b> da meta do Ep. 7! Entrega de ${q}`, t: a.em });
   }
   function conectar(arroba, codigo, look, fim) {
     if (S.ws) { try { S.ws.close(); } catch (e) { } }
@@ -347,6 +348,7 @@
     else if (m.t === 'emote') { const v = m.id === S.eu.id ? S.eu : o; if (v) v.emote = { txt: EMOTES[m.i] || '', ate: Date.now() + 4000 }; }
     else if (m.t === 'fim') { S.fim = true; S.on = false; store.set('jogando', 0); atualizaUI(); anuncia({ titulo: 'VOCÊ SAIU DA ILHA', texto: m.motivo, dur: 6000 }); }
     if (m.t === 'entrou' || m.t === 'saiu') atualizaBarra();
+    (window.IlhaJogo.aoMsg || []).forEach(fn => { try { fn(m); } catch (e) { } });
   }
   function sair() {
     S.fim = true; S.on = false; store.set('jogando', 0);
@@ -582,6 +584,7 @@
       <p class="m-nota">${d.bonus ? 'Você completou o dia! +50 XP de bônus.' : 'Complete as 3 para ganhar +50 XP de bônus.'}</p>
       <p class="m-nota">Dica: toque num morador para ir até ele e puxar conversa. No computador, ande com as setas ou W A S D.</p>`;
     if (window.IlhaMissaoDragao) window.IlhaMissaoDragao.bloco(corpo);
+    if (window.IlhaOficios) window.IlhaOficios.bloco(corpo);
   }
   function abaConquistas(corpo) {
     corpo.innerHTML = `<ul class="jg-conq">${CONQ.map(c => { const ok = S.perfil.conquistas[c.id]; return `<li class="${ok ? 'ok' : ''}"><i aria-hidden="true">${ok ? '★' : '?'}</i><div><b>${esc(c.nome)}</b><small>${esc(c.desc)}${c.xp ? ` · +${c.xp} XP` : ''}</small></div></li>`; }).join('')}</ul>`;
