@@ -42,8 +42,9 @@
       if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => { const xx = x + dx, yy = y + dy; return xx >= 0 && yy >= 0 && xx < w && yy < h && p[yy * w + xx]; })) this.c[y * w + x] = contorno || '#140c10';
     }
   };
-  Grade.prototype.pinta = function (g, ox, oy, espelho) {
-    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) { const c = this.c[y * this.w + x]; if (!c) continue; g.fillStyle = c; g.fillRect(ox + (espelho ? this.w - 1 - x : x), oy + y, 1, 1); }
+  Grade.prototype.pinta = function (g, ox, oy, espelho, z) {
+    z = z || 1;
+    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) { const c = this.c[y * this.w + x]; if (!c) continue; g.fillStyle = c; g.fillRect(ox + (espelho ? this.w - 1 - x : x) * z, oy + y * z, z, z); }
   };
 
   // ---------------------------------------------------------------- fundo liso (como nas referências)
@@ -94,28 +95,28 @@
   const ASA = tom('#f07a2a', '#b8481a', '#ffb060'), MEMB = tom('#a8401a', '#6a2410', '#c85a2a');
   // asa desenhada à mão (pixel por pixel) e "fechada" comprimindo as colunas em direção ao ombro
   const ASA_MAPA = [
-    'LL......................',
-    'LOLL....................',
-    'LOOOLL..................',
-    'LOMOOOLLL...............',
-    'LOMDMOOOOLLL............',
-    'LOMDDMOMOOOOLLL.........',
-    'LOMDDDOMDMOOOOOLLL......',
-    'OMDDDOMDDDOMOOOOOOLL....',
-    'OMDDDOMDDDOMDDMOOOOOL...',
-    'OMDDOMDDDDOMDDDOMDDOOL..',
-    'OMDDOMDDDOMDDDDOMDDDOOO.',
-    'OODDOMDDDOMDDDOMDDDDDOO.',
-    'O.OOOODDOOODDOOODDDDOO..',
-    '....O..OO...OO..OOOO....',
-    '........................'];
-  const ASA_COR = { L: '#ffb060', O: '#f07a2a', M: '#b8501e', D: '#7a2e14' };
+    '......LLLLLLLL.........',
+    '...LLLOOOOOOOOL........',
+    '.LLOOOOKDDMOOOOL.......',
+    'LOOOKDDDMOOKMOOOL......',
+    'LOKDDDMOOKDDMOOOOL.....',
+    '.LDDMOOKDDDMOOKOOOL....',
+    '..LMOOKDDDMOOKDDOOOL...',
+    '...LOKDDDMOOKDDDMOOOL..',
+    '....LDDDMOOKDDDMOOOOL..',
+    '......LDMOOKDDDMOOOOOL.',
+    '........LOKDDDMOOOOOOL.',
+    '..........LDDMOOOOOOOL.',
+    '............LMOOOOOOOL.',
+    '..............LOOOOOOL.',
+    '................LLOOOL.'];
+  const ASA_COR = { L: '#ffa858', O: '#f07a2a', M: '#c0541e', D: '#7a2a14', K: '#3a0e08' };
   function asaGrade(abre) {
-    const w0 = ASA_MAPA[0].length, h0 = ASA_MAPA.length, ombro = w0 - 2;
-    const G = new Grade(w0 + 2, h0 + 8), sobe = Math.round((1 - abre) * 5);
+    const w0 = Math.max(...ASA_MAPA.map(l => l.replace(/\.+$/, '').length)), h0 = ASA_MAPA.length, ombro = w0 - 1;
+    const G = new Grade(w0 + 1, h0 + 8), sobe = Math.round((1 - abre) * 5);
     for (let x = 0; x < w0; x++) {
       const src = Math.round(ombro - (ombro - x) / abre); if (src < 0) continue;
-      for (let y = 0; y < h0; y++) { const ch = ASA_MAPA[y][src]; if (ch && ch !== '.') G.set(x + 1, y + 3 - Math.round(sobe * (1 - x / w0)), ASA_COR[ch]); }
+      for (let y = 0; y < h0; y++) { const ch = ASA_MAPA[y][src]; if (ch && ch !== '.') G.set(x, y + 3 - Math.round(sobe * (1 - x / w0)), ASA_COR[ch]); }
     }
     G.acabamento();
     return G;
@@ -123,8 +124,8 @@
   const CICLO = [1, 0.62, 0.28, 0.62];
   function asas(g, t) {
     fundo(g, '#d4d8dc');
-    const q = CICLO[Math.floor(t * 6) % 4], G = asaGrade(q);
-    G.pinta(g, 35, 22); G.pinta(g, 59, 22, true);
+    const q = (window.__lojaQuadro != null ? CICLO[window.__lojaQuadro] : CICLO[Math.floor(t * 5) % 4]), G = asaGrade(q);
+    G.pinta(g, 64 - G.w * 2, 17, false, 2); G.pinta(g, 56, 17, true, 2);
   }
   // ---------------------------------------------------------------- 4. aura de brasas (anel de chamas)
   function chama(G, x, y, s, f) {
