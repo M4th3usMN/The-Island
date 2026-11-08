@@ -154,71 +154,44 @@
     // faíscas subindo
     for (let i = 0; i < 8; i++) { const u = (t * 0.7 + i / 8) % 1; g.fillStyle = u < 0.5 ? '#ffe04a' : '#ff7a1a'; g.fillRect(34 + (i * 13) % 52, Math.round(46 - u * 30), 1, 1 + (u < 0.3 ? 1 : 0)); }
   }
-  // ---------------------------------------------------------------- 5. Brasinha (filhote de dragão bravo, voando) — desenhada em resolução dobrada
-  const DR = tom('#d8402a', '#9a2218', '#f06a3a'), DR2 = tom('#b83020', '#7a1810', '#d84a2a'), BAR = tom('#f4c890', '#d89a5a', '#ffe2b8'),
-    PRATA = tom('#b8bccc', '#7a7e92', '#eceef6'), ASAC = tom('#f4c48a', '#d89a5a', '#ffdcae');
-  function brasinhaGrade(t) {
-    const G = new Grade(112, 112), b = Math.floor(t * 4) % 2 ? 6 : 0, cauda = Math.round(Math.sin(t * 2.5) * 2), pisca = (t % 5) < 0.12;
-    // ---- asa grande (atrás)
-    const asa = [[60, 50], [104, 12 - b], [102, 24 - b], [94, 32 - b], [90, 44 - b / 2], [78, 52], [68, 62]];
-    G.poli(asa, ASAC);
-    // dobras/nervuras da membrana
-    for (let k = 0; k < 4; k++) { const x0 = 63 + k * 6, y0 = 54 - k * 2, x1 = 98 - k * 4, y1 = 18 - b + k * 7; G.linha(x0, y0, x1, y1, RAMPA[ASAC][0]); G.linha(x0 + 1, y0, x1 + 1, y1, RAMPA[ASAC][2]); }
-    // borda da asa (osso) e garrinha
-    G.linha(60, 50, 104, 12 - b, DR, 4); G.linha(88, 22 - b, 106, 10 - b, DR, 2); G.set(107, 9 - b, '#f4ead8'); G.set(108, 8 - b, '#f4ead8');
-    // ---- rabo comprido com ponta em lança
-    G.linha(50, 80, 54, 90, DR, 8); G.linha(54, 90, 52, 97, DR, 6); G.linha(52, 97, 44, 101 + cauda, DR, 4); G.linha(44, 101 + cauda, 38, 97 + cauda, DR, 3);
-    G.poli([[38, 97 + cauda], [32, 93 + cauda], [34, 101 + cauda], [40, 100 + cauda]], DR2);
-    G.linha(48, 84, 50, 95, BAR, 2);
-    // ---- corpo
-    G.elipse(48, 68, 16, 20, DR);
-    G.poli([[34, 54], [44, 52], [44, 82], [34, 78]], BAR);
-    // ---- pernas, garras e braço
-    G.elipse(38, 88, 6.5, 5, DR2); G.elipse(54, 86, 6.5, 5, DR2); G.elipse(32, 66, 5, 6.5, DR2);
-    [[33, 92], [36, 93], [39, 93], [50, 90], [53, 91], [56, 91], [28, 71], [31, 72]].forEach(([x, y]) => { G.set(x, y, '#f4ead8'); G.set(x, y + 1, '#c8bca8'); });
-    // ---- espinhos nas costas (grandes, com sombra)
-    [[58, 28, 8], [62, 38, 8], [64, 48, 8], [64, 60, 7], [62, 72, 6], [58, 80, 5]].forEach(([x, y, h]) => G.poli([[x, y], [x + h, y + 2], [x, y + h]], PRATA));
-    // ---- cabeça
-    G.elipse(40, 38, 20, 17, DR);
-    G.poli([[10, 44], [20, 32], [32, 38], [30, 52], [16, 54]], DR); // focinho
-    G.poli([[26, 48], [34, 52], [26, 56], [16, 55]], DR2);          // mandíbula
-    // ---- chifres grandes (em gomos) e chifrinhos
-    G.poli([[30, 26], [34, 2], [42, 24]], PRATA); G.poli([[44, 24], [54, 0], [58, 26]], PRATA); G.poli([[22, 30], [16, 16], [28, 28]], PRATA);
-    G.poli([[56, 30], [66, 22], [60, 34]], PRATA);
-    // ---- barbatana da orelha
-    G.poli([[18, 34], [2, 26], [6, 34], [4, 38], [20, 40]], ASAC);
-    G.acabamento(false, new Set([BAR, ASAC]));
-    // gomos nos chifres
-    [[33, 8], [32, 14], [31, 20], [53, 6], [52, 12], [51, 18]].forEach(([x, y]) => G.linha(x, y, x + 4, y + 1, RAMPA[PRATA][0]));
-    // escamas no corpo e na cabeça (pontinhos de sombra em xadrez)
-    for (let y = 26; y < 92; y += 4) for (let x = 20; x < 66; x += 4) { const c = G.get(x + (y / 4 % 2) * 2, y); if (c === DR) G.set(x + (y / 4 % 2) * 2, y, RAMPA[DR][0]); }
-    // placas da barriga com brilho
-    for (let y = 56; y < 82; y += 5) { G.linha(35, y, 43, y, RAMPA[BAR][0]); G.linha(35, y + 1, 42, y + 1, RAMPA[BAR][2]); }
-    // ---- cara de mau
-    if (pisca) G.linha(24, 39, 36, 41, '#1a0608', 2);
-    else {
-      G.ret(24, 36, 13, 6, '#1a0608');            // olho estreito
-      G.ret(27, 36, 8, 4, '#e8141a'); G.ret(30, 36, 2, 5, '#3a0204'); // íris vermelha com pupila em fenda
-      G.set(28, 37, '#ff9a9a'); G.set(33, 38, '#ff5a5a');
-      G.ret(12, 40, 3, 2, '#1a0608'); G.set(12, 40, '#e8141a');       // olho do outro lado
-    }
-    G.linha(22, 32, 38, 36, RAMPA[DR][0], 3); G.linha(22, 31, 37, 34, RAMPA[DR][2]); // sobrancelha baixa
-    G.linha(10, 37, 18, 39, RAMPA[DR][0], 2);
-    // narina, boca e presas
-    G.ret(12, 44, 2, 2, '#3a0808'); G.linha(12, 50, 26, 51, '#3a0808', 2);
-    [[15, 52], [20, 52], [24, 52]].forEach(([x, y]) => { G.set(x, y, '#ffffff'); G.set(x, y + 1, '#ffffff'); G.set(x, y + 2, '#c8c0b0'); });
-    // espinhos na bochecha
-    G.poli([[30, 50], [36, 56], [30, 54]], PRATA);
-    G.acabamento('#12081a');
-    return G;
-  }
+  // ---------------------------------------------------------------- 5. Brasinha (dragãozinho em pé, de perfil, olhar bravo)
+  const DR = tom('#d8302a', '#8a1418', '#f05a4a'), DRE = '#8a1418', BAR = tom('#f8a830', '#d87a18', '#ffd060'), CHIF = tom('#f08a2a', '#b8501a', '#ffb860'), UNHA = '#f4e8cc';
   function brasinha(g, t) {
-    // esta carta usa o dobro de resolução (canvas 240x150): fundo em 2x, dragão em 1x
-    g.save(); g.scale(2, 2); fundo(g, '#2a2c4c'); g.restore();
-    const G = brasinhaGrade(t), voo = Math.round(Math.sin(t * 2.2) * 3);
-    G.pinta(g, 66, 24 + voo);
-    const f = (t % 3.5) / 3.5;
-    if (f < 0.35) { const k = f / 0.35; for (let i = 0; i < 3; i++) { g.fillStyle = k < 0.4 ? ['#ffd04a', '#ff7a2a', '#e8481a'][i] : ['#8a8ca0', '#6a6c80', '#4a4c60'][i]; g.fillRect(Math.round(74 - k * 18 - i * 4), Math.round(66 + voo - k * 10 - i * 3), 3 - (i > 1 ? 1 : 0), 3 - (i > 1 ? 1 : 0)); } }
+    fundo(g, '#f2f0ec');
+    const G = new Grade(48, 50), b = Math.floor(t * 3) % 2, cauda = Math.round(Math.sin(t * 2.4)), resp = Math.floor(t * 1.5) % 2, pisca = (t % 5) < 0.12;
+    // asa (atrás, à esquerda)
+    G.poli([[20, 22], [12, 7 - b], [6, 8 - b], [3, 15 - b], [1, 25], [7, 23], [9, 29], [13, 27], [17, 31]], DR);
+    // rabo enrolado
+    G.linha(17, 37, 10, 42, DR, 4); G.linha(10, 42, 4, 40 + cauda, DR, 3); G.linha(4, 40 + cauda, 2, 35 + cauda, DR, 2); G.poli([[1, 35 + cauda], [3, 31 + cauda], [5, 35 + cauda]], CHIF);
+    // corpo e pernas
+    G.elipse(23, 32 - resp, 9, 10, DR);
+    G.elipse(16, 42, 4.5, 4.5, DR); G.elipse(28, 42, 4.5, 4.5, DR);
+    G.ret(12, 45, 8, 3, DR); G.ret(25, 45, 8, 3, DR);
+    // braço para frente
+    G.linha(29, 30 - resp, 35, 34, DR, 3);
+    // pescoço e cabeça (olhando para a direita)
+    G.poli([[21, 24], [25, 14], [31, 15], [30, 26]], DR);
+    G.poli([[25, 11], [33, 8], [39, 11], [44, 13], [45, 18], [39, 21], [31, 21], [26, 17]], DR);
+    // chifres
+    G.poli([[26, 11], [23, 1], [29, 9]], CHIF); G.poli([[30, 9], [31, 0], [34, 8]], CHIF);
+    // espinhos no pescoço
+    [[23, 15], [21, 20], [19, 25]].forEach(([x, y]) => G.poli([[x, y], [x - 3, y + 1], [x, y + 3]], CHIF));
+    // barriga listrada
+    G.poli([[27, 23], [31, 25], [32, 37], [28, 40], [25, 35]], BAR);
+    G.acabamento(false);
+    // detalhes escuros: dedos da asa, listras da barriga, boca, sobrancelha
+    G.linha(17, 15, 3, 15 - b, DRE); G.linha(17, 15, 7, 23, DRE); G.linha(17, 15, 13, 27, DRE); G.linha(20, 22, 12, 7 - b, DRE);
+    for (let y = 27; y < 39; y += 3) G.linha(26, y, 31, y, RAMPA[BAR][0]);
+    G.linha(33, 19, 44, 18, DRE); G.set(43, 15, '#3a0808');
+    G.linha(31, 12, 37, 14, DRE); // sobrancelha baixa (cara de bravo)
+    if (pisca) G.linha(33, 15, 36, 15, '#140c10'); else { G.ret(33, 14, 3, 2, UNHA); G.set(35, 15, '#140c10'); }
+    // garras
+    [[12, 47], [14, 47], [17, 47], [25, 47], [27, 47], [30, 47], [35, 35], [36, 33]].forEach(([x, y]) => G.set(x, y, UNHA));
+    G.set(38, 20, UNHA); G.set(41, 20, UNHA); // presas
+    G.acabamento();
+    G.pinta(g, 37, 13);
+    // fumaça pelo nariz
+    const f = (t % 3.5) / 3.5; if (f < 0.35) { const k = f / 0.35; g.fillStyle = k < 0.4 ? '#ff7a2a' : '#a0a0a8'; g.fillRect(Math.round(83 + k * 8), Math.round(27 - k * 5), 2, 2); g.fillRect(Math.round(85 + k * 10), Math.round(25 - k * 7), 1, 1); }
   }
   // fonte de pixel própria (3x5) para o nome dourado: legível em qualquer aparelho
   const FONTE = {
@@ -298,5 +271,5 @@
   function teste(g, t) { fundo(g, '#d4d8dc'); const G = new Grade(30, 12); G.ret(1, 1, 28, 10, OURO); G.acabamento(); G.pinta(g, 45, 30); g.fillStyle = K; g.font = '8px Silkscreen, monospace'; g.textAlign = 'center'; g.fillText('R$ 1', 60, 39); }
 
   const ARTES = { tricornio, capa, asas, aura, brasinha, nome, moldura, bandeira, teste };
-  window.IlhaLojaPixel = { asaGrade, W: W * 2, H: H * 2, desenha: (g, id, t, arroba) => { g.save(); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W * 2, H * 2); if (id !== 'brasinha') g.scale(2, 2); (ARTES[id] || teste)(g, t, arroba); g.restore(); } };
+  window.IlhaLojaPixel = { asaGrade, W: W * 2, H: H * 2, desenha: (g, id, t, arroba) => { g.save(); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W * 2, H * 2); g.scale(2, 2); (ARTES[id] || teste)(g, t, arroba); g.restore(); } };
 })();
