@@ -4,6 +4,8 @@
    nome dourado, moldura de ouro na sua carta e bandeira na casa do morador. */
 (function () {
   'use strict';
+  // LOJA FORA DO AR (artes em revisão): só abre com ?lojateste=1 para testes internos
+  if (!/lojateste/.test(location.search)) return;
   const G = window.GrandeIlha, SP = window.IlhaSprites, K = window.IlhaComunidade, J = window.IlhaJogo;
   if (!G || !SP || !K || !J) return;
   const S = J.S, esc = K.esc;

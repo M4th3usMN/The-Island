@@ -231,6 +231,7 @@ export class Vila extends DurableObject {
     } else if (m.t === "pix") {
       // cria a cobrança Pix no Mercado Pago para o @ desta sessão (já autenticado pelo código)
       const item = String(m.item || "");
+      if (item !== "teste") return this.envia(ws, { t: "pix", erro: "A loja está fechada por enquanto. Volte em breve!" }); // LOJA FORA DO AR
       if (!LOJA[item] || agora - (a.px || 0) < 15e3) { ws.serializeAttachment(a); return this.envia(ws, { t: "pix", erro: "Espere alguns segundos e tente de novo." }); }
       a.px = agora; ws.serializeAttachment(a);
       const r = await this.criaPix(a.arroba, item);
