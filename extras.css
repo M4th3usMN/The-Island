@@ -384,8 +384,7 @@
 .lj-status { font-size: 13px; color: #ffd046; }
 @media (max-width: 520px) { .lj-grade { grid-template-columns: 1fr 1fr; gap: 8px; } .lj-carta p { font-size: 11px; } }
 /* Moldura de ouro (item da loja) na sua carta */
-.carta.moldura-ouro { box-shadow: 0 0 0 4px #e8b830, 0 0 0 8px #7a4a10, 0 0 36px rgba(255,208,70,.7) !important; position: relative; }
-.carta.moldura-ouro::before, .carta.moldura-ouro::after { content: ''; position: absolute; width: 14px; height: 14px; background: #e84a4a; border: 3px solid #e8b830; z-index: 3; }
-.carta.moldura-ouro::before { left: -10px; top: -10px; } .carta.moldura-ouro::after { right: -10px; bottom: -10px; background: #3a9ae8; }
+.carta.moldura-ouro { box-shadow: 0 0 36px rgba(255,208,70,.55) !important; position: relative; overflow: visible !important; }
+.carta.moldura-ouro::after { content: ''; position: absolute; inset: -12px; border: 22px solid transparent; border-image: url(itens-loja/moldura.png) 22 round; image-rendering: pixelated; pointer-events: none; z-index: 5; }
 .lj-arte canvas.lj-hd { image-rendering: auto; }
 .lj-arte { overflow: hidden; } .lj-arte canvas.lj-px { position: absolute; left: -16.67%; top: -16.67%; width: 133.34%; height: 133.34%; image-rendering: pixelated; } .lj-arte em, .lj-arte small { z-index: 2; }

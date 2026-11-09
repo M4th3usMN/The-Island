@@ -9,14 +9,14 @@
   const S = J.S, esc = K.esc;
   const TESTE = /lojateste/.test(location.search);
   const ITENS = [
-    { id: 'tricornio', n: 'Tricórnio pirata', d: 'Chapéu de capitão com caveira e pena', v: 3, r: 'comum', tipo: 'CHAPÉU' },
-    { id: 'capa', n: 'Capa de veludo', d: 'Capa real com fecho de ouro', v: 5, r: 'raro', tipo: 'COSTAS' },
+    { id: 'tricornio', n: 'Chapéu de mago', d: 'Chapéu pontudo com faixa vermelha', v: 3, r: 'comum', tipo: 'CHAPÉU' },
+    { id: 'capa', n: 'Capa encapuzada', d: 'Capa azul com capuz e broche de ouro', v: 5, r: 'raro', tipo: 'COSTAS' },
     { id: 'asas', n: 'Asas de dragão', d: 'Batem quando você anda', v: 8, r: 'epico', tipo: 'COSTAS · ANIMADA' },
     { id: 'aura', n: 'Aura de brasas', d: 'Faíscas de fogo sobem quando você anda', v: 6, r: 'raro', tipo: 'EFEITO ANIMADO' },
     { id: 'brasinha', n: 'Mascote Brasinha', d: 'Um bebê dragão que te segue pela ilha', v: 10, r: 'lendario', tipo: 'MASCOTE' },
     { id: 'nome', n: 'Nome dourado', d: 'Seu @ brilha em ouro no mapa', v: 3, r: 'comum', tipo: 'NOME NO MAPA' },
     { id: 'moldura', n: 'Moldura de ouro', d: 'Sua carta com moldura ornamentada', v: 4, r: 'comum', tipo: 'SUA CARTA' },
-    { id: 'bandeira', n: 'Bandeira na casa', d: 'Só para moradores: bandeira e flores na sua casa', v: 5, r: 'raro', tipo: 'CASA DO MORADOR', morador: true }
+    { id: 'bandeira', n: 'Estandarte na casa', d: 'Só para moradores: o estandarte do leão na sua casa', v: 5, r: 'raro', tipo: 'CASA DO MORADOR', morador: true }
   ];
   if (TESTE) ITENS.push({ id: 'teste', n: 'Item de teste', d: 'Só para testar o Pix (não faz nada)', v: 1, r: 'comum', tipo: 'TESTE' });
   const RAR = { comum: ['#b8bcc8', '#6a6e78', 'COMUM'], raro: ['#4aa0ff', '#1e4a8a', 'RARO'], epico: ['#b070ff', '#4a2a7a', 'ÉPICO'], lendario: ['#ffd046', '#b8862e', 'LENDÁRIO'] };
@@ -24,34 +24,26 @@
   const P = (c, x, y, w, h, cor) => { c.fillStyle = cor; c.fillRect(x, y, w, h); };
 
   // ---------------------------------------------------------------- desenhos (origem = pés do personagem, virado para a direita)
-  function tricornio(c) {
-    c.save(); c.translate(0, 1);
-    P(c, -8, -14, 16, 2, '#241a14'); P(c, -9, -15, 3, 2, '#241a14'); P(c, 6, -15, 3, 2, '#241a14'); P(c, -8, -14, 16, 1, '#3a2a20');
-    P(c, -5, -19, 10, 5, '#2c2018'); P(c, -4, -20, 8, 1, '#2c2018'); P(c, -5, -19, 10, 1, '#4a3628');
-    P(c, -9, -13, 18, 1, '#e8b830'); P(c, -9, -16, 1, 2, '#e8b830'); P(c, 8, -16, 1, 2, '#e8b830'); P(c, -5, -15, 10, 1, '#c9962a');
-    P(c, -1, -18, 3, 2, '#f4f0e6'); P(c, -1, -17, 1, 1, '#1a1410'); P(c, 1, -17, 1, 1, '#1a1410'); P(c, 0, -16, 1, 1, '#f4f0e6');
-    P(c, 4, -21, 2, 2, '#e84a3a'); P(c, 5, -23, 2, 2, '#f06a3a'); P(c, 6, -25, 2, 2, '#f89040'); P(c, 7, -26, 1, 1, '#ffc060'); P(c, 3, -20, 1, 1, '#b8302a');
-    c.restore();
+  const IM = () => (window.IlhaLojaPixel && window.IlhaLojaPixel.IMG) || {};
+  const ok = i => i && i.complete && i.naturalWidth;
+  // chapéu de mago (arte do criador), aba em cima da cabeça
+  function tricornio(c) { const i = IM().chapeu; if (ok(i)) c.drawImage(i, -6.5, -22, 13, 10); }
+  // capa encapuzada: atrás do corpo (de frente) ou por cima (de costas, com o capuz cobrindo a cabeça)
+  const capaCostas = new Image(); capaCostas.src = 'itens-loja/capa_costas.png';
+  function capaAtras(c, sec, anda, costas) {
+    const i = costas ? capaCostas : IM().capa; if (!ok(i)) return;
+    const o = anda ? Math.sin(sec * 9) * 0.06 : 0;
+    c.save(); c.translate(0, 1); c.transform(1, 0, o, 1, 0, 0); c.drawImage(i, -7, -18, 14, 18); c.restore();
   }
-  function capaAtras(c, sec, anda) {
-    const o = anda ? Math.round(Math.sin(sec * 9)) : 0;
-    P(c, -7, -10, 14, 12, '#8a1a2a'); P(c, -8 - (o > 0 ? 1 : 0), -8, 1, 9, '#8a1a2a'); P(c, 7, -8, 1, 9, '#8a1a2a');
-    P(c, -5, -9, 1, 10, '#6a1020'); P(c, -1, -9, 1, 11, '#6a1020'); P(c, 3, -9, 1, 10, '#6a1020'); P(c, -6, -9, 1, 10, '#a82a3a'); P(c, 5, -9, 1, 10, '#a82a3a');
-    P(c, -8, 1 + o, 16, 1, '#e8b830'); P(c, -8, -8, 1, 9, '#3a1040'); P(c, 7, -8, 1, 9, '#3a1040');
-  }
-  function capaFrente(c) { P(c, -5, -10, 10, 1, '#e8b830'); P(c, -1, -10, 2, 2, '#ffe27a'); P(c, 0, -9, 1, 1, '#e84a4a'); }
+  function capaFrente() { }
+  // asas de dragão (arte do criador): cada asa sobe e desce a partir do ombro
   function asas(c, sec, anda) {
-    const osso = '#5a1a1e', mem = '#b8362a', mem2 = '#e8643a', esc2 = '#8a2420', ponta = '#f4e4c8';
-    const bate = anda ? (Math.floor(sec * 7) % 2 ? -2 : 1) : Math.round(Math.sin(sec * 2) * 0.6);
-    [-1, 1].forEach(k => {
-      const X = x => k > 0 ? x : -x - 1;
-      for (let y = -21; y <= -7; y++) {
-        const inner = y >= -12 ? 4 : 4 + Math.round((-12 - y) * 0.55), outer = Math.min(13, 13 - Math.max(0, Math.round((y + 12) * 0.5)));
-        const yy = y + (y < -12 ? bate : Math.round(bate / 2));
-        for (let x = inner; x <= outer; x++) { if ((y === -7 && x % 3 !== 0) || (y === -8 && x % 3 === 1)) continue; P(c, X(x), yy, 1, 1, (x + y) % 4 === 0 ? mem2 : mem); }
-      }
-      for (let i = 0; i <= 9; i++) P(c, X(4 + i), -11 - Math.round(i * 1.1) + (i > 3 ? bate : 0), 1, 1, osso);
-      P(c, X(13), -22 + bate, 1, 1, ponta); P(c, X(14), -23 + bate, 1, 1, ponta);
+    const i = IM().asas; if (!ok(i)) return;
+    const meio = Math.floor(i.width / 2), k = 0.6, h = i.height * k;
+    const f = anda ? (Math.floor(sec * 7) % 2 ? 0.6 : 1) : 0.9 + Math.sin(sec * 2) * 0.08;
+    [[0, meio, -1], [meio, i.width - meio, 1]].forEach(([sx, sw, lado]) => {
+      c.save(); c.translate(0, -10); c.scale(1, f);
+      c.drawImage(i, sx, 0, sw, i.height, lado < 0 ? -sw * k + 1 : -1, -h, sw * k, h); c.restore();
     });
   }
   function auraChao(c, sec) {
@@ -67,36 +59,24 @@
       P(c, x, y, 1, u < 0.5 ? 2 : 1, i % 3 === 0 ? '#ffe27a' : i % 3 === 1 ? '#ffb347' : '#ff7a2a');
     }
   }
+  // Brasinha (arte do criador): pula quando anda; origem nos pés
   function dragaoBebe(c, sec, anda) {
-    const R = '#d8402a', R2 = '#a82a20', R3 = '#f2683a', B = '#f8d8a0', B2 = '#e8b878', pulo = anda ? -Math.abs(Math.round(Math.sin(sec * 10) * 1.5)) : 0;
-    P(c, -1, 0, 12, 1, 'rgba(0,0,0,.28)');
-    c.save(); c.translate(0, pulo);
-    const cauda = Math.round(Math.sin(sec * 4));
-    P(c, 9, -3, 2, 2, R); P(c, 11, -4 + cauda, 1, 2, R); P(c, 11, -6 + cauda, 2, 1, R2);
-    P(c, 1, -7, 8, 7, R); P(c, 0, -6, 1, 5, R); P(c, 9, -6, 1, 4, R); P(c, 1, -7, 8, 1, R3);
-    P(c, 2, -5, 5, 5, B); P(c, 2, -4, 5, 1, B2); P(c, 2, -2, 5, 1, B2);
-    P(c, 1, -1, 2, 1, R2); P(c, 6, -1, 2, 1, R2);
-    const asa = Math.floor(sec * 6) % 2;
-    P(c, 7, -11 - asa, 3, 3, R2); P(c, 8, -12 - asa, 3, 1, R2); P(c, 8, -10 - asa, 2, 1, R3);
-    P(c, -3, -15, 9, 8, R); P(c, -2, -16, 7, 1, R); P(c, -4, -13, 1, 5, R); P(c, 6, -14, 1, 5, R); P(c, -2, -16, 7, 1, R3); P(c, -3, -15, 2, 1, R3);
-    P(c, -6, -11, 3, 4, R); P(c, -7, -10, 1, 2, R); P(c, -6, -11, 3, 1, R3); P(c, -6, -10, 1, 1, '#3a1010');
-    const pisca = (sec % 4) < 0.15;
-    if (pisca) P(c, -1, -11, 4, 1, '#1a0608'); else { P(c, -1, -12, 4, 2, '#1a0608'); P(c, 0, -12, 2, 1, '#e8141a'); }
-    P(c, -2, -14, 6, 1, '#9a2218'); P(c, 1, -19, 1, 3, '#c8ccd8'); P(c, 4, -20, 1, 4, '#c8ccd8'); P(c, 6, -17, 2, 1, '#c8ccd8'); P(c, -5, -8, 1, 1, '#ffffff');
-    const f = (sec % 5) / 5; if (f < 0.25) { const k = f / 0.25; P(c, -9 - k * 4, -11 - k * 3, 2, 2, `rgba(255,179,71,${(1 - k).toFixed(2)})`); P(c, -11 - k * 4, -13 - k * 3, 1, 1, `rgba(255,226,122,${(1 - k).toFixed(2)})`); }
-    c.restore();
+    const i = IM().dragao; if (!ok(i)) return;
+    const pulo = anda ? Math.abs(Math.round(Math.sin(sec * 10) * 1.5)) : 0;
+    P(c, -9, -1, 18, 2, 'rgba(0,0,0,.25)');
+    c.drawImage(i, -13, -21 - pulo, 27, 21);
   }
+  // estandarte do leão (arte do criador) ao lado da casa, com flores
   function bandeira(c, sec) {
-    P(c, 0, -28, 1, 30, '#5a3e26'); P(c, 0, -29, 1, 1, '#e8b830');
-    const o = Math.round(Math.sin(sec * 4));
-    P(c, 1, -28, 9, 6, '#1aa84a'); P(c, 9, -27 + o, 1, 4, '#0e7a32'); P(c, 4, -27, 3, 1, '#ffd21a'); P(c, 3, -26, 5, 2, '#ffd21a'); P(c, 4, -24, 3, 1, '#ffd21a'); P(c, 5, -26, 1, 2, '#1a3a9a');
+    const i = IM().bandeira;
+    if (ok(i)) { const o = Math.sin(sec * 2.5) * 0.03; c.save(); c.transform(1, 0, o, 1, 0, 0); c.drawImage(i, -7.5, -32, 15.6, 33.6); c.restore(); }
     [[-14, 2, '#e84a8a'], [-11, 2, '#ffd046'], [-7, 2, '#e84a8a'], [3, 2, '#ffd046']].forEach(([x, y, f]) => { P(c, x, y, 2, 1, f); P(c, x, y + 1, 2, 1, '#4a8a3a'); });
   }
   // personagem completo com os itens (para a prévia grande e para o mapa)
   function comItens(c, look, itens, sec, anda, costas) {
     const t = id => itens.includes(id);
     if (t('aura')) auraChao(c, sec);
-    const atras = () => { if (t('asas')) asas(c, sec, anda); if (t('capa')) capaAtras(c, sec, anda); };
+    const atras = () => { if (t('asas')) asas(c, sec, anda); if (t('capa')) capaAtras(c, sec, anda, costas); };
     if (!costas) atras();
     SP.drawCharacter(c, 0, 0, t('tricornio') && look.chapeu ? Object.assign({}, look, { chapeu: undefined }) : look, { t: sec, walking: anda, side: 1, dir: costas ? 'up' : 'down' });
     if (costas) atras();
@@ -116,7 +96,7 @@
       const desenha = (fn, dy) => objs.push({ y: v.y + dy, f: () => { c.save(); c.translate(Math.round(v.x), Math.round(v.y)); c.scale(lado, 1); fn(); c.restore(); } });
       if (tem(v, 'aura')) desenha(() => auraChao(c, sec), -0.02);
       if (tem(v, 'asas')) desenha(() => asas(c, sec, anda), costas ? 0.02 : -0.01);
-      if (tem(v, 'capa')) desenha(() => { capaAtras(c, sec, anda); }, costas ? 0.02 : -0.01);
+      if (tem(v, 'capa')) desenha(() => { capaAtras(c, sec, anda, costas); }, costas ? 0.02 : -0.01);
       if (tem(v, 'capa') && !costas) desenha(() => capaFrente(c), 0.01);
       if (tem(v, 'tricornio')) desenha(() => tricornio(c), 0.015);
       if (tem(v, 'aura')) desenha(() => auraFaiscas(c, sec, anda), 0.02);

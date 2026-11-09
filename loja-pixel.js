@@ -264,6 +264,45 @@
   }
   function teste(g, t) { fundo(g, '#d4d8dc'); const G = new Grade(30, 12); G.ret(1, 1, 28, 10, OURO); G.acabamento(); G.pinta(g, 45, 30); g.fillStyle = K; g.font = '8px Silkscreen, monospace'; g.textAlign = 'center'; g.fillText('R$ 1', 60, 39); }
 
-  const ARTES = { tricornio, capa, asas, aura, brasinha, nome, moldura, bandeira, teste };
-  window.IlhaLojaPixel = { asaGrade, W: W * 2, H: H * 2, desenha: (g, id, t, arroba) => { g.save(); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W * 2, H * 2); g.scale(2, 2); (ARTES[id] || teste)(g, t, arroba); g.restore(); } };
+
+  // ---------------------------------------------------------------- artes desenhadas pelo criador da ilha (itens-loja/*.png)
+  const IMG = {};
+  ['asas', 'dragao', 'chapeu', 'bandeira', 'capa', 'moldura'].forEach(n => { const i = new Image(); i.src = 'itens-loja/' + n + '.png'; IMG[n] = i; });
+  const pronta = i => i && i.complete && i.naturalWidth;
+  // centro visível do card: (60, 37); área útil ~80x50. Escala em passos de 0.5 (pixels inteiros na tela 2x).
+  function figura(g, img, maxW, maxH, dy, liso) {
+    if (!pronta(img)) return null;
+    let k = Math.floor(Math.min(maxW / img.width, maxH / img.height) * 2) / 2;
+    if (k < 0.5 || liso) k = Math.min(maxW / img.width, maxH / img.height);
+    const w = img.width * k, h = img.height * k;
+    return { x: Math.round((60 - w / 2) * 2) / 2, y: Math.round((38 - h / 2 + (dy || 0)) * 2) / 2, w, h, k };
+  }
+  const sombra = (g, w, y) => { g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(Math.round(60 - w / 2), y, Math.round(w), 2); };
+  const flutua = t => Math.round(Math.sin(t * 2.2) * 1.5);
+  function imgChapeu(g, t) { fundo(g, '#c8d2d0'); const f = figura(g, IMG.chapeu, 70, 44); if (!f) return; sombra(g, f.w * 0.8, f.y + f.h + 3); g.drawImage(IMG.chapeu, f.x, f.y + flutua(t) - 1, f.w, f.h); }
+  function imgCapa(g, t) { fundo(g, '#c8d2d0'); const f = figura(g, IMG.capa, 70, 50); if (!f) return; const o = Math.sin(t * 2) * 0.03; g.save(); g.translate(60, f.y); g.transform(1, 0, o, 1, 0, 0); g.drawImage(IMG.capa, -f.w / 2, 0, f.w, f.h); g.restore(); }
+  function imgAsas(g, t) {
+    fundo(g, '#c8d2d0'); const img = IMG.asas, f = figura(g, img, 84, 44); if (!f) return;
+    const meio = Math.floor(img.width / 2), bate = 1 - 0.35 * (0.5 + 0.5 * Math.sin(t * 5)), base = f.y + f.h;
+    [[0, meio, -1], [meio, img.width - meio, 1]].forEach(([sx, sw, lado]) => {
+      g.save(); g.translate(60, base); g.scale(1, bate);
+      g.drawImage(img, sx, 0, sw, img.height, lado < 0 ? -sw * f.k : 0, -f.h, sw * f.k, f.h); g.restore();
+    });
+  }
+  function imgDragao(g, t) {
+    fundo(g, '#c8d2d0'); const f = figura(g, IMG.dragao, 70, 46); if (!f) return;
+    const pulo = Math.round(Math.abs(Math.sin(t * 2.4 * Math.PI)) * 3) * 0.5;
+    sombra(g, f.w * 0.7, f.y + f.h - 1); g.drawImage(IMG.dragao, f.x, f.y - pulo, f.w, f.h);
+  }
+  function imgBandeira(g, t) {
+    fundo(g, '#c8d2d0'); const f = figura(g, IMG.bandeira, 70, 54); if (!f) return;
+    const o = Math.sin(t * 2.5) * 0.04; g.save(); g.translate(60, f.y + f.h); g.transform(1, 0, o, 1, 0, 0); g.drawImage(IMG.bandeira, -f.w / 2, -f.h, f.w, f.h); g.restore();
+  }
+  function imgMoldura(g, t) {
+    fundo(g, '#3a2a20'); const f = figura(g, IMG.moldura, 70, 52, 0, true); if (!f) return;
+    g.save(); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(IMG.moldura, f.x, f.y, f.w, f.h); g.restore();
+    const b = 0.5 + 0.5 * Math.sin(t * 3); g.fillStyle = `rgba(255,240,180,${(0.5 * b).toFixed(2)})`; g.fillRect(Math.round(f.x + f.w * 0.75), Math.round(f.y + f.h * 0.2), 1, 3); g.fillRect(Math.round(f.x + f.w * 0.75) - 1, Math.round(f.y + f.h * 0.2) + 1, 3, 1);
+  }
+  const ARTES = { tricornio: imgChapeu, capa: imgCapa, asas: imgAsas, aura, brasinha: imgDragao, nome, moldura: imgMoldura, bandeira: imgBandeira, teste };
+  window.IlhaLojaPixel = { IMG, asaGrade, W: W * 2, H: H * 2, desenha: (g, id, t, arroba) => { g.save(); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W * 2, H * 2); g.scale(2, 2); (ARTES[id] || teste)(g, t, arroba); g.restore(); } };
 })();
