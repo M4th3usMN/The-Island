@@ -156,11 +156,9 @@
       const t = tela.getContext('2d'); t.imageSmoothingEnabled = false; t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, 72, 45);
       t.translate(36, 40); t.scale(1.42, 1.42);
       const anda = Math.floor(sec / 3) % 2 === 1;
-      if (itens.includes('brasinha')) { t.save(); t.translate(-9, 0); comItens(t, look, itens.filter(i => i !== 'brasinha'), sec, anda, false); t.restore(); t.save(); t.translate(9, 0); t.scale(-1, 1); dragaoBebe(t, sec, anda); t.restore(); }
+      if (itens.includes('brasinha')) { t.save(); t.translate(-8, 0); comItens(t, look, itens.filter(i => i !== 'brasinha'), sec, anda, false); t.restore(); t.save(); t.translate(16, 0); t.scale(0.5, 0.5); dragaoBebe(t, sec, anda); t.restore(); }
       else if (itens.includes('bandeira')) { t.translate(-2, 0); t.scale(0.78, 0.78); casinha(t); t.save(); t.translate(10, 4); bandeira(t, sec); t.restore(); }
       else comItens(t, look, itens, sec, anda, false);
-      if (itens.includes('nome')) { const nm = '@' + ((S.eu && S.eu.arroba) || 'você'); t.font = 'bold 5px Silkscreen, monospace'; t.textAlign = 'center'; t.fillStyle = '#7a4a10'; t.fillText(nm, 0.5, -16.5); t.fillStyle = '#ffd046'; t.fillText(nm, 0, -17); }
-      if (itens.includes('moldura')) { t.strokeStyle = '#e8b830'; t.lineWidth = 1.5; t.strokeRect(-9, -20, 18, 22); P(t, -10, -21, 2, 2, '#e84a4a'); P(t, 8, -21, 2, 2, '#3a9ae8'); P(t, -10, 1, 2, 2, '#3a9ae8'); P(t, 8, 1, 2, 2, '#e84a4a'); }
       // 2) contorno escuro (silhueta deslocada) para destacar do fundo
       const sg = sil.getContext('2d'); sg.globalCompositeOperation = 'source-over'; sg.clearRect(0, 0, 72, 45); sg.drawImage(tela, 0, 0); sg.globalCompositeOperation = 'source-in'; sg.fillStyle = '#0a0608'; sg.fillRect(0, 0, 72, 45);
       g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 72, 45); fundo(g, idx, sec);
@@ -210,7 +208,7 @@
     const quem = S.on ? `Você está comprando para <b>@${esc(S.eu.arroba)}</b>.` : 'Para comprar, toque em <b>JOGAR</b> e entre com o seu @: o item fica no seu personagem.';
     K.abrir('LOJA DA ILHA', `<p class="lj-lead">Só visual: nada aqui dá XP, carta ou vantagem nas missões. Pagamento por <b>Pix</b>, confirmado na hora pelo Mercado Pago. Toda compra coloca o seu @ nos <b>créditos do próximo episódio</b>.</p>
       <p class="m-nota">${quem}</p>
-      ${S.on ? `<div class="lj-eu"><canvas width="72" height="45"></canvas><div><b>SEU PERSONAGEM</b><small>${meus().length ? meus().length + ' item(ns) da loja' : 'Nenhum item ainda'}</small></div></div>` : ''}
+      ${S.on ? `<div class="lj-eu"><canvas width="72" height="45"></canvas><div><b>SEU PERSONAGEM</b>${tem(S.eu, 'nome') ? `<small style="color:#ffd046">✦ @${esc(S.eu.arroba)}</small>` : ''}<small>${meus().length ? meus().length + ' item(ns) da loja' : 'Nenhum item ainda'}</small></div></div>` : ''}
       <div class="lj-grade">${ITENS.map(cartaItem).join('')}</div>`, el => {
       el.querySelectorAll('.lj-arte canvas').forEach(cv => { const it = ITENS[+cv.dataset.i]; arteHD(cv, it.id); });
       const eu = el.querySelector('.lj-eu canvas'); if (eu) previa(eu, 4, meus(), meuLook());
