@@ -12,22 +12,27 @@
     { id: 'tricornio', n: 'Chapéu de mago', d: 'Chapéu pontudo com faixa vermelha', v: 3, r: 'comum', tipo: 'CHAPÉU' },
     { id: 'capa', n: 'Capa encapuzada', d: 'Capa azul com capuz e broche de ouro', v: 5, r: 'raro', tipo: 'COSTAS' },
     { id: 'asas', n: 'Asas de dragão', d: 'Batem quando você anda', v: 8, r: 'epico', tipo: 'COSTAS · ANIMADA' },
+    { id: 'asas_anjo', n: 'Asas de anjo', d: 'Asas brancas que batem quando você anda', v: 8, r: 'epico', tipo: 'COSTAS · ANIMADA' },
     { id: 'aura', n: 'Aura de brasas', d: 'Faíscas de fogo sobem quando você anda', v: 6, r: 'raro', tipo: 'EFEITO ANIMADO' },
     { id: 'brasinha', n: 'Mascote Brasinha', d: 'Um bebê dragão que te segue pela ilha', v: 10, r: 'lendario', tipo: 'MASCOTE' },
+    { id: 'dragao_verde', n: 'Mascote Esmeralda', d: 'Um filhote de dragão verde que voa do seu lado', v: 10, r: 'lendario', tipo: 'MASCOTE · VOA' },
     { id: 'nome', n: 'Nome dourado', d: 'Seu @ brilha em ouro no mapa', v: 3, r: 'comum', tipo: 'NOME NO MAPA' },
     { id: 'moldura', n: 'Moldura de ouro', d: 'Sua carta com moldura ornamentada', v: 4, r: 'comum', tipo: 'SUA CARTA' },
     { id: 'bandeira', n: 'Estandarte na casa', d: 'Só para moradores: o estandarte do leão na sua casa', v: 5, r: 'raro', tipo: 'CASA DO MORADOR', morador: true }
   ];
   if (TESTE) ITENS.push({ id: 'teste', n: 'Item de teste', d: 'Só para testar o Pix (não faz nada)', v: 1, r: 'comum', tipo: 'TESTE' });
   const RAR = { comum: ['#b8bcc8', '#6a6e78', 'COMUM'], raro: ['#4aa0ff', '#1e4a8a', 'RARO'], epico: ['#b070ff', '#4a2a7a', 'ÉPICO'], lendario: ['#ffd046', '#b8862e', 'LENDÁRIO'] };
-  const tem = (v, id) => !!(v && v.loja && v.loja.includes(id));
+  const GRUPOS = [['asas', 'asas_anjo'], ['brasinha', 'dragao_verde']];
+  // itens do mesmo tipo (2 asas, 2 mascotes): vale o comprado por último
+  const ativo = (lista, id) => { if (!lista || !lista.includes(id)) return false; const gr = GRUPOS.find(x => x.includes(id)); if (!gr) return true; const meus = lista.filter(x => gr.includes(x)); return meus[meus.length - 1] === id; };
+  const tem = (v, id) => !!(v && ativo(v.loja, id));
   const P = (c, x, y, w, h, cor) => { c.fillStyle = cor; c.fillRect(x, y, w, h); };
 
   // ---------------------------------------------------------------- desenhos (origem = pés do personagem, virado para a direita)
   const IM = () => (window.IlhaLojaPixel && window.IlhaLojaPixel.IMG) || {};
   const ok = i => i && i.complete && i.naturalWidth;
   // chapéu de mago (arte do criador), aba em cima da cabeça
-  function tricornio(c) { const i = IM().chapeu; if (ok(i)) c.drawImage(i, -6.5, -22, 13, 10); }
+  function tricornio(c, sec) { const i = IM().chapeu, X = window.IlhaLojaPixel; if (!ok(i)) return; const k = 13 / i.width, o = X.ondaChapeu(sec || 0); X.linhas(c, i, -6.5, -21.5, k, r => o(r) * k * 1.4); }
   // capa encapuzada: atrás do corpo (de frente) ou por cima (de costas, com o capuz cobrindo a cabeça)
   const capaCostas = new Image(); capaCostas.src = 'itens-loja/capa_costas.png';
   function capaAtras(c, sec, anda, costas) {
@@ -37,8 +42,8 @@
   }
   function capaFrente() { }
   // asas de dragão (arte do criador): cada asa sobe e desce a partir do ombro
-  function asas(c, sec, anda) {
-    const i = IM().asas; if (!ok(i)) return;
+  function asas(c, sec, anda, nome) {
+    const i = IM()[nome || 'asas']; if (!ok(i)) return;
     const meio = Math.floor(i.width / 2), k = 0.6, h = i.height * k;
     const f = anda ? (Math.floor(sec * 7) % 2 ? 0.6 : 1) : 0.9 + Math.sin(sec * 2) * 0.08;
     [[0, meio, -1], [meio, i.width - meio, 1]].forEach(([sx, sw, lado]) => {
@@ -66,22 +71,29 @@
     P(c, -9, -1, 18, 2, 'rgba(0,0,0,.25)');
     c.drawImage(i, -13, -21 - pulo, 27, 21);
   }
+  // Esmeralda: voa ao lado, sombra no chão; origem nos pés
+  function dragaoVoa(c, sec, anda) {
+    const X = window.IlhaLojaPixel, i = IM().dragao_verde; if (!ok(i)) return;
+    const k = 0.7, voo = Math.sin(sec * 3) * 1.5;
+    P(c, -6, -1, 12, 2, 'rgba(0,0,0,.22)');
+    X.dragaoVerde(c, -i.width * k / 2, -i.height * k - 9 + voo, k, sec);
+  }
   // estandarte do leão (arte do criador) ao lado da casa, com flores
   function bandeira(c, sec) {
     const i = IM().bandeira;
-    if (ok(i)) { const o = Math.sin(sec * 2.5) * 0.03; c.save(); c.transform(1, 0, o, 1, 0, 0); c.drawImage(i, -7.5, -32, 15.6, 33.6); c.restore(); }
+    if (ok(i)) { const X = window.IlhaLojaPixel, k = 0.42, o = X.ondaBandeira(sec); X.linhas(c, i, -i.width * k / 2, -i.height * k + 1, k, r => o(r) * k * 1.6); }
     [[-14, 2, '#e84a8a'], [-11, 2, '#ffd046'], [-7, 2, '#e84a8a'], [3, 2, '#ffd046']].forEach(([x, y, f]) => { P(c, x, y, 2, 1, f); P(c, x, y + 1, 2, 1, '#4a8a3a'); });
   }
   // personagem completo com os itens (para a prévia grande e para o mapa)
   function comItens(c, look, itens, sec, anda, costas) {
-    const t = id => itens.includes(id);
+    const t = id => ativo(itens, id);
     if (t('aura')) auraChao(c, sec);
-    const atras = () => { if (t('asas')) asas(c, sec, anda); if (t('capa')) capaAtras(c, sec, anda, costas); };
+    const atras = () => { if (t('asas')) asas(c, sec, anda); if (t('asas_anjo')) asas(c, sec, anda, 'asas_anjo'); if (t('capa')) capaAtras(c, sec, anda, costas); };
     if (!costas) atras();
     SP.drawCharacter(c, 0, 0, t('tricornio') && look.chapeu ? Object.assign({}, look, { chapeu: undefined }) : look, { t: sec, walking: anda, side: 1, dir: costas ? 'up' : 'down' });
     if (costas) atras();
     if (t('capa') && !costas) capaFrente(c);
-    if (t('tricornio')) tricornio(c);
+    if (t('tricornio')) tricornio(c, sec);
     if (t('aura')) auraFaiscas(c, sec, anda);
   }
 
@@ -96,17 +108,19 @@
       const desenha = (fn, dy) => objs.push({ y: v.y + dy, f: () => { c.save(); c.translate(Math.round(v.x), Math.round(v.y)); c.scale(lado, 1); fn(); c.restore(); } });
       if (tem(v, 'aura')) desenha(() => auraChao(c, sec), -0.02);
       if (tem(v, 'asas')) desenha(() => asas(c, sec, anda), costas ? 0.02 : -0.01);
+      if (tem(v, 'asas_anjo')) desenha(() => asas(c, sec, anda, 'asas_anjo'), costas ? 0.02 : -0.01);
       if (tem(v, 'capa')) desenha(() => { capaAtras(c, sec, anda, costas); }, costas ? 0.02 : -0.01);
       if (tem(v, 'capa') && !costas) desenha(() => capaFrente(c), 0.01);
-      if (tem(v, 'tricornio')) desenha(() => tricornio(c), 0.015);
+      if (tem(v, 'tricornio')) desenha(() => tricornio(c, sec), 0.015);
       if (tem(v, 'aura')) desenha(() => auraFaiscas(c, sec, anda), 0.02);
-      if (tem(v, 'brasinha')) {
-        let b = segue.get(v.id); const alvo = { x: v.x - lado * 11, y: v.y + 2 };
+      const mascote = tem(v, 'brasinha') ? 'brasinha' : tem(v, 'dragao_verde') ? 'dragao_verde' : null;
+      if (mascote) {
+        let b = segue.get(v.id); const alvo = { x: v.x - lado * (mascote === 'brasinha' ? 11 : 15), y: v.y + 2 };
         if (!b) { b = { x: alvo.x, y: alvo.y, s: lado }; segue.set(v.id, b); }
         const dx = alvo.x - b.x, dy = alvo.y - b.y, d = Math.hypot(dx, dy);
         if (d > 0.6) { b.x += dx * 0.08; b.y += dy * 0.08; if (Math.abs(dx) > 0.5) b.s = dx > 0 ? -1 : 1; }
         const andando = d > 1.5;
-        objs.push({ y: b.y, f: () => { c.save(); c.translate(Math.round(b.x), Math.round(b.y)); c.scale(b.s * 0.62, 0.62); dragaoBebe(c, sec, andando); c.restore(); } });
+        objs.push({ y: b.y, f: () => { c.save(); c.translate(Math.round(b.x), Math.round(b.y)); if (mascote === 'brasinha') { c.scale(b.s * 0.62, 0.62); dragaoBebe(c, sec, andando); } else { c.scale(b.s, 1); dragaoVoa(c, sec, andando); } c.restore(); } });
       }
     });
   });
@@ -156,7 +170,8 @@
       const t = tela.getContext('2d'); t.imageSmoothingEnabled = false; t.setTransform(1, 0, 0, 1, 0, 0); t.clearRect(0, 0, 72, 45);
       t.translate(36, 40); t.scale(1.42, 1.42);
       const anda = Math.floor(sec / 3) % 2 === 1;
-      if (itens.includes('brasinha')) { t.save(); t.translate(-8, 0); comItens(t, look, itens.filter(i => i !== 'brasinha'), sec, anda, false); t.restore(); t.save(); t.translate(16, 0); t.scale(0.5, 0.5); dragaoBebe(t, sec, anda); t.restore(); }
+      const masc = ativo(itens, 'brasinha') ? 'brasinha' : ativo(itens, 'dragao_verde') ? 'dragao_verde' : null;
+      if (masc) { t.save(); t.translate(-8, 0); comItens(t, look, itens.filter(i => i !== masc), sec, anda, false); t.restore(); t.save(); t.translate(16, 0); if (masc === 'brasinha') { t.scale(0.5, 0.5); dragaoBebe(t, sec, anda); } else { t.scale(0.8, 0.8); dragaoVoa(t, sec, anda); } t.restore(); }
       else if (itens.includes('bandeira')) { t.translate(-2, 0); t.scale(0.78, 0.78); casinha(t); t.save(); t.translate(10, 4); bandeira(t, sec); t.restore(); }
       else comItens(t, look, itens, sec, anda, false);
       // 2) contorno escuro (silhueta deslocada) para destacar do fundo

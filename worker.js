@@ -69,7 +69,7 @@ function limpaLook(v) {
   return o;
 }
 // Loja da Ilha: preços conferidos no servidor (o site nunca decide o preço). Só itens visuais.
-const LOJA = { tricornio: [3, "Tricórnio pirata"], capa: [5, "Capa de veludo"], asas: [8, "Asas de dragão"], aura: [6, "Aura de brasas"],
+const LOJA = { tricornio: [3, "Tricórnio pirata"], capa: [5, "Capa de veludo"], asas: [8, "Asas de dragão"], asas_anjo: [8, "Asas de anjo"], aura: [6, "Aura de brasas"], dragao_verde: [10, "Mascote Esmeralda"],
   brasinha: [10, "Mascote Brasinha"], nome: [3, "Nome dourado"], moldura: [4, "Moldura de ouro"], bandeira: [5, "Bandeira na casa"], teste: [1, "Item de teste"] };
 // Barra da comunidade do episódio (Ofícios). Troque o id/título quando mudar o objetivo.
 const COM = { id: "ep7", titulo: "Ep. 7 · Preparar a ilha contra o Reino do Sul", meta: 300 };
@@ -324,7 +324,7 @@ export class Vila extends DurableObject {
     }
     a.loja = (await this.ctx.storage.get("loja:" + arroba)) || [];
     // perfil oficial da ilha usa todos os itens da loja
-    if (arroba === "the_island.lab") a.loja = ["tricornio", "capa", "asas", "aura", "brasinha", "nome", "moldura", "bandeira"];
+    if (arroba === "the_island.lab") a.loja = ["tricornio", "capa", "asas", "asas_anjo", "aura", "brasinha", "dragao_verde", "nome", "moldura", "bandeira"];
     Object.assign(a, { id: crypto.randomUUID().slice(0, 8), arroba, look, x: 392, y: 512, lv: nivel((rec.perfil && rec.perfil.xp) || 0), falhas: 0 });
     ws.serializeAttachment(a);
     const outros = this.viajantes().filter(([w]) => w !== ws).map(([, b]) => this.publico(b));

@@ -267,8 +267,12 @@
 
   // ---------------------------------------------------------------- artes desenhadas pelo criador da ilha (itens-loja/*.png)
   const IMG = {};
-  ['asas', 'dragao', 'chapeu', 'bandeira', 'capa', 'moldura'].forEach(n => { const i = new Image(); i.src = 'itens-loja/' + n + '.png'; IMG[n] = i; });
+  ['asas', 'asas_anjo', 'dragao', 'dragao_verde', 'dragao_verde_asa', 'chapeu', 'bandeira', 'capa', 'moldura'].forEach(n => { const i = new Image(); i.src = 'itens-loja/' + n + '.png'; IMG[n] = i; });
   const pronta = i => i && i.complete && i.naturalWidth;
+  // ANIMAÇÃO POR CÓDIGO: desenha a imagem linha a linha, cada linha deslocada por off(linha) -> pano ondulando, ponta do chapéu balançando
+  function linhas(g, img, x, y, k, off) { for (let r = 0; r < img.height; r++) g.drawImage(img, 0, r, img.width, 1, x + off(r), y + r * k, img.width * k, k + 0.02); }
+  const ondaChapeu = t => r => r < 9 ? Math.sin(t * 3) * Math.pow(1 - r / 9, 1.5) * 1.6 : 0;
+  const ondaBandeira = t => r => r >= 16 && r <= 53 ? Math.sin(t * 3 - r * 0.28) * 1.3 * ((r - 16) / 37) : 0;
   // centro visível do card: (60, 37); área útil ~80x50. Escala em passos de 0.5 (pixels inteiros na tela 2x).
   function figura(g, img, maxW, maxH, dy, liso) {
     if (!pronta(img)) return null;
@@ -279,10 +283,16 @@
   }
   const sombra = (g, w, y) => { g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(Math.round(60 - w / 2), y, Math.round(w), 2); };
   const flutua = t => Math.round(Math.sin(t * 2.2) * 1.5);
-  function imgChapeu(g, t) { fundo(g, '#c8d2d0'); const f = figura(g, IMG.chapeu, 70, 44); if (!f) return; sombra(g, f.w * 0.8, f.y + f.h + 3); g.drawImage(IMG.chapeu, f.x, f.y + flutua(t) - 1, f.w, f.h); }
+  function imgChapeu(g, t) { fundo(g, '#c8d2d0'); const f = figura(g, IMG.chapeu, 70, 44); if (!f) return; sombra(g, f.w * 0.8, f.y + f.h + 3); const o = ondaChapeu(t); linhas(g, IMG.chapeu, f.x, f.y + flutua(t) - 1, f.k, r => o(r) * f.k); }
   function imgCapa(g, t) { fundo(g, '#c8d2d0'); const f = figura(g, IMG.capa, 70, 50); if (!f) return; const o = Math.sin(t * 2) * 0.03; g.save(); g.translate(60, f.y); g.transform(1, 0, o, 1, 0, 0); g.drawImage(IMG.capa, -f.w / 2, 0, f.w, f.h); g.restore(); }
-  function imgAsas(g, t) {
-    fundo(g, '#c8d2d0'); const img = IMG.asas, f = figura(g, img, 84, 44); if (!f) return;
+  const imgAsas = (g, t) => asasCard(g, t, IMG.asas);
+  // asas de anjo: batem + penas brilhando
+  function imgAsasAnjo(g, t) {
+    asasCard(g, t, IMG.asas_anjo, '#9aa8b8');
+    for (let i = 0; i < 4; i++) { const u = (t * 0.6 + i / 4) % 1, x = Math.round(30 + i * 19 + Math.sin(t + i) * 3), y = Math.round(56 - u * 34); g.fillStyle = `rgba(255,255,255,${(1 - u).toFixed(2)})`; g.fillRect(x, y, 1, 1); if (u < 0.4) { g.fillRect(x - 1, y, 3, 1); g.fillRect(x, y - 1, 1, 3); } }
+  }
+  function asasCard(g, t, img, cor) {
+    fundo(g, cor || '#c8d2d0'); const f = figura(g, img, 84, 44); if (!f) return;
     const meio = Math.floor(img.width / 2), bate = 1 - 0.35 * (0.5 + 0.5 * Math.sin(t * 5)), base = f.y + f.h;
     [[0, meio, -1], [meio, img.width - meio, 1]].forEach(([sx, sw, lado]) => {
       g.save(); g.translate(60, base); g.scale(1, bate);
@@ -294,15 +304,28 @@
     const pulo = Math.round(Math.abs(Math.sin(t * 2.4 * Math.PI)) * 3) * 0.5;
     sombra(g, f.w * 0.7, f.y + f.h - 1); g.drawImage(IMG.dragao, f.x, f.y - pulo, f.w, f.h);
   }
+  // ESMERALDA (dragão verde voando): pairando, asa batendo pela raiz, rabo balançando e piscando os olhos vermelhos
+  function dragaoVerde(g, x, y, k, t) {
+    const corpo = IMG.dragao_verde, asa = IMG.dragao_verde_asa; if (!pronta(corpo) || !pronta(asa)) return;
+    const ang = -Math.sin(t * 9) * 0.38;
+    g.save(); g.translate(x + 18 * k, y + 13 * k); g.rotate(ang); g.drawImage(asa, -18 * k, -13 * k, asa.width * k, asa.height * k); g.restore();
+    linhas(g, corpo, x, y, k, r => r >= 22 ? Math.round(Math.sin(t * 4 - r * 0.5) * (r - 22) / 8) * k : 0);
+    if (t % 3.4 < 0.16) { g.fillStyle = '#4caf47'; [[3, 10], [8, 10]].forEach(([cx, cy]) => g.fillRect(x + cx * k, y + cy * k, k, 3 * k)); }
+  }
+  function imgDragaoVerde(g, t) {
+    fundo(g, '#c8d2d0'); const f = figura(g, IMG.dragao_verde, 70, 52, 2); if (!f) return;
+    const voo = Math.sin(t * 3) * 2.5; sombra(g, f.w * (0.55 - voo * 0.03), f.y + f.h + 3);
+    dragaoVerde(g, f.x, Math.round((f.y - 1 + voo) * 2) / 2, f.k, t);
+  }
   function imgBandeira(g, t) {
-    fundo(g, '#c8d2d0'); const f = figura(g, IMG.bandeira, 70, 54); if (!f) return;
-    const o = Math.sin(t * 2.5) * 0.04; g.save(); g.translate(60, f.y + f.h); g.transform(1, 0, o, 1, 0, 0); g.drawImage(IMG.bandeira, -f.w / 2, -f.h, f.w, f.h); g.restore();
+    fundo(g, '#c8d2d0'); const f = figura(g, IMG.bandeira, 70, 56, 0, true); if (!f) return;
+    const o = ondaBandeira(t); linhas(g, IMG.bandeira, f.x, f.y, f.k, r => o(r) * f.k);
   }
   function imgMoldura(g, t) {
     fundo(g, '#3a2a20'); const f = figura(g, IMG.moldura, 70, 52, 0, true); if (!f) return;
     g.save(); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(IMG.moldura, f.x, f.y, f.w, f.h); g.restore();
     const b = 0.5 + 0.5 * Math.sin(t * 3); g.fillStyle = `rgba(255,240,180,${(0.5 * b).toFixed(2)})`; g.fillRect(Math.round(f.x + f.w * 0.75), Math.round(f.y + f.h * 0.2), 1, 3); g.fillRect(Math.round(f.x + f.w * 0.75) - 1, Math.round(f.y + f.h * 0.2) + 1, 3, 1);
   }
-  const ARTES = { tricornio: imgChapeu, capa: imgCapa, asas: imgAsas, aura, brasinha: imgDragao, nome, moldura: imgMoldura, bandeira: imgBandeira, teste };
-  window.IlhaLojaPixel = { IMG, asaGrade, W: W * 2, H: H * 2, desenha: (g, id, t, arroba) => { g.save(); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W * 2, H * 2); g.scale(2, 2); (ARTES[id] || teste)(g, t, arroba); g.restore(); } };
+  const ARTES = { tricornio: imgChapeu, capa: imgCapa, asas: imgAsas, asas_anjo: imgAsasAnjo, dragao_verde: imgDragaoVerde, aura, brasinha: imgDragao, nome, moldura: imgMoldura, bandeira: imgBandeira, teste };
+  window.IlhaLojaPixel = { IMG, linhas, dragaoVerde, ondaChapeu, ondaBandeira, asaGrade, W: W * 2, H: H * 2, desenha: (g, id, t, arroba) => { g.save(); g.imageSmoothingEnabled = false; g.clearRect(0, 0, W * 2, H * 2); g.scale(2, 2); (ARTES[id] || teste)(g, t, arroba); g.restore(); } };
 })();
