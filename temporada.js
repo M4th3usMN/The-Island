@@ -175,7 +175,7 @@
       if (!ok) return;
       const h = hist(); h.pistas[p.id] = Date.now(); J.ganhaXp(15); J.salvar();
       const n = Object.keys(h.pistas).length;
-      J.anuncia({ titulo: `PISTA ${n}/3`, texto: `Você achou ${p.n}.${n >= 3 ? ' Leve as pistas até o Abdula.' : ''}`, dur: 6000 });
+      J.anuncia({ titulo: `PISTA ${n}/3`, texto: `Você achou ${p.n}.${n >= 3 ? ` Leve as pistas até ${papel('abdula') === 'abdula' ? 'o Abdula' : nomeDe('abdula')}.` : ''}`, dur: 6000 });
       if (n >= 3) h.passo = 2;
     });
   }
@@ -222,23 +222,29 @@
   }, true);
 
   // conversar: missão de história (Yukine → pistas → Abdula → Egil) e o Armeiro
-  J.aoConversar.unshift(m => {
+  // se o jogador É um dos personagens da missão, outro morador assume aquele passo
+  const SUB = { yukine: 'charles', abdula: 'bob', egil: 'felipao' };
+  const papel = id => (S.eu && S.eu.mor && S.eu.mor.id === id) ? SUB[id] : id;
+  const nomeDe = id => (G.BY[papel(id)] || {}).nome || id;
+  J.aoConversar.unshift(m0 => {
     if (!S.on || T.jogo) return false;
+    const inv2 = { [papel('yukine')]: 'yukine', [papel('abdula')]: 'abdula', [papel('egil')]: 'egil' };
+    const m = inv2[m0.id] ? Object.assign({}, m0, { id: inv2[m0.id] }) : m0, quem = m0.id;
     const h = hist(), dentro = Date.now() < ESPIAO.prazo, fala = (id, txt) => { S.falas = S.falas.filter(f => f.quem !== id); S.falas.push({ quem: id, txt, ate: Date.now() + 6000 }); };
     if (m.id === 'yukine' && h.passo === 0 && dentro) {
-      if (!T.eco || repNv(T.eco.rep) < 1) { fala('yukine', 'Os ancestrais só falam com quem a ilha conhece. Volte quando for Conhecido.'); return true; }
-      h.passo = 1; J.salvar(); fala('yukine', 'Lira me mostrou: alguém manda sinais ao Reino do Sul. Procure no cais, na ponte e na floresta.');
+      if (!T.eco || repNv(T.eco.rep) < 1) { fala(quem, 'Os ancestrais só falam com quem a ilha conhece. Volte quando for Conhecido.'); return true; }
+      h.passo = 1; J.salvar(); fala(quem, quem === 'yukine' ? 'Lira me mostrou: alguém manda sinais ao Reino do Sul. Procure no cais, na ponte e na floresta.' : 'O Yukine me contou o que a Lira viu: alguém manda sinais ao Reino do Sul. Procure no cais, na ponte e na floresta.');
       J.anuncia({ titulo: 'MISSÃO DE HISTÓRIA: O ESPIÃO', texto: `Ache 3 pistas (cais, ponte e floresta) antes de ${fmtData(ESPIAO.prazo)}.`, acao: 'VER', fn: () => abrir(1), dur: 8000 });
       return true;
     }
     if (m.id === 'abdula' && h.passo === 2 && dentro) {
-      h.passo = 3; J.salvar(); fala('abdula', 'Tá bom, tá bom! Eu só vendia mapas... mas não fui eu quem acendeu a fogueira de sinal!');
-      J.anuncia({ titulo: 'O ESPIÃO', texto: 'O Abdula confessou que vendia mapas, mas jura que não é o espião. Leve tudo ao Egil Montfort.', dur: 8000 });
+      h.passo = 3; J.salvar(); fala(quem, quem === 'abdula' ? 'Tá bom, tá bom! Eu só vendia mapas... mas não fui eu quem acendeu a fogueira de sinal!' : 'Eu vi o Abdula vendendo mapas no cais... mas a fogueira de sinal não foi ele.');
+      J.anuncia({ titulo: 'O ESPIÃO', texto: `${papel('abdula') === 'abdula' ? 'O Abdula confessou que vendia mapas' : nomeDe('abdula') + ' contou que viu o Abdula vendendo mapas'}, mas o espião é outro. Leve tudo ${papel('egil') === 'egil' ? 'ao Egil Montfort' : 'a ' + nomeDe('egil')}.`, dur: 8000 });
       return true;
     }
     if (m.id === 'egil' && h.passo === 3 && dentro) {
       h.passo = 4; h.feito = Date.now(); J.salvar(); J.ganhaXp(120); ganho('historia:espiao');
-      fala('egil', 'Mapas vendidos e um sinal no escuro... O espião ainda está entre nós. Você fez bem.');
+      fala(quem, quem === 'egil' ? 'Mapas vendidos e um sinal no escuro... O espião ainda está entre nós. Você fez bem.' : 'Vou levar isso ao conselho e ao Egil. O espião ainda está entre nós. Você fez bem.');
       J.anuncia({ titulo: 'MISSÃO CUMPRIDA: O ESPIÃO', texto: 'Título "Caçador de Espiões", +120 XP, +50 TIC e +30 de reputação. O resto da história vem no próximo episódio!', dur: 9000 });
       return true;
     }
@@ -291,7 +297,7 @@
   }
   function abaHistoria(c) {
     const v = T.res && T.res.votacao, ev = T.res && T.res.evento, h = hist(), dentro = Date.now() < ESPIAO.prazo;
-    const passos = ['Fale com o Yukine no santuário (precisa ser Conhecido)', 'Ache 3 pistas: cais, ponte e floresta (minijogo de investigar)', 'Confronte o Abdula', 'Leve as provas ao Egil Montfort', 'Cumprida!'];
+    const passos = [`Fale com ${nomeDe('yukine')}${papel('yukine') === 'yukine' ? ' no santuário' : ''} (precisa ser Conhecido)`, 'Ache 3 pistas: cais, ponte e floresta (minijogo de investigar)', `Confronte ${papel('abdula') === 'abdula' ? 'o Abdula' : nomeDe('abdula')}`, `Leve as provas ${papel('egil') === 'egil' ? 'ao Egil Montfort' : 'a ' + nomeDe('egil')}`, 'Cumprida!'];
     const totV = v ? v.ops.reduce((s, o) => s + o.v, 0) : 0;
     c.innerHTML = (v ? `<div class="md-bloco tp-voto"><h3>🗳️ VOTAÇÃO QUE MUDA O MAPA</h3><p><b>${esc(v.titulo)}</b> ${v.encerrada ? 'Encerrada.' : `Termina ${fmtData(v.fim)} (faltam ${falta(v.fim)}).`} O canteiro já está no mapa; quem vencer é erguido com as entregas da ilha.</p>
       ${v.ops.map(o => `<div class="tp-op ${v.meu === o.id ? 'meu' : ''}"><div><b>${esc(o.n)}</b>${barraHtml(o.v, totV || 1)}<small>${o.v} voto${o.v === 1 ? '' : 's'}${v.vencedor === o.id ? ' · VENCEU' : ''}</small></div>${!v.meu && !v.encerrada ? `<button type="button" class="b-ouro tp-votar" data-op="${o.id}">VOTAR</button>` : v.meu === o.id ? '<span class="tp-selo">SEU VOTO</span>' : ''}</div>`).join('')}

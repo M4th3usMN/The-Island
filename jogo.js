@@ -477,11 +477,16 @@
   window.IlhaClique = (cx, cy, q) => {
     if (!S.on) return false;
     S.camLivre = false;
-    if (q) {
-      if (Math.hypot(q.p.x - S.eu.x, q.p.y - S.eu.y) < 24) conversar(q.m);
-      else { S.conversa = q.m.id; vaiPara(q.p.x, q.p.y + 4); }
+    const vai = q => { if (Math.hypot(q.p.x - S.eu.x, q.p.y - S.eu.y) < 24) conversar(q.m); else { S.conversa = q.m.id; vaiPara(q.p.x, q.p.y + 4); } };
+    // vários personagens amontoados no mesmo ponto: pergunta com quem falar
+    const varios = G.hitAll ? G.hitAll(cx, cy).filter(x => !(S.eu.mor && x.m.id === S.eu.mor.id)) : [];
+    if (varios.length > 1) {
+      K.abrir('COM QUEM VOCÊ QUER FALAR?', `<div class="jg-quem">${varios.slice(0, 8).map((x, i) => `<button type="button" class="b-linha" data-i="${i}"><b>${esc(x.m.nome)}</b><small>${esc(x.m.profissao || '')}</small></button>`).join('')}</div>`, el => {
+        el.querySelectorAll('.jg-quem button').forEach(b => b.onclick = () => { K.fechar(); vai(varios[+b.dataset.i]); });
+      });
       return true;
     }
+    if (q) { vai(q); return true; }
     S.conversa = null;
     const w = G.toWorld(cx, cy);
     vaiPara(w.x, w.y); S.marca = { x: w.x, y: w.y, ate: Date.now() + 600 }; // tocar numa casa leva até a porta

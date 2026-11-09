@@ -863,6 +863,17 @@
     });
     return best;
   }
+  // todos os personagens sob o toque (para escolher quando estão amontoados)
+  function hitAll(cx, cy) {
+    const r = stage.getBoundingClientRect();
+    const wx = (cx - r.left) / cam.s + lastOx, wy = (cy - r.top) / cam.s + lastOy, out = [];
+    frameChars.forEach(q => {
+      if (q.p.hidden) return;
+      const hb = SP.hitBox(q.m.visual), pad = cam.s <= 2 ? 4 : 2;
+      if (wx >= q.p.x + hb.l - pad && wx <= q.p.x + hb.r + pad && wy >= q.p.y + hb.t - pad && wy <= q.p.y + hb.b + pad) out.push(q);
+    });
+    return out.sort((a, b) => b.p.y - a.p.y);
+  }
   let drag = null;
   stage.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, moved: false, id: e.pointerId }; stage.setPointerCapture(e.pointerId); });
   stage.addEventListener('pointermove', e => {
@@ -990,7 +1001,7 @@
   updateHUD(Date.now());
   if (!window.ILHA_MANUAL) requestAnimationFrame(loop);
   window.GrandeIlha = {
-    posAt, MOR, BY, casas, LUG, estado, cam, seguir, pararSeguir,
+    hitAll, posAt, MOR, BY, casas, LUG, estado, cam, seguir, pararSeguir,
     rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, jogados: JOGADOS, arrived: (m, t) => t >= m._ch, localHours,
     andavel: (x, y) => {
       if (x > LUG.ponte.x - 9 && x < LUG.ponte.x + 9 && y > LUG.ponte.y - 5 && y < LUG.ponte.y + 4) return true; // tábuas da ponte
