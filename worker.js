@@ -323,6 +323,8 @@ export class Vila extends DurableObject {
       try { w.close(4001, "outra sessão"); } catch (e) { }
     }
     a.loja = (await this.ctx.storage.get("loja:" + arroba)) || [];
+    // perfil oficial da ilha usa todos os itens da loja
+    if (arroba === "the_island.lab") a.loja = ["tricornio", "capa", "asas", "aura", "brasinha", "nome", "moldura", "bandeira"];
     Object.assign(a, { id: crypto.randomUUID().slice(0, 8), arroba, look, x: 392, y: 512, lv: nivel((rec.perfil && rec.perfil.xp) || 0), falhas: 0 });
     ws.serializeAttachment(a);
     const outros = this.viajantes().filter(([w]) => w !== ws).map(([, b]) => this.publico(b));
