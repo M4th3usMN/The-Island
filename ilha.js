@@ -566,7 +566,10 @@
   function render(t) {
     const S = cam.s * dpr;
     const bw = Math.ceil(stage.width / S) + 2, bh = Math.ceil(stage.height / S) + 2;
-    if (buf.width !== bw || buf.height !== bh) { buf.width = bw; buf.height = bh; lightC.width = bw; lightC.height = bh; }
+    // SUPERAMOSTRAGEM: o mundo é desenhado Q vezes mais fino (pixel art continua igual, itens da loja ficam nítidos)
+    const Q = Math.max(1, Math.min(4, Math.floor(S)));
+    if (buf.width !== bw * Q || buf.height !== bh * Q) { buf.width = bw * Q; buf.height = bh * Q; lightC.width = bw; lightC.height = bh; }
+    bctx.imageSmoothingEnabled = false;
     const hrs = localHours(t), night = darkness(hrs) > 0.3, dia = diaDe(t), sec = t / 1000;
 
     // personagens
@@ -591,10 +594,10 @@
     lastOx = ox; lastOy = oy;
 
     const c = bctx;
-    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.setTransform(Q, 0, 0, Q, 0, 0);
     c.fillStyle = '#0e243e'; c.fillRect(0, 0, bw, bh);
     c.drawImage(terr, -ox, -oy);
-    c.setTransform(1, 0, 0, 1, -ox, -oy);
+    c.setTransform(Q, 0, 0, Q, -ox * Q, -oy * Q);
 
     // agua animada
     const fi = Math.floor(sec * 2.5);
@@ -649,7 +652,7 @@
 
     // clima
     const cl = clima(t);
-    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.setTransform(Q, 0, 0, Q, 0, 0);
     if (cl === 'nublado') { c.fillStyle = 'rgba(30,40,60,0.14)'; c.fillRect(0, 0, bw, bh); }
     if (cl === 'chuva') {
       c.fillStyle = 'rgba(20,30,50,0.22)'; c.fillRect(0, 0, bw, bh);

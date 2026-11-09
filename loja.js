@@ -32,19 +32,19 @@
   const IM = () => (window.IlhaLojaPixel && window.IlhaLojaPixel.IMG) || {};
   const ok = i => i && i.complete && i.naturalWidth;
   // chapéu de mago (arte do criador), aba em cima da cabeça
-  function tricornio(c, sec) { const i = IM().chapeu, X = window.IlhaLojaPixel; if (!ok(i)) return; const k = 13 / i.width, o = X.ondaChapeu(sec || 0); X.linhas(c, i, -6.5, -21.5, k, r => o(r) * k * 1.4); }
+  function tricornio(c, sec) { const i = IM().chapeu, X = window.IlhaLojaPixel; if (!ok(i)) return; const k = 0.5, o = X.ondaChapeu(sec || 0); X.linhas(c, i, -5.5, -20.5, k, r => Math.round(o(r) * 2.4) / 4); }
   // capa encapuzada: atrás do corpo (de frente) ou por cima (de costas, com o capuz cobrindo a cabeça)
   const capaCostas = new Image(); capaCostas.src = 'itens-loja/capa_costas.png';
   function capaAtras(c, sec, anda, costas) {
     const i = costas ? capaCostas : IM().capa; if (!ok(i)) return;
     const o = anda ? Math.sin(sec * 9) * 0.06 : 0;
-    c.save(); c.translate(0, 1); c.transform(1, 0, o, 1, 0, 0); c.drawImage(i, -7, -18, 14, 18); c.restore();
+    c.save(); c.translate(0, 1); c.transform(1, 0, o, 1, 0, 0); c.drawImage(i, -7.75, -18.5, i.width * 0.5, i.height * 0.5); c.restore();
   }
   function capaFrente() { }
   // asas de dragão (arte do criador): cada asa sobe e desce a partir do ombro
   function asas(c, sec, anda, nome) {
     const i = IM()[nome || 'asas']; if (!ok(i)) return;
-    const meio = Math.floor(i.width / 2), k = 0.6, h = i.height * k;
+    const meio = Math.floor(i.width / 2), k = nome === 'asas_anjo' ? 0.75 : 0.5, h = i.height * k;
     const f = anda ? (Math.floor(sec * 7) % 2 ? 0.6 : 1) : 0.9 + Math.sin(sec * 2) * 0.08;
     [[0, meio, -1], [meio, i.width - meio, 1]].forEach(([sx, sw, lado]) => {
       c.save(); c.translate(0, -10); c.scale(1, f);
@@ -74,14 +74,14 @@
   // Esmeralda: voa ao lado, sombra no chão; origem nos pés
   function dragaoVoa(c, sec, anda) {
     const X = window.IlhaLojaPixel, i = IM().dragao_verde; if (!ok(i)) return;
-    const k = 0.7, voo = Math.sin(sec * 3) * 1.5;
+    const k = 0.5, voo = Math.round(Math.sin(sec * 3) * 6) / 4;
     P(c, -6, -1, 12, 2, 'rgba(0,0,0,.22)');
     X.dragaoVerde(c, -i.width * k / 2, -i.height * k - 9 + voo, k, sec);
   }
   // estandarte do leão (arte do criador) ao lado da casa, com flores
   function bandeira(c, sec) {
     const i = IM().bandeira;
-    if (ok(i)) { const X = window.IlhaLojaPixel, k = 0.42, o = X.ondaBandeira(sec); X.linhas(c, i, -i.width * k / 2, -i.height * k + 1, k, r => o(r) * k * 1.6); }
+    if (ok(i)) { const X = window.IlhaLojaPixel, k = 0.5, o = X.ondaBandeira(sec); X.linhas(c, i, -9.5, -i.height * k + 1, k, r => Math.round(o(r) * 3.2) / 4); }
     [[-14, 2, '#e84a8a'], [-11, 2, '#ffd046'], [-7, 2, '#e84a8a'], [3, 2, '#ffd046']].forEach(([x, y, f]) => { P(c, x, y, 2, 1, f); P(c, x, y + 1, 2, 1, '#4a8a3a'); });
   }
   // personagem completo com os itens (para a prévia grande e para o mapa)
@@ -115,12 +115,12 @@
       if (tem(v, 'aura')) desenha(() => auraFaiscas(c, sec, anda), 0.02);
       const mascote = tem(v, 'brasinha') ? 'brasinha' : tem(v, 'dragao_verde') ? 'dragao_verde' : null;
       if (mascote) {
-        let b = segue.get(v.id); const alvo = { x: v.x - lado * (mascote === 'brasinha' ? 11 : 15), y: v.y + 2 };
+        let b = segue.get(v.id); const alvo = { x: v.x - lado * 11, y: v.y + 2 };
         if (!b) { b = { x: alvo.x, y: alvo.y, s: lado }; segue.set(v.id, b); }
         const dx = alvo.x - b.x, dy = alvo.y - b.y, d = Math.hypot(dx, dy);
         if (d > 0.6) { b.x += dx * 0.08; b.y += dy * 0.08; if (Math.abs(dx) > 0.5) b.s = dx > 0 ? -1 : 1; }
         const andando = d > 1.5;
-        objs.push({ y: b.y, f: () => { c.save(); c.translate(Math.round(b.x), Math.round(b.y)); if (mascote === 'brasinha') { c.scale(b.s * 0.62, 0.62); dragaoBebe(c, sec, andando); } else { c.scale(b.s, 1); dragaoVoa(c, sec, andando); } c.restore(); } });
+        objs.push({ y: b.y, f: () => { c.save(); c.translate(Math.round(b.x), Math.round(b.y)); if (mascote === 'brasinha') { c.scale(b.s * 0.5, 0.5); dragaoBebe(c, sec, andando); } else { c.scale(b.s, 1); dragaoVoa(c, sec, andando); } c.restore(); } });
       }
     });
   });
