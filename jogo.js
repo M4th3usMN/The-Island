@@ -365,8 +365,63 @@
 
   // ---------------------------------------------------------------- movimento
   let ultimoEnvio = 0, envioPendente = null;
-  function vaiPara(x, y, silencioso) {
+  // ---------------------------------------------------------------- caminho: desvia sozinho de casas, prédios, riacho e lago (A* numa grade de 3 px)
+  const CEL = 3, GW = Math.ceil(760 / CEL), GH = Math.ceil(600 / CEL);
+  let grade = null, gradeT = 0;
+  function livreGrade() {
+    if (!grade || Date.now() - gradeT > 30000) {
+      grade = new Uint8Array(GW * GH);
+      for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) grade[j * GW + i] = G.andavel(i * CEL + 1.5, j * CEL + 1.5) ? 1 : 0;
+      gradeT = Date.now();
+    }
+    return grade;
+  }
+  function visivel(a, b) {
+    const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y) / 1.2);
+    for (let k = 1; k <= n; k++) if (!G.andavel(a.x + (b.x - a.x) * k / n, a.y + (b.y - a.y) * k / n)) return false;
+    return true;
+  }
+  function rota(de, para) {
+    if (visivel(de, para)) return [para];
+    const g = livreGrade(), cel = p => [Math.max(0, Math.min(GW - 1, Math.floor(p.x / CEL))), Math.max(0, Math.min(GH - 1, Math.floor(p.y / CEL)))];
+    let [si, sj] = cel(de), [gi, gj] = cel(para);
+    if (!g[gj * GW + gi]) { // destino dentro de uma parede: vai para o ponto livre mais perto
+      let melhor = null;
+      for (let r = 1; r < 8 && !melhor; r++) for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) { const i = gi + di, j = gj + dj; if (i >= 0 && j >= 0 && i < GW && j < GH && g[j * GW + i] && (!melhor || Math.hypot(di, dj) < melhor[2])) melhor = [i, j, Math.hypot(di, dj)]; }
+      if (!melhor) return null; gi = melhor[0]; gj = melhor[1]; para = { x: gi * CEL + 1.5, y: gj * CEL + 1.5 };
+    }
+    const N = GW * GH, custo = new Float32Array(N).fill(Infinity), pai = new Int32Array(N).fill(-1), fechado = new Uint8Array(N);
+    const heap = [], h = (i, j) => { const dx = Math.abs(i - gi), dy = Math.abs(j - gj); return (dx + dy) + (Math.SQRT2 - 2) * Math.min(dx, dy); };
+    const push = (f, k) => { heap.push([f, k]); let c = heap.length - 1; while (c > 0) { const p = (c - 1) >> 1; if (heap[p][0] <= heap[c][0]) break; [heap[p], heap[c]] = [heap[c], heap[p]]; c = p; } };
+    const pop = () => { const top = heap[0], ult = heap.pop(); if (heap.length) { heap[0] = ult; let c = 0; for (;;) { const a = 2 * c + 1, b = a + 1; let m = c; if (a < heap.length && heap[a][0] < heap[m][0]) m = a; if (b < heap.length && heap[b][0] < heap[m][0]) m = b; if (m === c) break; [heap[m], heap[c]] = [heap[c], heap[m]]; c = m; } } return top; };
+    const ini = sj * GW + si, fim = gj * GW + gi; custo[ini] = 0; push(h(si, sj), ini);
+    let passos = 0, achou = false;
+    while (heap.length && passos++ < 40000) {
+      const [, k] = pop(); if (fechado[k]) continue; fechado[k] = 1;
+      if (k === fim) { achou = true; break; }
+      const i = k % GW, j = (k / GW) | 0;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        if (!di && !dj) continue; const ni = i + di, nj = j + dj; if (ni < 0 || nj < 0 || ni >= GW || nj >= GH) continue;
+        const nk = nj * GW + ni; if (!g[nk] || fechado[nk]) continue;
+        if (di && dj && (!g[j * GW + ni] || !g[nj * GW + i])) continue; // não corta quina de parede
+        const nc = custo[k] + (di && dj ? Math.SQRT2 : 1);
+        if (nc < custo[nk]) { custo[nk] = nc; pai[nk] = k; push(nc + h(ni, nj), nk); }
+      }
+    }
+    if (!achou) return null;
+    const pts = []; for (let k = fim; k !== -1 && k !== ini; k = pai[k]) pts.push({ x: (k % GW) * CEL + 1.5, y: ((k / GW) | 0) * CEL + 1.5 });
+    pts.reverse(); pts[pts.length - 1] = para;
+    // encurta: pula os pontos que dá para ver em linha reta
+    const out = []; let atual = de, i = 0;
+    while (i < pts.length) { let j = pts.length - 1; while (j > i && !visivel(atual, pts[j])) j--; out.push(pts[j]); atual = pts[j]; i = j + 1; }
+    return out;
+  }
+  function vaiPara(x, y, silencioso, direto) {
     if (!S.on) return;
+    const r = direto ? null : rota({ x: S.eu.x, y: S.eu.y }, { x, y });
+    if (!direto && !r) return; // não tem caminho (ex.: no meio do lago)
+    S.eu.rota = r && r.length > 1 ? r.slice(1) : null; S.eu.destino = { x, y };
+    if (r && r.length) { x = r[0].x; y = r[0].y; }
     S.eu.tx = x; S.eu.ty = y;
     if (!silencioso) S.camLivre = false;
     const agora = Date.now();
@@ -377,9 +432,23 @@
   function passo(v, dt, meu) {
     const dx = v.tx - v.x, dy = v.ty - v.y, d = Math.hypot(dx, dy);
     if (!meu && d > 140) { v.x = v.tx; v.y = v.ty; v.anda = false; return; }
-    if (d < 0.6) { v.anda = false; return; }
+    if (d < 0.6) {
+      if (meu && v.rota && v.rota.length) { const q = v.rota.shift(); v.tx = q.x; v.ty = q.y; envia({ t: 'alvo', x: q.x, y: q.y }); return; }
+      v.anda = false; return;
+    }
     const st = Math.min(d, VEL * (meu && window.IlhaJogo.bonus ? window.IlhaJogo.bonus.vel() : 1) * dt), nx = v.x + dx / d * st, ny = v.y + dy / d * st;
-    if (meu && !G.andavel(nx, ny)) { v.tx = v.x; v.ty = v.y; v.anda = false; envia({ t: 'alvo', x: v.x, y: v.y }); return; }
+    if (meu && !G.andavel(nx, ny)) {
+      // encostou numa parede: escorrega pelo lado livre e, se não der, recalcula o caminho
+      const sx = v.x + Math.sign(dx) * st, sy = v.y + Math.sign(dy) * st;
+      if (Math.abs(dx) > 0.3 && G.andavel(sx, v.y)) { v.x = sx; v.anda = true; return; }
+      if (Math.abs(dy) > 0.3 && G.andavel(v.x, sy)) { v.y = sy; v.anda = true; return; }
+      const alvo = v.destino || { x: v.tx, y: v.ty };
+      if (Date.now() - (v.replan || 0) > 600) {
+        v.replan = Date.now(); const r = rota({ x: v.x, y: v.y }, alvo);
+        if (r && r.length && !(Math.abs(r[0].x - v.tx) < 0.5 && Math.abs(r[0].y - v.ty) < 0.5)) { v.tx = r[0].x; v.ty = r[0].y; v.rota = r.slice(1); envia({ t: 'alvo', x: v.tx, y: v.ty }); return; }
+      }
+      v.tx = v.x; v.ty = v.y; v.rota = null; v.anda = false; envia({ t: 'alvo', x: v.x, y: v.y }); return;
+    }
     v.x = nx; v.y = ny; v.anda = true;
     if (Math.abs(dx) > 0.4) v.s = dx > 0 ? 1 : -1;
     v.dir = dy < -Math.abs(dx) ? 'up' : 'down';
@@ -397,8 +466,11 @@
     if (!S.on || !teclas.size) return;
     let dx = 0, dy = 0; teclas.forEach(k => { dx += DIRS[k][0]; dy += DIRS[k][1]; });
     if (!dx && !dy) return;
-    const n = Math.hypot(dx, dy), x = S.eu.x + dx / n * 10, y = S.eu.y + dy / n * 10;
-    if (G.andavel(x, y)) vaiPara(x, y);
+    const n = Math.hypot(dx, dy), a0 = Math.atan2(dy, dx);
+    for (const da of [0, 0.5, -0.5, 1, -1, 1.4, -1.4]) { // reto; se bater, escorrega para os lados
+      const x = S.eu.x + Math.cos(a0 + da) * 10, y = S.eu.y + Math.sin(a0 + da) * 10;
+      if (G.andavel(x, y) && G.andavel(S.eu.x + Math.cos(a0 + da) * 4, S.eu.y + Math.sin(a0 + da) * 4)) { vaiPara(x, y, false, true); break; }
+    }
   }, 120);
 
   // tocar no chão anda; tocar num morador vai até ele e puxa conversa
@@ -412,7 +484,7 @@
     }
     S.conversa = null;
     const w = G.toWorld(cx, cy);
-    if (G.andavel(w.x, w.y)) { vaiPara(w.x, w.y); S.marca = { x: w.x, y: w.y, ate: Date.now() + 600 }; }
+    vaiPara(w.x, w.y); S.marca = { x: w.x, y: w.y, ate: Date.now() + 600 }; // tocar numa casa leva até a porta
     return true;
   };
   const stage = $('ilha'); let arrasto = null;
@@ -639,5 +711,5 @@
   }
   window.addEventListener('pagehide', () => { if (S.on && S.mudou) { salvaLocal(); envia({ t: 'perfil', perfil: S.perfil }); } });
   // para módulos como a Missão do Dragão (missao-dragao.js)
-  Object.assign(window.IlhaJogo, { ganhaXp, conquista, revisa, ganhaCarta, abrirCarta, anuncia, abrirPainel, envia, atualizaUI, salvar: () => { S.mudou = true; } });
+  Object.assign(window.IlhaJogo, { rota, vaiPara, ganhaXp, conquista, revisa, ganhaCarta, abrirCarta, anuncia, abrirPainel, envia, atualizaUI, salvar: () => { S.mudou = true; } });
 })();

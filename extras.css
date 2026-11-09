@@ -427,5 +427,5 @@
 .tp-vender select, .tp-vender input { background: #05090d; color: var(--texto); border: 2px solid var(--borda); padding: 6px; font: inherit; font-size: 14px; min-width: 0; }
 .tp-pacotes { grid-template-columns: repeat(2, 1fr); }
 .tp-pacotes li { background: var(--pergaminho); color: var(--tinta); border: 2px solid #8a5a22; padding: 8px; display: grid; gap: 4px; text-align: center; }
-.tp-pacotes b { font-family: Silkscreen, monospace; font-size: 15px; } .tp-pacotes small { font-size: 12px; color: #6a4a2a; }
+.tp-pacotes b { font-family: Silkscreen, monospace; font-size: 15px; } .tp-preco { font-family: Silkscreen, monospace; font-size: 13px; background: var(--ouro); color: #1a1008; padding: 6px; border: 2px solid #000; } .tp-pacotes small { font-size: 12px; color: #6a4a2a; }
 .tp-voto .md-barra, .md-bloco .md-barra { margin: 4px 0; }

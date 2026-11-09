@@ -133,6 +133,7 @@ export class Vila extends DurableObject {
       if (id) await this.confere(id);
       return new Response("ok");
     }
+    if (rota === "/loja/status") return Response.json({ pix: !!this.env.MP_TOKEN }, { headers: { "cache-control": "no-store" } });
     if (rota === "/loja/bandeiras") return Response.json((await this.ctx.storage.get("loja:bandeiras")) || [], { headers: { "cache-control": "no-store" } });
     if (rota.startsWith("/temporada/")) return Response.json(await this.rotaTemporada(rota, new URL(request.url).searchParams), { headers: { "cache-control": "no-store" } });
     if (rota === "/comunidade") return Response.json(await this.resumoComunidade(), { headers: { "cache-control": "no-store" } });
@@ -654,6 +655,7 @@ export default {
     if (url.pathname === "/loja/webhook") {
       return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/loja/webhook" + url.search, { method: request.method, headers: request.headers, body: request.method === "POST" ? await request.text() : undefined }));
     }
+    if (url.pathname === "/loja/status") return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/loja/status"));
     if (url.pathname === "/loja/bandeiras") return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/loja/bandeiras"));
     if (url.pathname.startsWith("/temporada/")) return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha" + url.pathname + url.search));
     if (url.pathname === "/instagram/status" || url.pathname === "/instagram/verificar" || url.pathname === "/comunidade") {

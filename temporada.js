@@ -360,6 +360,24 @@
       <p>${aberto ? 'Você já abriu o presente de hoje. Amanhã tem outro!' : 'O presente de hoje ainda está escondido. Dica: procure o brilho dourado 🎁 no mapa.'}</p></div>`;
   }
 
+  // ---------------------------------------------------------------- LOJA DE TIC (botão ao lado do APOIAR): só os pacotes de moeda
+  function abrirLojaTic() {
+    if (!S.on) { K.abrir('LOJA DE TIC', `<p>A <b>TIC</b> é a moeda da ilha: com ela você compra equipamentos no Armeiro e itens nas lojas dos outros jogadores na Feira.</p><p>Para comprar, toque em <b>JOGAR</b> e entre com o seu @: a TIC cai direto na sua conta.</p><ul class="tp-pacotes">${PACOTES.map(([id, n, r, t]) => `<li><b>${t} TIC</b><small>${n}</small><span class="tp-preco">R$ ${r},00</span></li>`).join('')}</ul>`); return; }
+    const e = T.eco || { tic: 0 };
+    K.abrir('LOJA DE TIC', `<div class="tp-topo"><div class="tp-tic"><b>${e.tic}</b><span>TIC</span></div><div class="tp-rep"><span>SUA CONTA</span><b>@${esc(S.eu.arroba).toUpperCase()}</b><small>A TIC cai aqui assim que o Mercado Pago confirmar o Pix.</small></div></div>
+      <ul class="tp-pacotes">${PACOTES.map(([id, n, r, t]) => `<li><b>${t} TIC</b><small>${n}${t > r * 10 ? ` · +${t - r * 10} de bônus` : ''}</small><button type="button" class="b-ouro tp-pix" data-id="${id}">R$ ${r},00</button></li>`).join('')}</ul>
+      <p class="m-nota">Pagamento por Pix, confirmado sozinho. TIC não volta a ser dinheiro, e tudo o que dá para comprar com TIC também dá para ganhar jogando (missões, pedidos, evento e história). Menor de idade: peça para um responsável.</p>`, el => {
+      el.querySelectorAll('.tp-pix').forEach(b => b.onclick = () => pedePix(b.dataset.id));
+    });
+  }
+  function botaoLoja() {
+    if (document.getElementById('btn-tic')) return;
+    const ap = document.getElementById('btn-apoiar'); if (!ap) return;
+    const b = document.createElement('button'); b.type = 'button'; b.id = 'btn-tic'; b.className = ap.className; b.innerHTML = '<span>🪙 TIC</span>'; b.setAttribute('aria-label', 'Loja de TIC'); b.onclick = abrirLojaTic;
+    ap.after(b);
+  }
+  setTimeout(botaoLoja, 1200); setInterval(botaoLoja, 5000);
+
   // ---------------------------------------------------------------- Pix dos pacotes de TIC
   let pixAtual = null, pixPoll = null;
   function pedePix(id) { pixAtual = { id }; J.envia({ t: 'pix', item: id }); K.abrir('COMPRAR TIC', '<p>Gerando o Pix no Mercado Pago...</p>'); }
@@ -530,6 +548,6 @@
     d.innerHTML = `<h3>🏰 TEMPORADA DA ILHA</h3><p>${v && !v.encerrada && !v.meu ? '🗳️ Vote no que a ilha constrói primeiro. ' : ''}${ev && ev.ativo ? `🔥 Vigília da Costa Sul: ${ev.total}/${ev.meta}. ` : ''}📜 Missão de história com prazo · 🏆 ranking · 🏠 casas · ⚖️ feira · ⚔️ equipamentos.</p><button type="button" class="b-ouro">ABRIR A TEMPORADA</button>`;
     d.querySelector('button').onclick = () => abrir(1); corpo.prepend(d);
   };
-  window.IlhaTemporada = { abrir, bloco: blocoMissoes, ganho, EQUIP, REP, T };
+  window.IlhaTemporada = { abrirLojaTic, abrir, bloco: blocoMissoes, ganho, EQUIP, REP, T };
   setTimeout(() => { const F = window.IlhaFeed; if (F) F.push({ k: 'chegada', html: '<b>Temporada nova!</b> Vote no que a ilha constrói primeiro, patrulhe a costa sul e ganhe TIC. Toque em JOGAR e depois em 🏰 ILHA.', dur: 16000 }); }, 15000);
 })();
