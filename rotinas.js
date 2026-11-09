@@ -311,6 +311,31 @@
         [11, 13, 'cais', 'Contando os barcos que chegam'], [13, 14, 'casa', 'Almoçando com a mãe'], [14, 17, 'taverna', 'Vendo como a taverna dá lucro'], [17, 20, 'fogueira', 'Ouvindo histórias']],
       trabalho: ['Quer comprar?', 'Faço preço bom!', 'Uma moeda, por favor.'], social: ['Vou ser empresário!', 'Um dia vou ter uma loja.', 'Minha mãe é psicóloga.']
     },
+    // ---- Dia 9
+    astrologo: {
+      blocos: [[3, 11, 'casa', 'Dormindo', S], [11, 12, 'casa', 'Desenhando mapas do céu'], [12, 13, 'taverna', 'Almoçando'],
+        [13, 16, 'biblioteca', 'Calculando o caminho dos astros'], [16, 18, 'passeio', 'Lendo os signos dos moradores'], [18, 19, 'fogueira', 'Jantando na fogueira'],
+        [19, 3, 'torre', 'Observando as estrelas do alto da torre']],
+      trabalho: ['Júpiter está alto hoje.', 'Os astros não mentem.', 'Olha aquela constelação!'], social: ['Qual é o seu signo?', 'Vim ver as estrelas daqui.', 'O céu desta ilha é diferente.']
+    },
+    domador: {
+      blocos: [[21, 5, 'casa', 'Dormindo', S], [5, 7, 'pasto', 'Acalmando os animais do pasto'], [7, 11, 'floresta', 'Procurando criaturas na floresta'],
+        [11, 13, 'fogueira', 'Almoçando e contando da expedição'], [13, 17, 'arena', 'Treinando criaturas na arena'], [17, 19, 'cais', 'Olhando o mar por onde chegou'],
+        [19, 21, 'fogueira', 'Conversando na fogueira']],
+      trabalho: ['Calma, bichinho...', 'Senta! Muito bem!', 'Essa criatura é das boas.'], social: ['Me perdi do meu grupo no mar.', 'Já domou um monstro?', 'Será que o dragão deixa eu chegar perto?']
+    },
+    guardiao_exilado: {
+      blocos: [[0, 5, 'casa', 'Dormindo na cabana', S], [5, 9, 'arena', 'Treinando com armas de corpo a corpo'], [9, 10, 'fogueira', 'Comendo em silêncio'],
+        [10, 13, 'ponte', 'Treinando na beira do riacho'], [13, 14, 'taverna', 'Almoçando'], [14, 18, 'arena', 'Treinando sem parar'],
+        [18, 21, 'passeio', 'Vigiando a ilha'], [21, 0, 'fogueira', 'Afiando as lâminas na fogueira']],
+      trabalho: ['Mais rápido.', 'De novo.', 'A lâmina não perdoa.'], social: ['Meu irmão me tirou tudo.', 'Treino para proteger a ilha.', 'Um velho guerreiro me ensinou.']
+    },
+    tita_defensor: {
+      blocos: [[23, 6, 'casa', 'Recarregando a armadura', S], [6, 8, 'cais', 'Escaneando o horizonte'], [8, 12, 'passeio', 'Patrulhando a ilha'],
+        [12, 13, 'taverna', 'Almoçando'], [13, 16, 'oficina', 'Consertando o escudo de energia'], [16, 19, 'arena', 'Treinando defesa'],
+        [19, 23, 'fogueira', 'Contando do mundo tecnológico']],
+      trabalho: ['Escudo ativado!', 'Ninguém passa.', 'Sistema de defesa: ok.'], social: ['No meu mundo tudo era máquina.', 'Eu defendo o dragão.', 'Aqui é tudo de madeira!']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

@@ -361,5 +361,29 @@ window.MORADORES = [
     historia: 'Filho da psicóloga Fernanda. Sonha em ser empresário.',
     rotina: 'crianca_empresario', casa: 'com:fernanda', chegada: '2026-11-08T16:03:00-04:00',
     visual: { tipo: 'crianca', pele: '#8a5a3a', cabelo: 'curto', corCabelo: '#1a1210', roupa: '#d8a020', calca: '#2a2a3a', chapeu: 'cartola', corChapeu: '#22222a', acessorio: 'moeda' }
+  },
+  {
+    id: 'jupter', arroba: 'nara_ramone13', nome: 'Júpter', profissao: 'Astrólogo',
+    historia: 'Astrólogo que veio ver as estrelas da ilha. É ótimo lendo signos e os sinais dos astros.',
+    rotina: 'astrologo', casa: 'auto', chegada: '2026-11-09T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#7c4c34', cabelo: 'coque', corCabelo: '#e4e4ee', roupa: '#1e2a6a', detalhe: '#e8c870', manto: true, calca: '#1a1a3a', chapeu: 'diadema_lua', corChapeu: '#d8dce8', acessorio: 'astrolabio' }
+  },
+  {
+    id: 'domer', arroba: 'arthur11836', nome: 'Domer', profissao: 'Domador de criaturas',
+    historia: 'Doma animais, criaturas e monstros. Se perdeu do grupo numa expedição no mar e acabou chegando à ilha.',
+    rotina: 'domador', casa: 'auto', chegada: '2026-11-09T16:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#e4b48c', cabelo: 'espetado', corCabelo: '#c8742a', roupa: '#6a7a3a', detalhe: '#c8a070', calca: '#5a3a24', chapeu: 'pele_lobo', corChapeu: '#8a8e96', acessorio: 'chicote' }
+  },
+  {
+    id: 'giga', arroba: 'gigaprey2664', nome: 'Giga', profissao: 'Assassino e guardião',
+    historia: 'Filho de um rei, foi exilado por maldade do próprio irmão e aprendeu a lutar com um velho guerreiro que o encontrou. Mora numa cabana e passa o dia treinando para um dia proteger a ilha.',
+    rotina: 'guardiao_exilado', casa: 'auto', chegada: '2026-11-09T16:02:00-04:00',
+    visual: { tipo: 'humano', pele: '#a06a44', cabelo: 'rabo', corCabelo: '#2a1a30', roupa: '#2a2a34', detalhe: '#7a1a2a', calca: '#1e1e26', chapeu: 'capuz_sombra', corChapeu: '#3a2e40', acessorio: 'adagas' }
+  },
+  {
+    id: 'davi_tita', arroba: 'ANBF-ofc-LimaDavi09', nome: 'Davi Titã', profissao: 'Titã defensor',
+    historia: 'Um titã defensor que veio de um mundo tecnológico. Chegou disposto a defender o dragão.',
+    rotina: 'tita_defensor', casa: 'auto', chegada: '2026-11-09T16:03:00-04:00',
+    visual: { tipo: 'humano', pele: '#c08a5e', cabelo: 'curto', corCabelo: '#1a1210', roupa: '#3a4a6a', listras: '#4ac8f0', detalhe: '#9aa0aa', calca: '#2a3040', chapeu: 'visor_tech', corChapeu: '#5adcff', acessorio: 'escudo_energia' }
   }
 ];

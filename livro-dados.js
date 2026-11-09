@@ -59,7 +59,11 @@ window.LIVRO = {
     yamanaka: ['Yamanaka, samurai. Vim de um reino distante atrás de um velho Mu que saiu do nosso reino para uma missão e nunca voltou.', 'Foi a nossa Rainha Amisul quem me mandou descobrir o que aconteceu com ele.'],
     matheus: ['Matheus Carvalho, 15 anos, cartógrafo e navegador.', 'Vim de longe trazendo o que sei de navegação e os mapas do resto do mundo.'],
     fernanda: ['Fernanda, psicóloga. Cheguei à ilha com o meu filho, Omar.', 'Se alguém precisar conversar, é só me procurar na fogueira.'],
-    omar: ['Eu sou o Omar, filho da Fernanda.', 'Meu sonho é ser empresário.']
+    omar: ['Eu sou o Omar, filho da Fernanda.', 'Meu sonho é ser empresário.'],
+    jupter: ['Eu sou Júpter, astrólogo. Vim para a ilha ver as estrelas daqui.', 'Sou ótimo lendo signos e os sinais dos astros: se quiser saber o que o céu diz, me procure à noite na torre.'],
+    domer: ['Eu sou Domer, domador de animais, criaturas e monstros.', 'Fui numa expedição no mar, me perdi do meu grupo e acabei chegando nesta ilha.'],
+    giga: ['Eu sou Giga. Era filho de um rei, mas a maldade do meu irmão me mandou para o exílio, e um velho guerreiro me achou e me ensinou a lutar.', 'Moro numa cabana e passo a maior parte do tempo treinando, para um dia proteger esta ilha.'],
+    davi_tita: ['Eu sou Davi, um titã defensor que veio de um mundo tecnológico.', 'Cheguei para defender o dragão.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],
