@@ -336,6 +336,11 @@
         [19, 23, 'fogueira', 'Contando do mundo tecnológico']],
       trabalho: ['Escudo ativado!', 'Ninguém passa.', 'Sistema de defesa: ok.'], social: ['No meu mundo tudo era máquina.', 'Eu defendo o dragão.', 'Aqui é tudo de madeira!']
     },
+    fugitivo: {
+      blocos: [[3, 10, 'casa', 'Dormindo de botas, pronto para fugir', S], [10, 12, 'floresta', 'Andando por trilhas que ninguém usa'], [12, 13, 'fogueira', 'Comendo sozinho, de costas para a parede'],
+        [13, 17, 'ponte', 'Vigiando quem chega pela ponte'], [17, 20, 'floresta', 'Cavando alguma coisa no mato'], [20, 3, 'taverna', 'No canto mais escuro da taverna']],
+      trabalho: ['Não me olha assim.', 'Ninguém me seguiu... né?', 'Só estou de passagem.'], social: ['Fugi de um lugar pior que esse.', 'Prefiro não falar do passado.', 'Aqui ninguém me conhece. Ainda.']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

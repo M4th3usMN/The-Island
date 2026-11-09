@@ -123,6 +123,7 @@
   }
   function ganhaXp(n) {
     if ((S.perfil.cartas || {})['esp:dragao'] && n > 0) n = Math.round(n * 1.05); // Chama Ancestral: +5% de XP
+    if (window.IlhaJogo.bonus && n > 0) n = Math.round(n * window.IlhaJogo.bonus.xp()); // atributos e equipamentos (temporada.js)
     const p = S.perfil, antes = nivel(p.xp); p.xp += n; S.niveis[S.eu.arroba] = nivel(p.xp);
     const lv = nivel(p.xp);
     if (S.eu) S.eu.lv = lv;
@@ -140,9 +141,9 @@
     if (!m || d.feitas[k]) return;
     d.prog[k] = absoluto ? n : (d.prog[k] || 0) + n;
     if (d.prog[k] >= m.meta) {
-      d.feitas[k] = 1; S.perfil.missoes++; ganhaXp(m.xp); S.mudou = true; pertos().forEach(o => cartaDeOutro(o, 'missao'));
+      d.feitas[k] = 1; S.perfil.missoes++; ganhaXp(m.xp); if (window.IlhaJogo.bonus) window.IlhaJogo.bonus.ganho('missao'); S.mudou = true; pertos().forEach(o => cartaDeOutro(o, 'missao'));
       anuncia({ titulo: 'MISSÃO CUMPRIDA!', texto: `${m.txt} (+${m.xp} XP)`, dur: 5000 });
-      if (ms.every(x => d.feitas[x.k]) && !d.bonus) { d.bonus = 1; ganhaXp(50); conquista('diaperfeito'); }
+      if (ms.every(x => d.feitas[x.k]) && !d.bonus) { d.bonus = 1; ganhaXp(50); conquista('diaperfeito'); if (window.IlhaJogo.bonus) window.IlhaJogo.bonus.ganho('diaperfeito'); }
     }
     atualizaBarra();
   }
@@ -190,7 +191,7 @@
       const d = diaria();
       if (!p.conversas[v]) { p.conversas[v] = 1; S.mudou = true; }
       ganhaCarta(v, { c: 'conversa' });
-      if (!d.conv[v]) { d.conv[v] = 1; avanca('conversar', conta(d.conv), true); }
+      if (!d.conv[v]) { d.conv[v] = 1; avanca('conversar', conta(d.conv), true); if (window.IlhaJogo.bonus) window.IlhaJogo.bonus.ganho('conversa'); }
       avanca('encontrar:' + v, 1, true);
     }
     if (tipo === 'passos') { p.passos += v; avanca('passos', v); }
@@ -275,6 +276,9 @@
       const v = String(a.v || ''), nome = v === 'esp:dragao' ? 'o DRAGÃO 🐉' : v.indexOf('v:') === 0 ? '@' + v.slice(2) : (G.BY[v] || {}).nome;
       if (nome) F.push({ k: 'carta', html: `${q} ganhou a carta de <b>${esc(nome)}</b>`, t: a.em });
     }
+    else if (a.k === 'voto') F.push({ k: 'conquista', html: `${q} votou na <b>${a.v === 'fortaleza' ? 'Fortaleza do Dragão' : 'Muralha da Costa Sul'}</b> 🗳️`, t: a.em });
+    else if (a.k === 'evento') F.push({ k: 'conquista', html: `A Vigília da Costa Sul chegou a <b>${a.v | 0}%</b>! Patrulha de ${q} 🔥`, t: a.em });
+    else if (a.k === 'casa') F.push({ k: 'conquista', html: `${q} melhorou a casa (etapa <b>${a.v | 0}</b>) 🔨`, t: a.em });
     else if (a.k === 'comunidade') F.push({ k: 'conquista', html: `A ilha chegou a <b>${a.v | 0}%</b> da meta do Ep. 7! Entrega de ${q}`, t: a.em });
   }
   function conectar(arroba, codigo, look, fim) {
@@ -374,7 +378,7 @@
     const dx = v.tx - v.x, dy = v.ty - v.y, d = Math.hypot(dx, dy);
     if (!meu && d > 140) { v.x = v.tx; v.y = v.ty; v.anda = false; return; }
     if (d < 0.6) { v.anda = false; return; }
-    const st = Math.min(d, VEL * dt), nx = v.x + dx / d * st, ny = v.y + dy / d * st;
+    const st = Math.min(d, VEL * (meu && window.IlhaJogo.bonus ? window.IlhaJogo.bonus.vel() : 1) * dt), nx = v.x + dx / d * st, ny = v.y + dy / d * st;
     if (meu && !G.andavel(nx, ny)) { v.tx = v.x; v.ty = v.y; v.anda = false; envia({ t: 'alvo', x: v.x, y: v.y }); return; }
     v.x = nx; v.y = ny; v.anda = true;
     if (Math.abs(dx) > 0.4) v.s = dx > 0 ? 1 : -1;
@@ -590,6 +594,7 @@
       <p class="m-nota">Dica: toque num morador para ir até ele e puxar conversa. No computador, ande com as setas ou W A S D.</p>`;
     if (window.IlhaMissaoDragao) window.IlhaMissaoDragao.bloco(corpo);
     if (window.IlhaOficios) window.IlhaOficios.bloco(corpo);
+    if (window.IlhaTemporada) window.IlhaTemporada.bloco(corpo);
   }
   function abaConquistas(corpo) {
     corpo.innerHTML = `<ul class="jg-conq">${CONQ.map(c => { const ok = S.perfil.conquistas[c.id]; return `<li class="${ok ? 'ok' : ''}"><i aria-hidden="true">${ok ? '★' : '?'}</i><div><b>${esc(c.nome)}</b><small>${esc(c.desc)}${c.xp ? ` · +${c.xp} XP` : ''}</small></div></li>`; }).join('')}</ul>`;

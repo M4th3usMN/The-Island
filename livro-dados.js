@@ -63,7 +63,12 @@ window.LIVRO = {
     jupter: ['Eu sou Júpter, astrólogo. Vim para a ilha ver as estrelas daqui.', 'Sou ótimo lendo signos e os sinais dos astros: se quiser saber o que o céu diz, me procure à noite na torre.'],
     domer: ['Eu sou Domer, domador de animais, criaturas e monstros.', 'Fui numa expedição no mar, me perdi do meu grupo e acabei chegando nesta ilha.'],
     giga: ['Eu sou Giga. Era filho de um rei, mas a maldade do meu irmão me mandou para o exílio, e um velho guerreiro me achou e me ensinou a lutar.', 'Moro numa cabana e passo a maior parte do tempo treinando, para um dia proteger esta ilha.'],
-    davi_tita: ['Eu sou Davi, um titã defensor que veio de um mundo tecnológico.', 'Cheguei para defender o dragão.']
+    davi_tita: ['Eu sou Davi, um titã defensor que veio de um mundo tecnológico.', 'Cheguei para defender o dragão.'],
+    sapiens: ['Eu sou o Sapiens, fazendeiro. Ouvi falar desta ilha e quis vir.', 'Meu sonho é simples: ter a minha plantação. Anoto tudo o que planto no meu caderninho.'],
+    joao_gabriel: ['João Gabriel, mago. A minha magia é a do gelo.', 'Vim aprender com quem sabe mais. Um dia ainda congelo esse mar inteiro.'],
+    joao_victor: ['Sou o João Victor, padre de uma ordem de monges andarilhos.', 'Fiz o voto de cuidar de quem ninguém cuida. Esta ilha tem muita gente assim.'],
+    iran: ['Iran, ferreiro, 37 anos.', 'Trouxe as minhas ferramentas. A bigorna do Kasseki que se prepare.'],
+    bob: ['Bob. 20 anos.', 'Fugi de uma prisão do continente. O que eu fiz? Isso fica entre mim e o mar.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],
@@ -84,7 +89,7 @@ window.LIVRO = {
     jester: [['Ep. 5', 'Fez o dragão dormir tocando a flauta.']],
     velhomu: [['Ep. 5', 'Desembarcou e ficou encarando o dragão na praia. É dele que o dragão fugia.']],
     blazvathan: [['Ep. 5', 'Reconheceu a cara do Velho Mu.']],
-    igor: [['Ep. 5', 'Desenhou a Fortaleza do Dragão.']],
+    igor: [['Ep. 5', 'Desenhou a Fortaleza do Dragão.'], ['Temporada', 'A Fortaleza do Dragão foi para a primeira votação que muda o mapa.']],
     guilherme: [['Dia 6', 'Chegou montado num touro, com a oficina nas costas.']],
     peregrino: [['Ep. 3', 'Votou A na enquete do dragão.']],
     brutos: [['Ep. 3', 'Foi o único a votar B.']],

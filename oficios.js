@@ -81,7 +81,7 @@
   }
   function inicia(cfg, fim) {
     const e = S.eu;
-    jogo = Object.assign({}, cfg, { t0: Date.now(), hits: 0, falhas: 0, x: e.tx, y: e.ty, fim, z0: 0.2 + Math.random() * 0.5, larg0: cfg.larg || 0.25, fase: 'espera', prox: Date.now() + 900 + Math.random() * 1800, cor: 0, troca: Date.now() });
+    jogo = Object.assign({}, cfg, { t0: Date.now(), hits: 0, falhas: 0, x: e.tx, y: e.ty, fim, z0: 0.2 + Math.random() * 0.5, larg0: (cfg.larg || 0.25) * (J.bonus ? J.bonus.faixa() : 1), fase: 'espera', prox: Date.now() + 900 + Math.random() * 1800, cor: 0, troca: Date.now() });
     J.anuncia({ titulo: cfg.titulo || 'MINIJOGO', texto: cfg.txt + ' · toque no botão (ou Espaço)', dur: 4500 });
     atualiza();
   }
@@ -124,14 +124,16 @@
   function coletaPerto() { const e = S.eu; return e ? COLETA.find(c => dist(e, c) < c.r) : null; }
   function estacaoPropria() {
     const mor = S.eu && S.eu.mor; if (!mor) return null;
-    const r = RECEITAS.find(x => x.quem === mor.id); if (!r) return null;
+    const rs = RECEITAS.filter(x => x.quem === mor.id); if (!rs.length) return null;
+    const r = rs.find(podeFazer) || rs[0];
     const lug = L[r.onde]; return lug && dist(S.eu, { x: lug.sx, y: lug.sy }) < 34 ? r : null;
   }
   function coletar(c) {
     inicia(Object.assign({ titulo: c.verbo + ' · ' + ITENS[c.item].n.toUpperCase() }, c.jogo), ok => {
       if (!ok) return;
-      add(c.item, 1); J.ganhaXp(4);
-      S.eu.emote = { txt: `+1 ${ITENS[c.item].i} ${ITENS[c.item].n} (${inv()[c.item]})`, ate: Date.now() + 2200 };
+      const n = J.bonus && Math.random() < J.bonus.dobro() ? 2 : 1;
+      add(c.item, n); J.ganhaXp(4); if (J.bonus) J.bonus.ganho('coleta');
+      S.eu.emote = { txt: `+${n} ${ITENS[c.item].i} ${ITENS[c.item].n}${n > 1 ? ' (DOBRO!)' : ''} (${inv()[c.item]})`, ate: Date.now() + 2200 };
     });
   }
   function fabricar(r, quem) {
@@ -139,8 +141,8 @@
     inicia(Object.assign({ titulo: r.verbo + ' · ' + ITENS[r.item].n.toUpperCase() }, r.jogo), ok => {
       if (!ok) { if (quem) fala(quem, 'Quase! Tenta de novo, os ingredientes ainda estão com você.'); return; }
       Object.entries(r.pede).forEach(([k, n]) => add(k, -n));
-      add(r.item, 1); J.ganhaXp(r.xp);
-      S.eu.emote = { txt: `+1 ${ITENS[r.item].i} ${ITENS[r.item].n}!`, ate: Date.now() + 2400 };
+      add(r.item, r.sai || 1); J.ganhaXp(r.xp); if (J.bonus) J.bonus.ganho('fabrica');
+      S.eu.emote = { txt: `+${r.sai || 1} ${ITENS[r.item].i} ${ITENS[r.item].n}!`, ate: Date.now() + 2400 };
       if (quem) fala(quem, 'Ficou ótimo! Leve para quem precisa.');
     });
   }
@@ -158,23 +160,24 @@
     const i = lista.findIndex((p, k) => p.para === m.id && !pd.feitos[k] && tem(p.item, p.q));
     if (i >= 0) {
       const p = lista[i]; add(p.item, -p.q); pd.feitos[i] = true; J.salvar(); J.ganhaXp(p.xp);
-      J.envia({ t: 'entrega', item: p.item, q: p.q });
+      J.envia({ t: 'entrega', item: p.item, q: p.q }); if (J.bonus) J.bonus.ganho('pedido');
       fala(m.id, 'Muito obrigado! A ilha agradece.');
       const todos = lista.every((x, k) => pd.feitos[k]);
       J.anuncia({ titulo: 'PEDIDO ENTREGUE!', texto: `${p.txt} · +${p.xp} XP${todos ? ' · Você fez todos os pedidos do dia!' : ''}`, acao: 'MOCHILA', fn: abrir, dur: 6000 });
       if (todos && !pd.bonus) { pd.bonus = true; J.ganhaXp(80); }
       return true;
     }
-    const r = RECEITAS.find(x => x.quem === m.id);
-    if (!r || (S.eu.mor && S.eu.mor.id === m.id)) return false;
-    if (podeFazer(r)) {
-      K.abrir(m.nome.toUpperCase() + ' · ' + m.profissao.toUpperCase(), `<p>“${esc(r.fala)}”</p><p>Você tem os ingredientes: <b>${pedeTxt(r)}</b> → <b>1 ${ITENS[r.item].i} ${esc(ITENS[r.item].n)}</b></p><p class="m-nota">${esc(r.jogo.txt)}.</p><div class="m-botoes"><button type="button" class="b-ouro" id="of-sim">${r.verbo} JUNTOS</button><button type="button" class="b-linha" id="of-nao">AGORA NÃO</button></div>`, el => {
-        el.querySelector('#of-sim').onclick = () => { K.fechar(); fabricar(r, m.id); };
+    const rs = RECEITAS.filter(x => x.quem === m.id);
+    if (!rs.length || (S.eu.mor && S.eu.mor.id === m.id)) return false;
+    const prontas = rs.filter(podeFazer);
+    if (prontas.length) {
+      K.abrir(m.nome.toUpperCase() + ' · ' + m.profissao.toUpperCase(), prontas.map((r, i) => `<p>“${esc(r.fala)}”</p><p>Você tem: <b>${pedeTxt(r)}</b> → <b>${r.sai || 1} ${ITENS[r.item].i} ${esc(ITENS[r.item].n)}</b> · <small>${esc(r.jogo.txt)}</small></p><div class="m-botoes"><button type="button" class="b-ouro of-sim" data-i="${i}">${r.verbo} JUNTOS</button></div>`).join('') + `<div class="m-botoes"><button type="button" class="b-linha" id="of-nao">AGORA NÃO</button></div>`, el => {
+        el.querySelectorAll('.of-sim').forEach(b => b.onclick = () => { K.fechar(); fabricar(prontas[+b.dataset.i], m.id); });
         el.querySelector('#of-nao').onclick = K.fechar;
       });
       return true;
     }
-    fala(m.id, r.fala);
+    fala(m.id, rs[Math.floor(Date.now() / 6000) % rs.length].fala);
     return false;
   });
 

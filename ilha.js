@@ -79,7 +79,8 @@
   const SLOTS_EXTRA = [[364, 432], [264, 228], [484, 204], [404, 456], [520, 188], [200, 344], [192, 292], [216, 424], [588, 360],
     [487, 355], [511, 250], [247, 355], [364, 457], [520, 376], [223, 271], [232, 229], [547, 277], // Dia 7
     [578, 278], [474, 302], [442, 466], // Dia 8
-    [164, 228], [472, 474], [242, 390], [455, 384]]; // Dia 9
+    [164, 228], [472, 474], [242, 390], [455, 384], // Dia 9
+    [170, 392], [596, 420], [312, 446], [560, 446], [276, 186]]; // Dia 10
   // RESERVADO (não usar como terreno): pedreira dos Ofícios em (566, 220), ver oficios.js
   const LOTES = [];
   const TRAP = { x0: 586, y0: 170, x1: 597, y1: 137 }; // trapiche da praia até a ponte  // casas com lugar marcado (casa: 'lote:x,y' em moradores.js)
@@ -320,6 +321,8 @@
       trees.push([Math.round(x), Math.round(y), R()]);
     }
     trees.sort((a, b) => a[1] - b[1]);
+    // clareira da votação (temporada.js): canteiro da Fortaleza do Dragão no alto da floresta. Filtra depois do sorteio para não mudar o resto do mapa.
+    for (let i = trees.length - 1; i >= 0; i--) if (Math.hypot(trees[i][0] - 300, (trees[i][1] - 96) * 1.3) < 34) trees.splice(i, 1);
     trees.forEach(([x, y, k]) => {
       if (k < 0.12) { // arvore redonda de outono
         P(c, x - 4, y - 1, 8, 2, 'rgba(0,0,0,.25)'); P(c, x, y - 2, 1, 3, '#5a3e26');

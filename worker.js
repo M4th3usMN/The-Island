@@ -75,6 +75,28 @@ const LOJA = { tricornio: [3, "Tricórnio pirata"], capa: [5, "Capa de veludo"],
 const COM = { id: "ep7", titulo: "Ep. 7 · Preparar a ilha contra o Reino do Sul", meta: 300 };
 const ITENS_COM = new Set(["trigo", "madeira", "minerio", "erva", "pao", "lamina", "lamina_enc", "remedio"]);
 const LIMITE_DIA = 30;
+const TEMPORADA_MSG = new Set(["ganho", "votar", "patrulha", "casa", "oferta", "retirar", "comprar", "equip_compra", "equip_forja", "eco"]);
+
+// ---------------------------------------------------------------------------
+// TEMPORADA (atualizações de novembro/dezembro): reputação, TIC, ranking, votação,
+// evento coletivo, casas, mercado dos membros e equipamentos. Tudo o que vale "de
+// verdade" (moeda, reputação, votos) é contado aqui no servidor, com limites por dia.
+const REP_NIVEIS = [[0, "Forasteiro"], [20, "Conhecido"], [80, "Respeitado"], [200, "Herói da Ilha"], [500, "Lenda"]];
+const repNivel = r => { let i = 0; REP_NIVEIS.forEach(([min], k) => { if (r >= min) i = k; }); return i; };
+// ganhos: tic e reputação por tipo de ação, com limite diário (dia) ou uma vez só (uma)
+const GANHOS = {
+  missao: { tic: 5, rep: 3, dia: 3 }, diaperfeito: { tic: 10, rep: 5, dia: 1 }, pedido: { tic: 8, rep: 4, dia: 3 },
+  coleta: { tic: 0, rep: 1, dia: 12 }, fabrica: { tic: 2, rep: 2, dia: 6 }, conversa: { tic: 0, rep: 1, dia: 8 },
+  "historia:espiao": { tic: 50, rep: 30, uma: true }, "evento:costa1": { tic: 30, rep: 20, uma: true }, presente: { tic: 15, rep: 3, dia: 1 }
+};
+const VOTACAO = { id: "v1", titulo: "O que a ilha constrói primeiro?", fim: Date.parse("2026-11-15T21:00:00-03:00"),
+  ops: [{ id: "fortaleza", n: "Fortaleza do Dragão (projeto do Igor)" }, { id: "muralha", n: "Muralha da Costa Sul" }] };
+const EVENTO = { id: "costa1", titulo: "Vigília da Costa Sul", inicio: Date.parse("2026-11-09T12:00:00-03:00"), fim: Date.parse("2026-11-16T23:59:00-03:00"), meta: 400, porDia: 30 };
+const NATAL = { inicio: Date.parse("2026-12-19T00:00:00-03:00"), fim: Date.parse("2026-12-26T23:59:00-03:00") };
+const EQUIP = { luvas_ferreiro: 15, botas_andarilho: 15, lanterna_costa: 15, lamina_runica: 40, manto_aprendiz: 40, amuleto_dragao: 80 };
+const EQUIP_FORJA = new Set(["luvas_ferreiro", "botas_andarilho", "lanterna_costa"]);
+const TICPACK = { tic20: [2, 20, "20 TIC (Bronze)"], tic55: [5, 55, "55 TIC (Prata)"], tic120: [10, 120, "120 TIC (Ouro)"], tic260: [20, 260, "260 TIC (Diamante)"] };
+const diaBR = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
 function limpaPerfil(p) {
   if (!p || typeof p !== 'object' || Array.isArray(p)) return null;
   const s = JSON.stringify(p);
@@ -112,6 +134,7 @@ export class Vila extends DurableObject {
       return new Response("ok");
     }
     if (rota === "/loja/bandeiras") return Response.json((await this.ctx.storage.get("loja:bandeiras")) || [], { headers: { "cache-control": "no-store" } });
+    if (rota.startsWith("/temporada/")) return Response.json(await this.rotaTemporada(rota, new URL(request.url).searchParams), { headers: { "cache-control": "no-store" } });
     if (rota === "/comunidade") return Response.json(await this.resumoComunidade(), { headers: { "cache-control": "no-store" } });
     if (rota === "/interno/instagram") { await this.verificaInstagram(); return new Response("ok"); }
     if (rota === "/instagram/status") return Response.json(await this.statusInstagram(), { headers: { "cache-control": "no-store" } });
@@ -130,7 +153,7 @@ export class Vila extends DurableObject {
   // ---------------------------------------------------------------- Loja (Mercado Pago, Pix)
   async criaPix(arroba, item) {
     if (!this.env.MP_TOKEN) return { erro: "A loja ainda não está configurada." };
-    const [valor, nome] = LOJA[item], ref = arroba + "|" + item + "|" + crypto.randomUUID().slice(0, 8);
+    const [valor, nome] = TICPACK[item] ? [TICPACK[item][0], TICPACK[item][2]] : LOJA[item], ref = arroba + "|" + item + "|" + crypto.randomUUID().slice(0, 8);
     const expira = new Date(Date.now() + 30 * 60e3 - 4 * 3600e3).toISOString().replace("Z", "-04:00");
     try {
       const r = await fetch("https://api.mercadopago.com/v1/payments", { method: "POST", headers: { "Authorization": "Bearer " + this.env.MP_TOKEN, "Content-Type": "application/json", "X-Idempotency-Key": crypto.randomUUID() },
@@ -157,6 +180,12 @@ export class Vila extends DurableObject {
   }
   async entrega(id, rec) {
     rec.pago = true; rec.pagoEm = Date.now(); await this.ctx.storage.put("pix:" + id, rec);
+    if (TICPACK[rec.item]) {
+      const e = await this.eco(rec.arroba); e.tic += TICPACK[rec.item][1]; e.compras = (e.compras || 0) + 1; await this.salvaEco(rec.arroba, e);
+      const cr = (await this.ctx.storage.get("loja:creditos")) || []; cr.push({ arroba: rec.arroba, item: rec.item, valor: rec.valor, em: rec.pagoEm }); await this.ctx.storage.put("loja:creditos", cr.slice(-500));
+      this.paraArroba(rec.arroba, { t: "eco", ...this.ecoPub(e), aviso: "Pix confirmado: +" + TICPACK[rec.item][1] + " TIC!" });
+      return;
+    }
     const k = "loja:" + rec.arroba, itens = (await this.ctx.storage.get(k)) || [];
     if (!itens.includes(rec.item)) itens.push(rec.item);
     await this.ctx.storage.put(k, itens);
@@ -228,11 +257,14 @@ export class Vila extends DurableObject {
       if ((k === "conquista" || k === "carta") && /^[a-z0-9_.:]{1,48}$/.test(v) && agora - (a.ft || 0) > 1500) {
         a.ft = agora; this.aviso({ t: "aviso", k, v, arroba: a.arroba, em: agora }, ws);
       }
+    } else if (m.t && TEMPORADA_MSG.has(m.t)) {
+      ws.serializeAttachment(a);
+      return this.msgTemporada(ws, a, m, agora);
     } else if (m.t === "pix") {
       // cria a cobrança Pix no Mercado Pago para o @ desta sessão (já autenticado pelo código)
       const item = String(m.item || "");
-      if (item !== "teste") return this.envia(ws, { t: "pix", erro: "A loja está fechada por enquanto. Volte em breve!" }); // LOJA FORA DO AR
-      if (!LOJA[item] || agora - (a.px || 0) < 15e3) { ws.serializeAttachment(a); return this.envia(ws, { t: "pix", erro: "Espere alguns segundos e tente de novo." }); }
+      if (item !== "teste" && !TICPACK[item]) return this.envia(ws, { t: "pix", erro: "A loja está fechada por enquanto. Volte em breve!" }); // LOJA DE VISUAIS FORA DO AR (pacotes de TIC valem)
+      if ((!LOJA[item] && !TICPACK[item]) || agora - (a.px || 0) < 15e3) { ws.serializeAttachment(a); return this.envia(ws, { t: "pix", erro: "Espere alguns segundos e tente de novo." }); }
       a.px = agora; ws.serializeAttachment(a);
       const r = await this.criaPix(a.arroba, item);
       return this.envia(ws, Object.assign({ t: "pix", item }, r));
@@ -264,10 +296,169 @@ export class Vila extends DurableObject {
         if (lv !== a.lv) { a.lv = lv; this.todos({ t: "lv", id: a.id, lv }, ws); }
         const niv = (await this.ctx.storage.get("niveis")) || {};
         if (niv[a.arroba] !== lv) { niv[a.arroba] = lv; await this.ctx.storage.put("niveis", niv); }
+        await this.rankXp(a.arroba, p.xp);
         await this.salva(a.arroba, { perfil: p });
       }
     }
     ws.serializeAttachment(a);
+  }
+
+  // ---------------------------------------------------------------- TEMPORADA
+  async eco(arroba) {
+    const e = (await this.ctx.storage.get("eco:" + arroba)) || {};
+    return Object.assign({ tic: 0, rep: 0, dia: "", hoje: {}, uma: {}, equip: [], vendas: [] }, e);
+  }
+  async salvaEco(arroba, e) { await this.ctx.storage.put("eco:" + arroba, e); await this.rankRep(arroba, e.rep); }
+  ecoPub(e) { return { tic: e.tic, rep: e.rep, repNv: repNivel(e.rep), repNome: REP_NIVEIS[repNivel(e.rep)][1], equip: e.equip || [], vendas: (e.vendas || []).slice(-5) }; }
+  paraArroba(arroba, m) { for (const [ws, b] of this.viajantes()) if (b.arroba === arroba) this.envia(ws, m); }
+  async rank() { if (!this.rk) this.rk = (await this.ctx.storage.get("rank")) || {}; return this.rk; }
+  async rankXp(arroba, xp) { const r = await this.rank(); const v = r[arroba] || [0, 0]; if (v[0] !== xp) { v[0] = xp; r[arroba] = v; await this.ctx.storage.put("rank", r); } }
+  async rankRep(arroba, rep) { const r = await this.rank(); const v = r[arroba] || [0, 0]; if (v[1] !== rep) { v[1] = rep; r[arroba] = v; await this.ctx.storage.put("rank", r); } }
+  async multRep(arroba, e) {
+    const rec = await this.ctx.storage.get("j:" + arroba), at = (rec && rec.perfil && rec.perfil.attr) || {};
+    const eq = (rec && rec.perfil && rec.perfil.eqp) || [];
+    return 1 + Math.max(0, Math.min(10, at.car | 0)) * 0.05 + (eq.includes("amuleto_dragao") && (e.equip || []).includes("amuleto_dragao") ? 0.2 : 0);
+  }
+  async ganha(arroba, k, agora) {
+    const g = GANHOS[k]; if (!g) return null;
+    const e = await this.eco(arroba), dia = diaBR(agora);
+    if (e.dia !== dia) { e.dia = dia; e.hoje = {}; }
+    if (g.uma) { if (e.uma[k]) return null; e.uma[k] = agora; }
+    else { if ((e.hoje[k] || 0) >= g.dia) return null; e.hoje[k] = (e.hoje[k] || 0) + 1; }
+    const rep = Math.round(g.rep * (await this.multRep(arroba, e)));
+    e.tic += g.tic; e.rep += rep;
+    await this.salvaEco(arroba, e);
+    return { e, tic: g.tic, rep };
+  }
+  async votacao() { if (!this.vt) this.vt = (await this.ctx.storage.get("voto:" + VOTACAO.id)) || { por: {}, peso: {} }; return this.vt; }
+  async resumoVotacao(eu) {
+    const v = await this.votacao(), soma = {};
+    VOTACAO.ops.forEach(o => { soma[o.id] = 0; });
+    Object.entries(v.por).forEach(([ar, op]) => { soma[op] = (soma[op] || 0) + (v.peso[ar] || 1); });
+    const encerrada = Date.now() >= VOTACAO.fim, ord = VOTACAO.ops.map(o => o.id).sort((x, y) => soma[y] - soma[x]);
+    return { id: VOTACAO.id, titulo: VOTACAO.titulo, fim: VOTACAO.fim, encerrada, ops: VOTACAO.ops.map(o => ({ id: o.id, n: o.n, v: soma[o.id] })),
+      votantes: Object.keys(v.por).length, vencedor: encerrada ? ord[0] : null, lider: ord[0], meu: eu ? v.por[eu] || null : null };
+  }
+  async evento() { if (!this.ev) this.ev = (await this.ctx.storage.get("evento:" + EVENTO.id)) || { total: 0, por: {}, hoje: { dia: "", por: {} } }; return this.ev; }
+  async resumoEvento(eu) {
+    const v = await this.evento(), agora = Date.now();
+    const top = Object.entries(v.por).sort((x, y) => y[1] - x[1]).slice(0, 5).map(([arroba, n]) => ({ arroba, n }));
+    return { id: EVENTO.id, titulo: EVENTO.titulo, inicio: EVENTO.inicio, fim: EVENTO.fim, meta: EVENTO.meta, total: v.total, ativo: agora >= EVENTO.inicio && agora <= EVENTO.fim,
+      participantes: Object.keys(v.por).length, top, meu: eu ? v.por[eu] || 0 : 0 };
+  }
+  async mercado() { if (!this.mc) this.mc = (await this.ctx.storage.get("mercado")) || { seq: 1, ofertas: [] }; return this.mc; }
+  async rotaTemporada(rota, q) {
+    const eu = limpaArroba(q.get("eu") || "");
+    if (rota === "/temporada/ranking") {
+      const r = await this.rank(), lista = Object.entries(r).filter(([, v]) => v[0] > 0);
+      lista.sort((x, y) => y[1][0] - x[1][0]);
+      const pos = eu ? lista.findIndex(([ar]) => ar === eu) + 1 : 0;
+      const repTop = Object.entries(r).sort((x, y) => y[1][1] - x[1][1]).slice(0, 5).map(([arroba, v]) => ({ arroba, rep: v[1], nome: REP_NIVEIS[repNivel(v[1])][1] }));
+      return { top: lista.slice(0, 10).map(([arroba, v]) => ({ arroba, xp: v[0], lv: nivel(v[0]), rep: v[1], repNome: REP_NIVEIS[repNivel(v[1])][1] })), total: lista.length, pos, repTop };
+    }
+    if (rota === "/temporada/votacao") return this.resumoVotacao(eu);
+    if (rota === "/temporada/evento") return this.resumoEvento(eu);
+    if (rota === "/temporada/casas") return (await this.ctx.storage.get("casas")) || {};
+    if (rota === "/temporada/mercado") { const m = await this.mercado(); return { ofertas: m.ofertas.slice(-60) }; }
+    if (rota === "/temporada/resumo") {
+      const [vt, ev, mc, c] = [await this.resumoVotacao(eu), await this.resumoEvento(eu), await this.mercado(), (await this.ctx.storage.get("casas")) || {}];
+      return { votacao: vt, evento: ev, ofertas: mc.ofertas.length, lojas: [...new Set(mc.ofertas.map(o => o.a))], casas: c, natal: NATAL, agora: Date.now() };
+    }
+    return { erro: "rota desconhecida" };
+  }
+  async msgTemporada(ws, a, m, agora) {
+    const ar = a.arroba, responde = (x) => this.envia(ws, x);
+    const ecoMsg = (e, extra) => responde(Object.assign({ t: "eco" }, this.ecoPub(e), extra || {}));
+    if (m.t === "eco") return ecoMsg(await this.eco(ar));
+    if (m.t === "ganho") {
+      const k = String(m.k || "");
+      if (k === "evento:costa1") { const ev = await this.evento(); if (ev.total < EVENTO.meta || (ev.por[ar] || 0) < 3) return; }
+      if (k === "presente" && (agora < NATAL.inicio || agora > NATAL.fim)) return;
+      const r = await this.ganha(ar, k, agora);
+      if (r) ecoMsg(r.e, { ganho: { k, tic: r.tic, rep: r.rep } });
+      return;
+    }
+    if (m.t === "votar") {
+      const op = String(m.op || "");
+      if (agora >= VOTACAO.fim || !VOTACAO.ops.some(o => o.id === op)) return responde({ t: "voto", erro: "A votação já terminou." });
+      const v = await this.votacao(); const novo = !v.por[ar];
+      if (!novo) return responde({ t: "voto", erro: "Você já votou.", res: await this.resumoVotacao(ar) });
+      const e = await this.eco(ar); v.por[ar] = op; v.peso[ar] = 1 + Math.max(0, repNivel(e.rep) - 1);
+      await this.ctx.storage.put("voto:" + VOTACAO.id, v);
+      e.rep += 5; e.tic += 5; e.uma["voto:" + VOTACAO.id] = agora; await this.salvaEco(ar, e);
+      const res = await this.resumoVotacao(ar);
+      responde({ t: "voto", ok: true, res, peso: v.peso[ar] }); ecoMsg(e);
+      this.todos({ t: "votacao", res: Object.assign({}, res, { meu: null }) });
+      this.aviso({ t: "aviso", k: "voto", v: op, arroba: ar, em: agora }, ws);
+      return;
+    }
+    if (m.t === "patrulha") {
+      if (agora < EVENTO.inicio || agora > EVENTO.fim || agora - (a.pt || 0) < 4000) return;
+      a.pt = agora; ws.serializeAttachment(a);
+      const v = await this.evento(), dia = diaBR(agora);
+      if (v.hoje.dia !== dia) v.hoje = { dia, por: {} };
+      const ja = v.hoje.por[ar] || 0, n = Math.max(0, Math.min(m.n === 2 ? 2 : 1, EVENTO.porDia - ja));
+      if (!n) return responde({ t: "patrulha", erro: "Você já fez todas as patrulhas de hoje. Volte amanhã!" });
+      const antes = v.total; v.total += n; v.hoje.por[ar] = ja + n; v.por[ar] = (v.por[ar] || 0) + n;
+      await this.ctx.storage.put("evento:" + EVENTO.id, v);
+      const g = await this.ganha(ar, "coleta", agora);
+      responde({ t: "patrulha", ok: true, n, meu: v.por[ar] }); if (g) ecoMsg(g.e);
+      this.todos({ t: "evento", total: v.total, meta: EVENTO.meta, participantes: Object.keys(v.por).length });
+      const marco = [0.25, 0.5, 0.75, 1].find(f => antes < EVENTO.meta * f && v.total >= EVENTO.meta * f);
+      if (marco) this.aviso({ t: "aviso", k: "evento", v: String(Math.round(marco * 100)), arroba: ar, em: agora });
+      return;
+    }
+    if (m.t === "casa") {
+      if (!(await this.moradoresPorArroba())[ar]) return responde({ t: "casa", erro: "Só os moradores têm casa para melhorar." });
+      const c = (await this.ctx.storage.get("casas")) || {}, atual = c[ar] || 0, n = m.n | 0;
+      if (n !== atual + 1 || n > 3) return responde({ t: "casa", erro: "Melhoria inválida.", nivel: atual });
+      c[ar] = n; await this.ctx.storage.put("casas", c);
+      const e = await this.eco(ar); e.rep += 15; await this.salvaEco(ar, e);
+      responde({ t: "casa", ok: true, nivel: n }); ecoMsg(e);
+      this.todos({ t: "casas", casas: c });
+      this.aviso({ t: "aviso", k: "casa", v: String(n), arroba: ar, em: agora }, ws);
+      return;
+    }
+    if (m.t === "oferta") {
+      const item = String(m.item || ""), q = Math.max(1, Math.min(10, m.q | 0)), preco = Math.max(1, Math.min(500, m.preco | 0));
+      if (!/^[a-z_]{2,24}$/.test(item)) return;
+      const e = await this.eco(ar);
+      if (repNivel(e.rep) < 2) return responde({ t: "oferta", erro: "Para abrir a sua loja você precisa ser Respeitado (80 de reputação)." });
+      const mc = await this.mercado();
+      if (mc.ofertas.filter(o => o.a === ar).length >= 4) return responde({ t: "oferta", erro: "Sua loja já tem 4 ofertas. Retire uma para colocar outra." });
+      if (mc.ofertas.length >= 200) return responde({ t: "oferta", erro: "A feira está cheia agora. Tente mais tarde." });
+      const o = { id: mc.seq++, a: ar, item, q, preco, em: agora }; mc.ofertas.push(o);
+      await this.ctx.storage.put("mercado", mc);
+      responde({ t: "oferta", ok: true, o }); this.todos({ t: "mercado", n: mc.ofertas.length });
+      return;
+    }
+    if (m.t === "retirar" || m.t === "comprar") {
+      const mc = await this.mercado(), i = mc.ofertas.findIndex(o => o.id === (m.id | 0)); if (i < 0) return responde({ t: m.t, erro: "Essa oferta não existe mais." });
+      const o = mc.ofertas[i];
+      if (m.t === "retirar") {
+        if (o.a !== ar) return;
+        mc.ofertas.splice(i, 1); await this.ctx.storage.put("mercado", mc);
+        return responde({ t: "retirar", ok: true, item: o.item, q: o.q });
+      }
+      if (o.a === ar) return responde({ t: "comprar", erro: "Essa oferta é sua." });
+      const e = await this.eco(ar); if (e.tic < o.preco) return responde({ t: "comprar", erro: "Você não tem TIC suficiente." });
+      mc.ofertas.splice(i, 1); await this.ctx.storage.put("mercado", mc);
+      e.tic -= o.preco; await this.salvaEco(ar, e);
+      const v = await this.eco(o.a); v.tic += o.preco; v.rep += 2; v.vendas = (v.vendas || []).concat({ item: o.item, q: o.q, preco: o.preco, para: ar, em: agora }).slice(-20); await this.salvaEco(o.a, v);
+      responde({ t: "comprar", ok: true, item: o.item, q: o.q, de: o.a }); ecoMsg(e);
+      this.paraArroba(o.a, Object.assign({ t: "eco" }, this.ecoPub(v), { aviso: `@${ar} comprou ${o.q}x ${o.item} na sua loja: +${o.preco} TIC` }));
+      this.todos({ t: "mercado", n: mc.ofertas.length });
+      return;
+    }
+    if (m.t === "equip_compra" || m.t === "equip_forja") {
+      const id = String(m.id || ""); if (!EQUIP[id]) return;
+      const e = await this.eco(ar); if (e.equip.includes(id)) return responde({ t: "equip", erro: "Você já tem esse equipamento." });
+      if (m.t === "equip_compra") { if (e.tic < EQUIP[id]) return responde({ t: "equip", erro: "Você não tem TIC suficiente." }); e.tic -= EQUIP[id]; }
+      else if (!EQUIP_FORJA.has(id)) return;
+      e.equip.push(id); await this.salvaEco(ar, e);
+      responde({ t: "equip", ok: true, id }); ecoMsg(e);
+      return;
+    }
   }
 
   async salva(arroba, parte) {
@@ -330,7 +521,7 @@ export class Vila extends DurableObject {
     ws.serializeAttachment(a);
     const outros = this.viajantes().filter(([w]) => w !== ws).map(([, b]) => this.publico(b));
     const niveis = (await this.ctx.storage.get("niveis")) || {};
-    this.envia(ws, { t: "ok", eu: this.publico(a), codigo: codigoNovo, perfil: rec.perfil, outros, niveis, hist: this.hist || [] });
+    this.envia(ws, { t: "ok", eu: this.publico(a), codigo: codigoNovo, perfil: rec.perfil, outros, niveis, hist: this.hist || [], eco: this.ecoPub(await this.eco(arroba)) });
     this.todos({ t: "entrou", ...this.publico(a) }, ws);
     this.hist = (this.hist || []).concat({ t: "aviso", k: "entrou", arroba, em: Date.now() }).slice(-10);
   }
@@ -464,6 +655,7 @@ export default {
       return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/loja/webhook" + url.search, { method: request.method, headers: request.headers, body: request.method === "POST" ? await request.text() : undefined }));
     }
     if (url.pathname === "/loja/bandeiras") return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha/loja/bandeiras"));
+    if (url.pathname.startsWith("/temporada/")) return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha" + url.pathname + url.search));
     if (url.pathname === "/instagram/status" || url.pathname === "/instagram/verificar" || url.pathname === "/comunidade") {
       return env.VILA.get(env.VILA.idFromName("grande-ilha")).fetch(new Request("https://ilha" + url.pathname));
     }

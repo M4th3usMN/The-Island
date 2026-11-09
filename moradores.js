@@ -385,5 +385,36 @@ window.MORADORES = [
     historia: 'Um titã defensor que veio de um mundo tecnológico. Chegou disposto a defender o dragão.',
     rotina: 'tita_defensor', casa: 'auto', chegada: '2026-11-09T16:03:00-04:00',
     visual: { tipo: 'humano', pele: '#c08a5e', cabelo: 'curto', corCabelo: '#1a1210', roupa: '#3a4a6a', listras: '#4ac8f0', detalhe: '#9aa0aa', calca: '#2a3040', chapeu: 'visor_tech', corChapeu: '#5adcff', acessorio: 'escudo_energia' }
+  },
+  // Dia 10 (09/11): comentários antigos do YouTube que ainda não estavam no mapa
+  {
+    id: 'sapiens', arroba: 'Homo_Sapien_Intelectual_ofc', nome: 'Sapiens', profissao: 'Fazendeiro',
+    historia: 'Um fazendeiro estudioso que chegou querendo só uma coisa: ter a própria plantação. Anota tudo o que planta num caderninho.',
+    rotina: 'fazendeiro', casa: 'auto', chegada: '2026-11-09T19:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#d8a47a', cabelo: 'longo', corCabelo: '#5a3a1e', roupa: '#7a8a3a', avental: '#c8a070', calca: '#4a3a24', chapeu: 'oculos', acessorio: 'cesta' }
+  },
+  {
+    id: 'joao_gabriel', arroba: 'kenjibs-l7t', nome: 'João Gabriel', profissao: 'Mago',
+    historia: 'Mago jovem de magia do gelo. Veio à ilha para estudar com quem sabe mais e jura que um dia vai congelar o mar inteiro.',
+    rotina: 'aprendiz_magia', casa: 'auto', chegada: '2026-11-09T19:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#f0c4a0', cabelo: 'espetado', corCabelo: '#e2c070', roupa: '#4a8ab8', detalhe: '#e8f4ff', manto: true, calca: '#2a3a5a', chapeu: 'faixa', corChapeu: '#9adcff', acessorio: 'cajado_magico', magia: '#7ae0ff' }
+  },
+  {
+    id: 'joao_victor', arroba: 'JoãoVictor-r7h8c', nome: 'João Victor', profissao: 'Padre',
+    historia: 'Padre de uma ordem de monges andarilhos. Chegou com um capuz marrom e o voto de cuidar de quem ninguém cuida.',
+    rotina: 'sacerdote', casa: 'auto', chegada: '2026-11-09T19:02:00-04:00',
+    visual: { tipo: 'humano', pele: '#a87452', cabelo: 'careca', roupa: '#6a4a2a', detalhe: '#e2d6b4', manto: true, calca: '#4a3420', chapeu: 'capuz', corChapeu: '#5a3a1e', acessorio: 'cajado' }
+  },
+  {
+    id: 'iran', arroba: 'Iran-f2j9m', nome: 'Iran', profissao: 'Ferreiro',
+    historia: 'Ferreiro de 37 anos, braço forte e pouca conversa. Chegou com as próprias ferramentas e já disputa a bigorna com o Kasseki.',
+    rotina: 'ferreiro', casa: 'auto', chegada: '2026-11-09T19:03:00-04:00',
+    visual: { tipo: 'humano', pele: '#8a5a3a', cabelo: 'careca', barba: '#c0461e', roupa: '#5a5e66', avental: '#3a2418', calca: '#2a2a2e', chapeu: 'bandana', corChapeu: '#2f4f8a', acessorio: 'martelo' }
+  },
+  {
+    id: 'bob', arroba: 'caiolim-f5s', nome: 'Bob', profissao: 'Fugitivo misterioso',
+    historia: 'Tem 20 anos e chegou ainda com o uniforme listrado de uma prisão do continente. Fugiu de lá e veio se esconder na ilha. Ninguém sabe o que ele fez.',
+    rotina: 'fugitivo', casa: 'auto', chegada: '2026-11-09T19:04:00-04:00',
+    visual: { tipo: 'humano', pele: '#e4b48c', cabelo: 'espetado', corCabelo: '#1a120e', roupa: '#d8d8d0', listras: '#2a2a2e', calca: '#2a2a2e', acessorio: 'chave' }
   }
 ];

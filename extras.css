@@ -388,3 +388,44 @@
 .carta.moldura-ouro::after { content: ''; position: absolute; inset: -12px; border: 22px solid transparent; border-image: url(itens-loja/moldura.png) 22 round; image-rendering: pixelated; pointer-events: none; z-index: 5; }
 .lj-arte canvas.lj-hd { image-rendering: auto; }
 .lj-arte { overflow: hidden; } .lj-arte canvas.lj-px { position: absolute; left: -16.67%; top: -16.67%; width: 133.34%; height: 133.34%; image-rendering: pixelated; } .lj-arte em, .lj-arte small { z-index: 2; }
+
+/* ---------------------------------------------------------------- TEMPORADA (temporada.js) */
+.tp-topo { display: grid; grid-template-columns: 92px 1fr; gap: 10px; margin: 0 0 12px; }
+.tp-tic { background: var(--pergaminho); color: var(--tinta); border: 2px solid #8a5a22; box-shadow: 0 0 0 2px #2a1808; display: grid; place-content: center; text-align: center; padding: 6px; }
+.tp-tic b { font-family: Silkscreen, monospace; font-size: 26px; line-height: 1; color: #6a3a10; }
+.tp-tic span { font-family: Silkscreen, monospace; font-size: 11px; letter-spacing: .1em; }
+.tp-rep { background: #0a1016; border: 1px solid var(--borda); padding: 8px 10px; display: grid; gap: 3px; min-width: 0; }
+.tp-rep span { font-family: Silkscreen, monospace; font-size: 10px; letter-spacing: .1em; color: var(--apagado); }
+.tp-rep b { font-family: Silkscreen, monospace; font-size: 15px; }
+.tp-rep small { font-size: 12px; color: var(--apagado); }
+.tp-pts { font-style: normal; color: #1a1008; background: var(--ouro); padding: 1px 6px; margin-left: 6px; letter-spacing: 0; }
+.tp-attr, .tp-lista, .tp-equip, .tp-rank, .tp-pacotes { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.tp-attr li, .tp-equip li { display: flex; align-items: center; gap: 10px; background: #0a1016; border: 1px solid var(--borda); padding: 8px 10px; }
+.tp-attr li > i, .tp-equip li > i { font-style: normal; font-size: 20px; width: 30px; text-align: center; flex: none; }
+.tp-attr li > div, .tp-equip li > div { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.tp-attr b { font-size: 15px; } .tp-attr b span { font-family: Silkscreen, monospace; color: var(--ouro); margin-left: 4px; }
+.tp-attr small, .tp-equip small { font-size: 12px; color: var(--apagado); }
+.tp-attr button, .tp-equip button { flex: none; min-width: 52px; }
+.tp-equip li { border-left: 4px solid var(--r, #b8bcc8); }
+.tp-bts { display: flex; gap: 6px; flex: none; }
+.tp-lista li { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; padding: 6px 10px; background: #0a1016; border: 1px solid var(--borda); opacity: .7; }
+.tp-lista li.ok { opacity: 1; border-color: #8a5a22; }
+.tp-lista small { font-size: 12px; color: var(--apagado); text-align: right; }
+.tp-op { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px dashed #5a4020; }
+.tp-op > div { flex: 1; display: grid; gap: 4px; min-width: 0; }
+.tp-op small { font-size: 12px; color: var(--apagado); }
+.tp-op.meu b { color: var(--ouro); }
+.tp-selo { font-family: Silkscreen, monospace; font-size: 10px; color: #1a1008; background: var(--ouro); padding: 4px 6px; flex: none; }
+.tp-rank li { display: grid; grid-template-columns: 30px 1fr; column-gap: 8px; align-items: baseline; background: #0a1016; border: 1px solid var(--borda); padding: 7px 10px; }
+.tp-rank li em { grid-row: span 2; font-style: normal; font-family: Silkscreen, monospace; font-size: 16px; color: var(--ouro); }
+.tp-rank li small { font-size: 12px; color: var(--apagado); }
+.tp-rank li:nth-child(1) { border-color: #ffd046; } .tp-rank li:nth-child(2) { border-color: #c8ccd6; } .tp-rank li:nth-child(3) { border-color: #c98a4a; }
+.tp-rank li.eu { background: var(--pergaminho); color: var(--tinta); } .tp-rank li.eu small { color: #6a4a2a; } .tp-rank li.eu em { color: #8a3a10; }
+.tp-pos { background: #1a1008; border: 2px solid #b8862e; padding: 8px 10px; }
+.tp-loja { background: #0a1016; border: 1px solid var(--borda); padding: 8px; margin: 0 0 8px; } .tp-loja > b { display: block; margin: 0 0 6px; }
+.tp-vender { display: grid; grid-template-columns: 1fr 58px 64px auto; gap: 6px; }
+.tp-vender select, .tp-vender input { background: #05090d; color: var(--texto); border: 2px solid var(--borda); padding: 6px; font: inherit; font-size: 14px; min-width: 0; }
+.tp-pacotes { grid-template-columns: repeat(2, 1fr); }
+.tp-pacotes li { background: var(--pergaminho); color: var(--tinta); border: 2px solid #8a5a22; padding: 8px; display: grid; gap: 4px; text-align: center; }
+.tp-pacotes b { font-family: Silkscreen, monospace; font-size: 15px; } .tp-pacotes small { font-size: 12px; color: #6a4a2a; }
+.tp-voto .md-barra, .md-bloco .md-barra { margin: 4px 0; }
