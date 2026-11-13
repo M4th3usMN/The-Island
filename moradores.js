@@ -416,5 +416,12 @@ window.MORADORES = [
     historia: 'Tem 20 anos e chegou ainda com o uniforme listrado de uma prisão do continente. Fugiu de lá e veio se esconder na ilha. Ninguém sabe o que ele fez.',
     rotina: 'fugitivo', casa: 'auto', chegada: '2026-11-09T16:00:00-04:00',
     visual: { tipo: 'humano', pele: '#e4b48c', cabelo: 'espetado', corCabelo: '#1a120e', roupa: '#d8d8d0', listras: '#2a2a2e', calca: '#2a2a2e', acessorio: 'chave' }
+  },
+  // 14/11: comentário do YouTube
+  {
+    id: 'edunedi', arroba: 'Batata_e_potato', nome: 'Edunedi', profissao: 'Defensor (batata falante)',
+    historia: 'Uma batata falante que já foi rei de um reino de batatas. O reino foi atacado, só sobrou ele, e hoje ele é defensor.',
+    rotina: 'batata_defensor', casa: 'auto', chegada: '2026-11-14T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#c8a064', manchas: '#8a6a3a', cabelo: 'careca', roupa: '#6a2a5a', detalhe: '#c9a14a', manto: true, calca: '#4a2a40', chapeu: 'coroa_torta', corChapeu: '#c0392b', acessorio: 'garfo_tampa' }
   }
 ];

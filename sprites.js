@@ -76,6 +76,7 @@
       if (est === 'careca') P(x - 3, HY, 6, 1, shade(pele, 0.88));
       if (!o.dormindo) { P(x - 2, HY + 2, 1, 1, '#2a1e1e'); P(x + 1, HY + 2, 1, 1, '#2a1e1e'); }
       if (v.barba) P(x - 3, HY + 3, 6, 2, v.barba);
+      if (v.manchas) { P(x + 1, HY + 1, 1, 1, v.manchas); P(x - 3, HY + 4, 1, 1, v.manchas); P(x + 2, HY + 3, 1, 1, v.manchas); }
     }
 
     // chapeus
@@ -123,12 +124,14 @@
     if (ch === 'diadema_lua') { P(x - 3, HY, 6, 1, cc); P(x - 2, HY - 3, 3, 1, '#ffe9a0'); P(x - 2, HY - 2, 1, 1, '#ffe9a0'); P(x - 2, HY - 1, 3, 1, '#ffe9a0'); if (!back) P(x + 2, HY - 3, 1, 1, '#ffffff'); }
     if (ch === 'pele_lobo') { P(x - 4, HY - 2, 8, 3, cc); P(x - 4, HY - 4, 2, 2, cc); P(x + 2, HY - 4, 2, 2, cc); P(x - 3, HY - 3, 1, 1, '#c08a8a'); P(x + 2, HY - 3, 1, 1, '#c08a8a'); P(x - 4, HY + 1, 1, 4, cc); P(x + 3, HY + 1, 1, 4, cc); if (!back) { P(x - 1, HY - 1, 2, 1, shade(cc, 0.6)); P(x - 2, HY - 2, 1, 1, '#f2e6a0'); P(x + 1, HY - 2, 1, 1, '#f2e6a0'); } else P(x - 3, HY, 6, 6, cc); }
     if (ch === 'capuz_sombra') { P(x - 4, HY - 1, 8, 2, cc); P(x - 2, HY - 3, 4, 2, cc); P(x - 1, HY - 4, 2, 1, cc); P(x - 4, HY + 1, 1, 5, cc); P(x + 3, HY + 1, 1, 5, cc); if (!back) P(x - 3, HY + 1, 6, 1, 'rgba(0,0,0,0.45)'); else P(x - 3, HY, 6, 5, cc); }
+    // ---- 14/11
+    if (ch === 'coroa_torta') { P(x - 3, HY - 1, 6, 1, '#b8862e'); P(x - 3, HY - 2, 3, 1, '#e8b830'); P(x, HY - 3, 3, 2, '#e8b830'); P(x - 3, HY - 3, 1, 1, '#e8b830'); P(x + 2, HY - 4, 1, 1, '#e8b830'); P(x - 1, HY - 2, 1, 1, '#7a5a20'); if (!back) P(x + 1, HY - 2, 1, 1, cc); }
     if (ch === 'visor_tech') { P(x - 3, HY - 1, 6, 2, '#5a6070'); P(x - 3, HY - 1, 6, 1, '#7a808e'); P(side > 0 ? x + 3 : x - 4, HY - 3, 1, 4, '#9aa0aa'); P(side > 0 ? x + 3 : x - 4, HY - 4, 1, 1, Math.floor(t * 2) % 2 ? '#ff4a4a' : '#8a2a2a'); if (!back) P(x - 3, HY + 2, 6, 1, cc); else P(x - 3, HY + 1, 6, 1, '#5a6070'); }
 
     // acessorio (mao do lado "side")
     const M = (dx, dy, w, h, col) => P(side > 0 ? x + dx : x - dx - w, Y + dy, w, h, col);
     const a = v.acessorio;
-    if (!back || a === 'bau' || a === 'bigorna' || a === 'corrente' || a === 'machado' || a === 'montante' || a === 'machado_runico' || a === 'cajado' || a === 'cajado_magico' || a === 'vara' || a === 'escudo_lanca' || a === 'forcado' || a === 'martelo_grande' || a === 'alabarda' || a === 'guitarra' || a === 'cachecol_bracos' || a === 'katana') {
+    if (!back || a === 'bau' || a === 'bigorna' || a === 'corrente' || a === 'machado' || a === 'montante' || a === 'machado_runico' || a === 'cajado' || a === 'cajado_magico' || a === 'vara' || a === 'escudo_lanca' || a === 'forcado' || a === 'martelo_grande' || a === 'alabarda' || a === 'guitarra' || a === 'cachecol_bracos' || a === 'katana' || a === 'garfo_tampa') {
       if (a === 'machado') { M(4, -3, 1, 8, '#7a5230'); M(5, -3, 2, 3, '#b8bcc8'); M(5, -3, 1, 3, '#dfe3ea'); }
       if (a === 'cajado') { M(4, -6, 1, 11, '#8a6234'); M(4, -7, 3, 1, '#8a6234'); M(6, -6, 1, 2, '#8a6234'); }
       if (a === 'cajado_magico') { M(4, -5, 1, 10, '#4a3a5a'); M(3, -8, 3, 3, v.magia || '#9b6bff'); M(4, -7, 1, 1, '#ffffff'); }
@@ -189,6 +192,8 @@
       if (a === 'astrolabio') { M(5, -1, 1, 1, '#c9a14a'); M(3, 0, 4, 4, '#c9a14a'); M(4, 1, 2, 2, '#1e2a4a'); M(4 + (Math.floor(t) % 2), 1 + (Math.floor(t) % 2), 1, 1, '#ffe27a'); }
       if (a === 'chicote') { M(4, 0, 1, 3, '#5a3a1e'); M(5, -2, 1, 2, '#8a5a32'); M(6, -4, 2, 1, '#8a5a32'); M(8, -3, 1, 2, '#8a5a32'); M(9, -1, 1, 1, '#8a5a32'); if (Math.floor(t * 2) % 3 === 0) M(10, -2, 1, 1, '#fff6c8'); }
       if (a === 'adagas') { M(4, -2, 1, 5, '#c9ced8'); M(3, 2, 3, 1, '#3a2a2a'); M(4, 3, 1, 1, '#7a1a2a'); M(-5, 0, 1, 4, '#c9ced8'); M(-6, 3, 3, 1, '#3a2a2a'); }
+      // ---- 14/11
+      if (a === 'garfo_tampa') { M(4, -3, 1, 8, '#c9ced8'); M(3, -4, 3, 1, '#c9ced8'); M(3, -6, 1, 2, '#c9ced8'); M(5, -6, 1, 2, '#c9ced8'); M(4, 4, 1, 1, '#8a6234'); if (!back) { M(-8, 0, 5, 4, '#9aa0aa'); M(-7, -1, 3, 1, '#b8bcc8'); M(-6, -2, 1, 1, '#5a3a1e'); M(-7, 0, 1, 1, '#dfe3ea'); } }
       if (a === 'escudo_energia') { const g = 0.45 + 0.25 * Math.sin(t * 3); M(4, 1, 2, 2, '#5a6070'); M(-9, -1, 5, 7, `rgba(90,220,255,${g.toFixed(2)})`); M(-8, 0, 3, 5, 'rgba(210,250,255,0.35)'); M(-9, -1, 5, 1, '#9aeaff'); M(-9, 5, 5, 1, '#9aeaff'); }
     }
     if (a === 'espirito') {

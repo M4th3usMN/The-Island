@@ -330,6 +330,12 @@
         [18, 21, 'passeio', 'Vigiando a ilha'], [21, 0, 'fogueira', 'Afiando as lâminas na fogueira']],
       trabalho: ['Mais rápido.', 'De novo.', 'A lâmina não perdoa.'], social: ['Meu irmão me tirou tudo.', 'Treino para proteger a ilha.', 'Um velho guerreiro me ensinou.']
     },
+    batata_defensor: {
+      blocos: [[22, 6, 'casa', 'Dormindo', S], [6, 8, 'fazenda', 'Visitando a plantação (com respeito)'], [8, 12, 'arena', 'Treinando defesa com o garfo e a tampa'],
+        [12, 13, 'taverna', 'Almoçando (nada de batata no prato!)'], [13, 17, 'cais', 'Vigiando o mar'], [17, 19, 'passeio', 'Patrulhando a ilha'],
+        [19, 22, 'fogueira', 'Contando do reino das batatas, longe do fogo']],
+      trabalho: ['Em guarda!', 'Ninguém passa!', 'Pela coroa das batatas!'], social: ['Eu era rei, sabia?', 'Do meu reino, só sobrou eu.', 'Batata frita? Que horror!']
+    },
     tita_defensor: {
       blocos: [[23, 6, 'casa', 'Recarregando a armadura', S], [6, 8, 'cais', 'Escaneando o horizonte'], [8, 12, 'passeio', 'Patrulhando a ilha'],
         [12, 13, 'taverna', 'Almoçando'], [13, 16, 'oficina', 'Consertando o escudo de energia'], [16, 19, 'arena', 'Treinando defesa'],

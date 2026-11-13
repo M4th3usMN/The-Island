@@ -68,7 +68,8 @@ window.LIVRO = {
     joao_gabriel: ['João Gabriel, mago. A minha magia é a do gelo.', 'Vim aprender com quem sabe mais. Um dia ainda congelo esse mar inteiro.'],
     joao_victor: ['Sou o João Victor, padre de uma ordem de monges andarilhos.', 'Fiz o voto de cuidar de quem ninguém cuida. Esta ilha tem muita gente assim.'],
     iran: ['Iran, ferreiro, 37 anos.', 'Trouxe as minhas ferramentas. A bigorna do Kasseki que se prepare.'],
-    bob: ['Bob. 20 anos.', 'Fugi de uma prisão do continente. O que eu fiz? Isso fica entre mim e o mar.']
+    bob: ['Bob. 20 anos.', 'Fugi de uma prisão do continente. O que eu fiz? Isso fica entre mim e o mar.'],
+    edunedi: ['Edunedi, batata falante. Eu era o rei de um reino de batatas.', 'O meu reino foi atacado e hoje só sobrou eu. Agora sou defensor, e esta ilha eu não deixo cair.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],
