@@ -423,5 +423,12 @@ window.MORADORES = [
     historia: 'Uma batata falante que já foi rei de um reino de batatas. O reino foi atacado, só sobrou ele, e hoje ele é defensor.',
     rotina: 'batata_defensor', casa: 'auto', chegada: '2026-11-14T16:00:00-04:00',
     visual: { tipo: 'humano', pele: '#c8a064', manchas: '#8a6a3a', cabelo: 'careca', roupa: '#6a2a5a', detalhe: '#c9a14a', manto: true, calca: '#4a2a40', chapeu: 'coroa_torta', corChapeu: '#c0392b', acessorio: 'garfo_tampa' }
+  },
+  // 14/11: comentário do Instagram
+  {
+    id: 'ludwig', arroba: 'loony_bunitin05', nome: 'Ludwig', profissao: 'Mestre engenheiro',
+    historia: 'Mestre engenheiro de um país distante e avançado, exilado depois de uma conspiração, que ainda não sabe o idioma da ilha. É especialista em engenhocas movidas a vapor e planeja construir um enorme dirigível.',
+    rotina: 'engenheiro_vapor', casa: 'auto', chegada: '2026-11-14T16:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#f6e0cc', cabelo: 'curto', corCabelo: '#d8c8a0', barba: '#a08050', roupa: '#2e5a5a', detalhe: '#b87a3a', calca: '#4a3a30', chapeu: 'cartola_oculos', corChapeu: '#3a2a24', acessorio: 'chave_vapor' }
   }
 ];

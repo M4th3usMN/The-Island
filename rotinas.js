@@ -347,6 +347,12 @@
         [13, 17, 'ponte', 'Vigiando quem chega pela ponte'], [17, 20, 'floresta', 'Cavando alguma coisa no mato'], [20, 3, 'taverna', 'No canto mais escuro da taverna']],
       trabalho: ['Não me olha assim.', 'Ninguém me seguiu... né?', 'Só estou de passagem.'], social: ['Fugi de um lugar pior que esse.', 'Prefiro não falar do passado.', 'Aqui ninguém me conhece. Ainda.']
     },
+    engenheiro_vapor: {
+      blocos: [[23, 6, 'casa', 'Dormindo', S], [6, 7, 'casa', 'Dando corda no relógio de bolso'], [7, 12, 'oficina', 'Montando uma engenhoca a vapor'],
+        [12, 13, 'fogueira', 'Almoçando e apontando as coisas para aprender o nome'], [13, 15, 'biblioteca', 'Estudando o idioma da ilha'],
+        [15, 18, 'cais', 'Medindo o vento para o dirigível'], [18, 20, 'oficina', 'Desenhando o dirigível'], [20, 23, 'taverna', 'Tentando conversar com as mãos']],
+      trabalho: ['Pfff! Mais pressão.', 'Caldeira... quente!', 'Engrenagem... aqui.'], social: ['Eu... não falo bem. Ainda.', 'Um dia: dirigível!', 'Na minha terra, tudo a vapor.']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

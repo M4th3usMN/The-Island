@@ -127,6 +127,7 @@
     // ---- 14/11
     if (ch === 'coroa_torta') { P(x - 3, HY - 1, 6, 1, '#b8862e'); P(x - 3, HY - 2, 3, 1, '#e8b830'); P(x, HY - 3, 3, 2, '#e8b830'); P(x - 3, HY - 3, 1, 1, '#e8b830'); P(x + 2, HY - 4, 1, 1, '#e8b830'); P(x - 1, HY - 2, 1, 1, '#7a5a20'); if (!back) P(x + 1, HY - 2, 1, 1, cc); }
     if (ch === 'visor_tech') { P(x - 3, HY - 1, 6, 2, '#5a6070'); P(x - 3, HY - 1, 6, 1, '#7a808e'); P(side > 0 ? x + 3 : x - 4, HY - 3, 1, 4, '#9aa0aa'); P(side > 0 ? x + 3 : x - 4, HY - 4, 1, 1, Math.floor(t * 2) % 2 ? '#ff4a4a' : '#8a2a2a'); if (!back) P(x - 3, HY + 2, 6, 1, cc); else P(x - 3, HY + 1, 6, 1, '#5a6070'); }
+    if (ch === 'cartola_oculos') { P(x - 4, HY - 1, 8, 1, cc); P(x - 3, HY - 4, 6, 3, cc); P(x - 3, HY - 2, 6, 1, '#7a5a3a'); if (!back) { P(x - 2, HY - 2, 2, 1, '#c9a14a'); P(x + 1, HY - 2, 2, 1, '#c9a14a'); P(x - 2, HY - 2, 1, 1, '#ffb347'); P(x + 1, HY - 2, 1, 1, '#ffb347'); } P(side > 0 ? x + 3 : x - 4, HY - 3, 1, 1, '#c9a14a'); }
 
     // acessorio (mao do lado "side")
     const M = (dx, dy, w, h, col) => P(side > 0 ? x + dx : x - dx - w, Y + dy, w, h, col);
@@ -194,6 +195,7 @@
       if (a === 'adagas') { M(4, -2, 1, 5, '#c9ced8'); M(3, 2, 3, 1, '#3a2a2a'); M(4, 3, 1, 1, '#7a1a2a'); M(-5, 0, 1, 4, '#c9ced8'); M(-6, 3, 3, 1, '#3a2a2a'); }
       // ---- 14/11
       if (a === 'garfo_tampa') { M(4, -3, 1, 8, '#c9ced8'); M(3, -4, 3, 1, '#c9ced8'); M(3, -6, 1, 2, '#c9ced8'); M(5, -6, 1, 2, '#c9ced8'); M(4, 4, 1, 1, '#8a6234'); if (!back) { M(-8, 0, 5, 4, '#9aa0aa'); M(-7, -1, 3, 1, '#b8bcc8'); M(-6, -2, 1, 1, '#5a3a1e'); M(-7, 0, 1, 1, '#dfe3ea'); } }
+      if (a === 'chave_vapor') { const f = (t * 1.5) % 1; M(4, -2, 1, 6, '#8a8e9a'); M(3, -3, 3, 1, '#8a8e9a'); M(3, -4, 1, 1, '#8a8e9a'); M(5, -4, 1, 1, '#8a8e9a'); M(4, 4, 1, 1, '#5a3a1e'); M(6, -6 - Math.round(f * 3), 1, 1, `rgba(235,235,240,${(0.75 * (1 - f)).toFixed(2)})`); M(7, -8 - Math.round(f * 3), 1, 1, `rgba(235,235,240,${(0.45 * (1 - f)).toFixed(2)})`); }
       if (a === 'escudo_energia') { const g = 0.45 + 0.25 * Math.sin(t * 3); M(4, 1, 2, 2, '#5a6070'); M(-9, -1, 5, 7, `rgba(90,220,255,${g.toFixed(2)})`); M(-8, 0, 3, 5, 'rgba(210,250,255,0.35)'); M(-9, -1, 5, 1, '#9aeaff'); M(-9, 5, 5, 1, '#9aeaff'); }
     }
     if (a === 'espirito') {

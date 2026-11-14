@@ -69,7 +69,8 @@ window.LIVRO = {
     joao_victor: ['Sou o João Victor, padre de uma ordem de monges andarilhos.', 'Fiz o voto de cuidar de quem ninguém cuida. Esta ilha tem muita gente assim.'],
     iran: ['Iran, ferreiro, 37 anos.', 'Trouxe as minhas ferramentas. A bigorna do Kasseki que se prepare.'],
     bob: ['Bob. 20 anos.', 'Fugi de uma prisão do continente. O que eu fiz? Isso fica entre mim e o mar.'],
-    edunedi: ['Edunedi, batata falante. Eu era o rei de um reino de batatas.', 'O meu reino foi atacado e hoje só sobrou eu. Agora sou defensor, e esta ilha eu não deixo cair.']
+    edunedi: ['Edunedi, batata falante. Eu era o rei de um reino de batatas.', 'O meu reino foi atacado e hoje só sobrou eu. Agora sou defensor, e esta ilha eu não deixo cair.'],
+    ludwig: ['Ludwig, mestre engenheiro, 38 anos. Venho de uma terra muito distante, fui exilado depois de uma conspiração e ainda não sei o idioma da ilha.', 'Sou especialista em engenhocas movidas a vapor e tenho planos de construir um enorme dirigível aqui.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],
