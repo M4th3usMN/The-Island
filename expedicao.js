@@ -34,10 +34,10 @@
 
   // ---------------------------------------------------------------- as ilhas
   const ILHAS = {
-    t1: { id: 't1', tier: 1, nome: 'Ilhota das Gaivotas', tic: 5, lv: 1, chao: ['#5f9a4a', '#6aa652', '#57904a'], areia: '#d8c48a', morte: 'nada',
-      desc: 'Praias e capim baixo. Bom para começar.', recursos: ['cobre', 'pinho'], monstros: { caranguejo: 6, javali: 4 } },
-    t2: { id: 't2', tier: 2, nome: 'Bosque Sombrio', tic: 15, lv: 3, chao: ['#2f5636', '#365f3c', '#2a4c30'], areia: '#a89a6a', morte: 'metade',
-      desc: 'Mata fechada, lobos em bando e aranhas nas árvores.', recursos: ['ferro', 'carvalho'], monstros: { lobo: 6, aranha: 5 } }
+    t1: { id: 't1', tier: 1, nome: 'Ilhota das Gaivotas', tic: 10, lv: 1, chao: ['#5f9a4a', '#6aa652', '#57904a'], areia: '#d8c48a', morte: 'nada',
+      desc: 'Praias e capim baixo. Bom para começar.', recursos: ['cobre', 'pinho'], monstros: { caranguejo: 6, javali: 4 }, chefe: 'rei_caranguejo' },
+    t2: { id: 't2', tier: 2, nome: 'Bosque Sombrio', tic: 20, lv: 3, chao: ['#2f5636', '#365f3c', '#2a4c30'], areia: '#a89a6a', morte: 'metade',
+      desc: 'Mata fechada, lobos em bando e aranhas nas árvores.', recursos: ['ferro', 'carvalho'], monstros: { lobo: 6, aranha: 5 }, chefe: 'lobo_alfa' }
   };
   const RECURSO = {
     cobre: { tipo: 'rocha', cor: '#c97a3a', jogo: { tipo: 'reacao', golpes: 2, janela: 850 }, verbo: 'MINERAR', xp: 4 },
@@ -49,8 +49,14 @@
     caranguejo: { nome: 'Caranguejo', hp: 18, dano: 4, vel: 14, aggro: 40, alcance: 10, cd: 1400, prep: 480, xp: 8, drop: ['cobre', 0.5, 1] },
     javali: { nome: 'Javali', hp: 30, dano: 7, vel: 22, aggro: 55, alcance: 11, cd: 1600, prep: 520, xp: 14, drop: ['couro', 0.6, 1] },
     lobo: { nome: 'Lobo', hp: 40, dano: 9, vel: 30, aggro: 70, alcance: 11, cd: 1150, prep: 400, xp: 20, drop: ['couro', 0.7, 2] },
-    aranha: { nome: 'Aranha', hp: 32, dano: 8, vel: 24, aggro: 60, alcance: 12, cd: 1250, prep: 430, xp: 18, drop: ['seda', 0.7, 1] }
+    aranha: { nome: 'Aranha', hp: 32, dano: 8, vel: 24, aggro: 60, alcance: 12, cd: 1250, prep: 430, xp: 18, drop: ['seda', 0.7, 1] },
+    // CHEFES: um por ilha, na toca do norte. Muita vida, golpe forte e, a cada 3 golpes, uma pancada em área.
+    rei_caranguejo: { nome: 'Rei Caranguejo', chefe: true, hp: 450, dano: 16, vel: 16, aggro: 70, alcance: 16, cd: 1500, prep: 650, xp: 160, area: 30,
+      saque: { cobre: 6, couro: 2, pinho: 3 } },
+    lobo_alfa: { nome: 'Lobo Alfa Sombrio', chefe: true, hp: 800, dano: 24, vel: 30, aggro: 85, alcance: 16, cd: 1250, prep: 560, xp: 320, area: 34,
+      saque: { ferro: 6, couro: 4, seda: 3, carvalho: 3 } }
   };
+  const TOCA = { x: 160, y: 58 };
   const DURACAO = 10 * 60e3, BOLSA_MAX = 30, W = 320, H = 320, DOCA = { x: 160, y: 292 };
 
   // ---------------------------------------------------------------- vida
@@ -131,6 +137,7 @@
     const mapa = geraIlha(def), r = mapa.r;
     const monstros = [];
     Object.entries(def.monstros).forEach(([k, n]) => { for (let i = 0; i < n; i++) monstros.push(novoMonstro(mapa, k)); });
+    if (def.chefe) monstros.push(novoChefe(mapa, def.chefe));
     X = { def, mapa, monstros, t0: Date.now(), fim: Date.now() + DURACAO, bolsa: {}, eu: { x: DOCA.x, y: 262, side: 1, dir: 'up', atk: 0, inv: 0, anda: false },
       nums: [], jogo: null, abates: 0, avisou: false, golpes: [] };
     S.eu.emote = { txt: '⛵ Expedição!', ate: Date.now() + 4000 };
@@ -141,6 +148,10 @@
     const r = mapa.r; let x, y, t = 0;
     do { x = 20 + r() * 280; y = 20 + r() * 250; t++; } while ((!mapa.terra(x, y) || mapa.borda(x, y) || Math.hypot(x - DOCA.x, y - 262) < 70 || (X && dist({ x, y }, X.eu) < 80)) && t < 400);
     const d = MONSTRO[k]; return { k, d, x, y, sx: x, sy: y, hp: d.hp, est: 'vaga', alvo: null, prox: 0, prepAte: 0, cdAte: 0, flash: 0, side: 1, morto: 0 };
+  }
+  function novoChefe(mapa, k) {
+    let x = TOCA.x, y = TOCA.y; for (let t = 0; t < 200 && !(mapa.terra(x, y) && !mapa.borda(x, y)); t++) y += 2;
+    const d = MONSTRO[k]; return { k, d, x, y, sx: x, sy: y, hp: d.hp, est: 'vaga', alvo: null, prox: 0, prepAte: 0, cdAte: 0, flash: 0, side: 1, morto: 0, golpes: 0, chefe: true };
   }
   function volta(motivo) {
     if (!X) return;
@@ -210,18 +221,18 @@
   }
   function mata(m) {
     m.morto = Date.now(); X.abates++; J.ganhaXp(m.d.xp);
-    const [item, chance, q] = m.d.drop;
-    if (Math.random() < chance) poeNaBolsa(item, q);
+    if (m.d.saque) { Object.entries(m.d.saque).forEach(([k, q]) => poeNaBolsa(k, q, true)); aviso(`Você derrotou o ${m.d.nome}! O saque foi para a bolsa. Ele volta em 10 minutos.`, 6000); const p = S.perfil; p.chefes = p.chefes || {}; p.chefes[m.k] = (p.chefes[m.k] || 0) + 1; J.salvar(); }
+    else { const [item, chance, q] = m.d.drop; if (Math.random() < chance) poeNaBolsa(item, q); }
     numero(m.x, m.y - 22, '+' + m.d.xp + ' XP', '#bea0ff');
   }
-  function poeNaBolsa(k, n) {
-    const tot = Object.values(X.bolsa).reduce((s, v) => s + v, 0), cabe = Math.min(n, BOLSA_MAX - tot);
+  function poeNaBolsa(k, n, livre) {
+    const tot = Object.values(X.bolsa).reduce((s, v) => s + v, 0), cabe = livre ? n : Math.min(n, BOLSA_MAX - tot);
     if (cabe <= 0) { aviso('A bolsa está cheia (30). Volte ao barco para guardar na mochila.', 3500); return; }
     X.bolsa[k] = (X.bolsa[k] || 0) + cabe; numero(X.eu.x, X.eu.y - 26, `+${cabe} ${O.ITENS[k].i}`, '#d3a55a');
   }
-  function apanha(m) {
+  function apanha(m, mult) {
     const e = X.eu, agora = Date.now(); if (agora < e.inv) return;
-    const v = Math.max(1, Math.round(m.d.dano * (1 - escudo().def) * (0.85 + Math.random() * 0.3)));
+    const v = Math.max(1, Math.round(m.d.dano * (mult || 1) * (1 - escudo().def) * (0.85 + Math.random() * 0.3)));
     S.perfil.hp = vida() - v; e.inv = agora + 350; e.flash = agora;
     numero(e.x, e.y - 20, '-' + v, '#ff4a3a'); bip(120, 0.12);
     if (X.jogo) { X.jogo = null; aviso('Atacado! O minijogo foi interrompido.', 2000); }
@@ -275,20 +286,20 @@
     }
     // monstros
     X.monstros.forEach((m, i) => {
-      if (m.morto) { if (agora - m.morto > 45e3) X.monstros[i] = novoMonstro(X.mapa, m.k); return; }
+      if (m.morto) { if (agora - m.morto > (m.chefe ? 600e3 : 45e3)) X.monstros[i] = m.chefe ? novoChefe(X.mapa, m.k) : novoMonstro(X.mapa, m.k); return; }
       const d = dist(m, e), D = m.d;
       if (m.est === 'prepara') {
-        if (agora >= m.prepAte) { m.est = 'caca'; m.cdAte = agora + D.cd; m.golpe = agora; if (dist(m, e) < D.alcance + 4) apanha(m); }
+        if (agora >= m.prepAte) { const area = m.chefe && m.emArea; m.est = 'caca'; m.cdAte = agora + D.cd; m.golpe = agora; m.pancada = area ? agora : 0; if (dist(m, e) < (area ? D.area : D.alcance + 4)) apanha(m, area ? 1.4 : 1); }
         return;
       }
       if (m.est === 'vaga' && d < D.aggro) m.est = 'caca';
-      if (m.est === 'caca' && (d > D.aggro * 2 || Math.hypot(m.x - m.sx, m.y - m.sy) > 120)) { m.est = 'vaga'; m.alvo = { x: m.sx, y: m.sy }; }
+      if (m.est === 'caca' && (d > D.aggro * 2 || Math.hypot(m.x - m.sx, m.y - m.sy) > (m.chefe ? 80 : 120))) { m.est = 'vaga'; m.alvo = { x: m.sx, y: m.sy }; if (m.chefe) m.hp = Math.min(D.hp, m.hp + D.hp * 0.25); }
       let tx, ty, v = D.vel;
       if (m.est === 'caca') {
-        if (d < D.alcance && agora > m.cdAte) { m.est = 'prepara'; m.prepAte = agora + D.prep; return; }
+        if (d < D.alcance && agora > m.cdAte) { m.est = 'prepara'; m.golpes = (m.golpes || 0) + 1; m.emArea = m.chefe && m.golpes % 3 === 0; m.prepAte = agora + D.prep * (m.emArea ? 1.4 : 1); return; }
         tx = e.x; ty = e.y; if (d < D.alcance - 2) v = 0;
       } else {
-        if (!m.alvo || agora > m.prox) { m.alvo = { x: m.sx + (Math.random() - 0.5) * 50, y: m.sy + (Math.random() - 0.5) * 50 }; m.prox = agora + 2000 + Math.random() * 3000; }
+        if (!m.alvo || agora > m.prox) { const r = m.chefe ? 20 : 50; m.alvo = { x: m.sx + (Math.random() - 0.5) * r, y: m.sy + (Math.random() - 0.5) * r }; m.prox = agora + 2000 + Math.random() * 3000; }
         tx = m.alvo.x; ty = m.alvo.y; v *= 0.4;
       }
       const ddx = tx - m.x, ddy = ty - m.y, dd = Math.hypot(ddx, ddy);
@@ -297,7 +308,7 @@
     // monstros não se empilham
     for (let a = 0; a < X.monstros.length; a++) for (let b = a + 1; b < X.monstros.length; b++) {
       const p = X.monstros[a], q = X.monstros[b]; if (p.morto || q.morto) continue;
-      const d = dist(p, q); if (d < 8 && d > 0) { const k = (8 - d) / d / 2; p.x -= (q.x - p.x) * k; p.y -= (q.y - p.y) * k; q.x += (q.x - p.x) * k; q.y += (q.y - p.y) * k; }
+      const R0 = p.chefe || q.chefe ? 16 : 8, d = dist(p, q); if (d < R0 && d > 0) { const k = (R0 - d) / d / 2; p.x -= (q.x - p.x) * k; p.y -= (q.y - p.y) * k; q.x += (q.x - p.x) * k; q.y += (q.y - p.y) * k; }
     }
     X.mapa.nos.forEach(n => { if (n.usos <= 0 && agora > n.volta) n.usos = 3; });
     X.nums = X.nums.filter(n => agora - n.t < 1100);
@@ -327,6 +338,7 @@
     }
   }
   function desenhaMonstro(m, t) {
+    if (m.chefe) return desenhaChefe(m, t);
     const x = Math.round(m.x), y = Math.round(m.y), s = m.side, pisca = t - m.flash < 120, prep = m.est === 'prepara';
     const b = m.anda ? Math.round(Math.sin(t / 90)) : 0;
     P(x - 6, y, 12, 2, 'rgba(0,0,0,.3)');
@@ -352,6 +364,18 @@
     }
     if (prep) { const u = 1 - (m.prepAte - t) / m.d.prep; ctx.globalAlpha = 0.35 + 0.4 * u; P(x - 1, y - 18, 2, 4, '#ff3a2a'); P(x - 1, y - 13, 2, 1, '#ff3a2a'); ctx.globalAlpha = 1; }
     if (m.hp < m.d.hp) { P(x - 6, y - 15, 12, 2, '#3a1010'); P(x - 6, y - 15, Math.max(1, Math.round(12 * m.hp / m.d.hp)), 2, '#c8433a'); }
+  }
+  function desenhaChefe(m, t) {
+    // o chefe é o monstro base desenhado em escala 2, com coroa/juba e barra de vida grande
+    const base = m.k === 'rei_caranguejo' ? 'caranguejo' : 'lobo', x = Math.round(m.x), y = Math.round(m.y);
+    if (m.pancada && t - m.pancada < 400) { const u = (t - m.pancada) / 400; ctx.globalAlpha = 0.5 * (1 - u); ctx.fillStyle = '#ff3a2a'; ctx.beginPath(); ctx.ellipse(x, y - 2, m.d.area * u, m.d.area * u * 0.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+    if (m.est === 'prepara' && m.emArea) { ctx.globalAlpha = 0.18 + 0.15 * Math.sin(t / 60); ctx.fillStyle = '#ff3a2a'; ctx.beginPath(); ctx.ellipse(x, y - 2, m.d.area, m.d.area * 0.6, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+    ctx.save(); ctx.translate(x, y); ctx.scale(2, 2); ctx.translate(-x, -y);
+    desenhaMonstro(Object.assign({}, m, { k: base, chefe: false, hp: 1, d: Object.assign({}, MONSTRO[base], { hp: 1 }) }), t);
+    ctx.restore();
+    if (m.k === 'rei_caranguejo') { P(x - 5, y - 20, 10, 2, '#ffd046'); P(x - 5, y - 23, 2, 3, '#ffd046'); P(x - 1, y - 24, 2, 4, '#ffd046'); P(x + 3, y - 23, 2, 3, '#ffd046'); P(x - 1, y - 22, 2, 1, '#c8433a'); }
+    else { P(x - 3, y - 26, 2, 3, '#1a1c22'); P(x + 2, y - 27, 2, 4, '#1a1c22'); P(x - 8, y - 21, 16, 3, '#3a3d44'); P(x + (m.side > 0 ? 9 : -11), y - 17, 2, 2, '#ff3a2a'); }
+    P(x - 14, y - 32, 28, 3, '#3a1010'); P(x - 14, y - 32, Math.max(1, Math.round(28 * m.hp / m.d.hp)), 3, '#ff4a3a'); P(x - 14, y - 33, 28, 1, '#000');
   }
   function desenha() {
     const e = X.eu, t = Date.now(), s = esc2 * dpr, vw = cv.width / s, vh = cv.height / s;
@@ -383,6 +407,7 @@
     const scr = (x, y) => [(x - ox) * esc2, (y - oy) * esc2];
     ctx.textAlign = 'center'; ctx.font = `bold ${Math.max(11, esc2 * 4)}px Silkscreen, monospace`;
     X.nums.forEach(n => { const u = (t - n.t) / 1100, [x, y] = scr(n.x, n.y - u * 10); ctx.globalAlpha = 1 - u; ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.strokeText(n.txt, x, y); ctx.fillStyle = n.cor; ctx.fillText(n.txt, x, y); }); ctx.globalAlpha = 1;
+    X.monstros.forEach(m => { if (!m.chefe || m.morto) return; const [x, y] = scr(m.x, m.y - 36); ctx.font = `bold ${Math.max(10, esc2 * 3)}px Silkscreen, monospace`; ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.strokeText(m.d.nome.toUpperCase(), x, y); ctx.fillStyle = '#ff6a4a'; ctx.fillText(m.d.nome.toUpperCase(), x, y); });
     const no = noPerto();
     if (no && !X.jogo) { const [x, y] = scr(no.x, no.y - 24); ctx.font = `${Math.max(12, esc2 * 4)}px sans-serif`; ctx.fillText(RECURSO[no.k].tipo === 'rocha' ? '⛏️' : '🪓', x, y + Math.round(Math.sin(t / 250) * 3)); }
     const j = X.jogo;
@@ -432,7 +457,7 @@
     const lv = nivel(S.perfil.xp), hp = vida(), mx = hpMax(), a = arma(), es = escudo(), tic = ticAgora();
     const lista = Object.values(ILHAS).map(d => {
       const pode = lv >= d.lv, paga = tic >= d.tic;
-      return `<li class="${pode ? 'pode' : ''}"><i>${d.tier === 1 ? '🏝️' : '🌲'}</i><div><b>T${d.tier} · ${esc(d.nome)}</b><small>${esc(d.desc)} Recursos: ${d.recursos.map(k => O.ITENS[k].i + ' ' + O.ITENS[k].n).join(', ')}. Monstros: ${Object.keys(d.monstros).map(k => MONSTRO[k].nome).join(', ')}. Se cair: ${d.morte === 'nada' ? 'volta com tudo' : 'perde metade da bolsa'}.${pode ? '' : ` Precisa do nível ${d.lv}.`}</small></div><button type="button" class="b-ouro ex-ir" data-id="${d.id}" ${pode && paga ? '' : 'disabled'}>${d.tic} TIC</button></li>`;
+      return `<li class="${pode ? 'pode' : ''}"><i>${d.tier === 1 ? '🏝️' : '🌲'}</i><div><b>T${d.tier} · ${esc(d.nome)}</b><small>${esc(d.desc)} Recursos: ${d.recursos.map(k => O.ITENS[k].i + ' ' + O.ITENS[k].n).join(', ')}. Monstros: ${Object.keys(d.monstros).map(k => MONSTRO[k].nome).join(', ')}. Chefe: ${MONSTRO[d.chefe].nome} (${MONSTRO[d.chefe].hp} de vida). Se cair: ${d.morte === 'nada' ? 'volta com tudo' : 'perde metade da bolsa'}.${pode ? '' : ` Precisa do nível ${d.lv}.`}</small></div><button type="button" class="b-ouro ex-ir" data-id="${d.id}" ${pode && paga ? '' : 'disabled'}>${d.tic} TIC</button></li>`;
     }).join('');
     K.abrir('⛵ EXPEDIÇÕES COM O BORDON', `<p>O capitão Bordon leva você para ilhas distantes, com monstros e materiais que não existem aqui. Você tem <b>10 minutos</b> em cada viagem, e o que coletar só entra na mochila quando você voltar pelo barco.</p>
       <div class="tp-topo"><div class="tp-tic"><b>${tic}</b><span>TIC</span></div><div class="tp-rep"><span>SUA VIDA</span><b style="color:${hp < mx * 0.4 ? '#c8433a' : '#4ac07a'}">${hp}/${mx}</b><small>Arma: ${a.id ? O.ITENS[a.id].n : 'os punhos'} (dano ${a.dano}) · Defesa: ${es.id ? O.ITENS[es.id].n + ' (-' + Math.round(es.def * 100) + '%)' : 'nenhuma'}</small></div></div>

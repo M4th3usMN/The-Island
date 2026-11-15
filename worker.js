@@ -379,7 +379,7 @@ export class Vila extends DurableObject {
     const ecoMsg = (e, extra) => responde(Object.assign({ t: "eco" }, this.ecoPub(e), extra || {}));
     if (m.t === "eco") return ecoMsg(await this.eco(ar));
     if (m.t === "barco") { // expedições: o Bordon cobra a passagem em TIC (expedicao.js)
-      const BARCO = { t1: 5, t2: 15 }, id = String(m.ilha || "");
+      const BARCO = { t1: 10, t2: 20 }, id = String(m.ilha || "");
       if (!BARCO[id]) return;
       const e = await this.eco(ar);
       if (e.tic < BARCO[id]) return responde({ t: "barco", erro: `A passagem custa ${BARCO[id]} TIC e você tem ${e.tic}.` });
