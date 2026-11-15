@@ -30,12 +30,12 @@
     { k: 'car', n: 'Carisma', i: '💬', d: '+5% de reputação ganha (contado no servidor)' }
   ];
   const EQUIP = {
-    luvas_ferreiro: { n: 'Luvas do Ferreiro', i: '🧤', r: 'comum', tic: 30, slot: 'mãos', d: 'Faixa dos minijogos 20% maior', forja: { minerio: 2, pao: 1 }, quem: 'kasseki' },
-    botas_andarilho: { n: 'Botas do Andarilho', i: '🥾', r: 'comum', tic: 30, slot: 'pés', d: '+15% de velocidade', forja: { madeira: 3, erva: 2 }, quem: 'kasseki' },
-    lanterna_costa: { n: 'Lanterna da Costa', i: '🏮', r: 'comum', tic: 30, slot: 'extra', d: 'Cada patrulha do evento vale 2', forja: { lamina: 1, madeira: 2 }, quem: 'kasseki' },
-    lamina_runica: { n: 'Lâmina Rúnica', i: '🗡️', r: 'raro', tic: 90, slot: 'mãos', d: '+25% de chance de coletar em dobro' },
-    manto_aprendiz: { n: 'Manto do Aprendiz', i: '🧥', r: 'raro', tic: 90, slot: 'corpo', d: '+10% de XP' },
-    amuleto_dragao: { n: 'Amuleto do Dragão', i: '🐉', r: 'epico', tic: 180, slot: 'extra', d: '+20% de reputação ganha' }
+    luvas_ferreiro: { n: 'Luvas do Ferreiro', i: '🧤', r: 'comum', tic: 40, slot: 'mãos', d: 'Faixa dos minijogos 20% maior', forja: { minerio: 2, pao: 1 }, quem: 'kasseki' },
+    botas_andarilho: { n: 'Botas do Andarilho', i: '🥾', r: 'comum', tic: 40, slot: 'pés', d: '+15% de velocidade', forja: { madeira: 3, erva: 2 }, quem: 'kasseki' },
+    lanterna_costa: { n: 'Lanterna da Costa', i: '🏮', r: 'comum', tic: 40, slot: 'extra', d: 'Cada patrulha do evento vale 2', forja: { lamina: 1, madeira: 2 }, quem: 'kasseki' },
+    lamina_runica: { n: 'Lâmina Rúnica', i: '🗡️', r: 'raro', tic: 120, slot: 'mãos', d: '+25% de chance de coletar em dobro' },
+    manto_aprendiz: { n: 'Manto do Aprendiz', i: '🧥', r: 'raro', tic: 120, slot: 'corpo', d: '+10% de XP' },
+    amuleto_dragao: { n: 'Amuleto do Dragão', i: '🐉', r: 'epico', tic: 250, slot: 'extra', d: '+20% de reputação ganha' }
   };
   const RAR = { comum: ['#b8bcc8', 'COMUM'], raro: ['#4aa0ff', 'RARO'], epico: ['#b070ff', 'ÉPICO'] };
   const PACOTES = [['tic20', 'Bronze', 2, 20], ['tic55', 'Prata', 5, 55], ['tic120', 'Ouro', 10, 120], ['tic260', 'Diamante', 20, 260]];
@@ -82,7 +82,7 @@
     if (m.t === 'votacao' && T.res) { T.res.votacao = Object.assign({}, m.res, { meu: T.res.votacao.meu }); redesenha(); }
     if (m.t === 'evento' && T.res) { Object.assign(T.res.evento, { total: m.total, participantes: m.participantes }); redesenha(); }
     if (m.t === 'casas' && T.res) { T.res.casas = m.casas; }
-    if (m.t === 'voto') { if (m.res) { T.res.votacao = m.res; } if (m.erro) J.anuncia({ titulo: 'VOTAÇÃO', texto: m.erro, dur: 4000 }); else J.anuncia({ titulo: 'VOTO REGISTRADO!', texto: `Seu voto vale ${m.peso} pela sua reputação. +3 TIC e +5 de reputação.`, dur: 6000 }); redesenha(); }
+    if (m.t === 'voto') { if (m.res) { T.res.votacao = m.res; } if (m.erro) J.anuncia({ titulo: 'VOTAÇÃO', texto: m.erro, dur: 4000 }); else J.anuncia({ titulo: 'VOTO REGISTRADO!', texto: `Seu voto vale ${m.peso} pela sua reputação. +2 TIC e +5 de reputação.`, dur: 6000 }); redesenha(); }
     if (m.t === 'patrulha') { if (m.erro) J.anuncia({ titulo: 'VIGÍLIA', texto: m.erro, dur: 4000 }); else { T.res.evento.meu = m.meu; S.eu.emote = { txt: `Patrulha +${m.n} 🔥`, ate: Date.now() + 2000 }; } }
     if (m.t === 'casa') { if (m.erro) J.anuncia({ titulo: 'CASA', texto: m.erro, dur: 4000 }); else { T.res.casas[S.eu.arroba] = m.nivel; J.anuncia({ titulo: 'CASA MELHORADA!', texto: `${CASA_NV[m.nivel].n}: todo mundo vê no mapa. +15 de reputação.`, dur: 6000 }); } }
     if (m.t === 'oferta') { if (m.erro) J.anuncia({ titulo: 'FEIRA', texto: m.erro, dur: 5000 }); else { O.ITENS[m.o.item] && add(m.o.item, -m.o.q); J.anuncia({ titulo: 'NA FEIRA!', texto: `${m.o.q}x ${nomeItem(m.o.item)} por ${m.o.preco} TIC na sua loja.`, dur: 5000 }); redesenhaModal(); } }
@@ -245,7 +245,7 @@
     if (m.id === 'egil' && h.passo === 3 && dentro) {
       h.passo = 4; h.feito = Date.now(); J.salvar(); J.ganhaXp(120); ganho('historia:espiao');
       fala(quem, quem === 'egil' ? 'Mapas vendidos e um sinal no escuro... O espião ainda está entre nós. Você fez bem.' : 'Vou levar isso ao conselho e ao Egil. O espião ainda está entre nós. Você fez bem.');
-      J.anuncia({ titulo: 'MISSÃO CUMPRIDA: O ESPIÃO', texto: 'Título "Caçador de Espiões", +120 XP, +50 TIC e +30 de reputação. O resto da história vem no próximo episódio!', dur: 9000 });
+      J.anuncia({ titulo: 'MISSÃO CUMPRIDA: O ESPIÃO', texto: 'Título "Caçador de Espiões", +120 XP, +30 TIC e +30 de reputação. O resto da história vem no próximo episódio!', dur: 9000 });
       return true;
     }
     return false;
@@ -278,7 +278,7 @@
       <p class="m-nota">Você ganha 1 ponto a cada nível. Agora: +${Math.round((J.bonus.xp() - 1) * 100)}% XP · +${Math.round((J.bonus.vel() - 1) * 100)}% velocidade · ${Math.round(J.bonus.dobro() * 100)}% coleta em dobro.</p>
       <h3 class="of-h">REPUTAÇÃO VALE DE VERDADE</h3>
       <ul class="tp-lista">${REP.map(([min, n, cor], i) => `<li class="${T.eco && T.eco.rep >= min ? 'ok' : ''}"><b style="color:${cor}">${n}</b><small>${min} pts · ${['começo de todo viajante', 'libera a missão de história e votos', 'abre a sua loja na Feira e voto vale 2', 'voto vale 3', 'voto vale 4'][i]}</small></li>`).join('')}</ul>
-      <p class="m-nota">Ganhe reputação e TIC com missões do dia (+3 TIC), pedidos (+5 TIC), dia perfeito (+6 TIC), coletas, fabricação, votação, evento e história. Tudo é contado no servidor, com limite por dia.</p>
+      <p class="m-nota">Ganhe reputação e TIC com missões do dia (+2 TIC), pedidos (+3 TIC), dia perfeito (+4 TIC), coletas, fabricação, votação, evento e história. Tudo é contado no servidor, com limite por dia.</p>
       <h3 class="of-h">ARMEIRO · EQUIPAMENTOS COM PODERES</h3>
       <ul class="tp-equip">${Object.entries(EQUIP).map(([id, q]) => { const t = tenho(id), u = usando(id); return `<li style="--r:${RAR[q.r][0]}"><i>${q.i}</i><div><b>${q.n}</b><small>${RAR[q.r][1]} · ${q.slot} · ${q.d}${q.forja ? ` · forja com ${(G.BY[q.quem] || {}).nome || q.quem}: ${pedeTxt(q.forja)}` : ''}</small></div>
         ${t ? `<button type="button" class="${u ? 'b-ouro' : 'b-linha'} tp-usar" data-id="${id}">${u ? 'USANDO' : 'USAR'}</button>` : `<span class="tp-bts">${q.forja ? `<button type="button" class="b-linha tp-forja" data-id="${id}" ${temTudo(q.forja) ? '' : 'disabled'}>FORJAR</button>` : ''}<button type="button" class="b-ouro tp-comp" data-id="${id}" ${T.eco && T.eco.tic >= q.tic ? '' : 'disabled'}>${q.tic} TIC</button></span>`}</li>`; }).join('')}</ul>
@@ -301,15 +301,15 @@
     const totV = v ? v.ops.reduce((s, o) => s + o.v, 0) : 0;
     c.innerHTML = (v ? `<div class="md-bloco tp-voto"><h3>🗳️ VOTAÇÃO QUE MUDA O MAPA</h3><p><b>${esc(v.titulo)}</b> ${v.encerrada ? 'Encerrada.' : `Termina ${fmtData(v.fim)} (faltam ${falta(v.fim)}).`} O canteiro já está no mapa; quem vencer é erguido com as entregas da ilha.</p>
       ${v.ops.map(o => `<div class="tp-op ${v.meu === o.id ? 'meu' : ''}"><div><b>${esc(o.n)}</b>${barraHtml(o.v, totV || 1)}<small>${o.v} voto${o.v === 1 ? '' : 's'}${v.vencedor === o.id ? ' · VENCEU' : ''}</small></div>${!v.meu && !v.encerrada ? `<button type="button" class="b-ouro tp-votar" data-op="${o.id}">VOTAR</button>` : v.meu === o.id ? '<span class="tp-selo">SEU VOTO</span>' : ''}</div>`).join('')}
-      <p class="m-nota">${v.votantes} pessoas votaram. O seu voto pesa pela sua reputação (Respeitado vale 2, Herói 3, Lenda 4). Votar dá +3 TIC.</p></div>` : '<p>Carregando a votação...</p>') +
+      <p class="m-nota">${v.votantes} pessoas votaram. O seu voto pesa pela sua reputação (Respeitado vale 2, Herói 3, Lenda 4). Votar dá +2 TIC.</p></div>` : '<p>Carregando a votação...</p>') +
       (ev ? `<div class="md-bloco"><h3>🔥 EVENTO: ${esc(ev.titulo).toUpperCase()}</h3><p>${ev.ativo ? `Até ${fmtData(ev.fim)}.` : 'Fora do horário.'} A ilha inteira vigia o mar contra o Reino do Sul. Vá a um dos 3 postos na praia do sul (tochas 🔥 no mapa) e jogue o minijogo da patrulha.</p>
       ${barraHtml(ev.total, ev.meta)}<small>${ev.total}/${ev.meta} patrulhas · ${ev.participantes} participantes · você: ${ev.meu || 0}</small>
       ${ev.top && ev.top.length ? `<p class="m-nota">Quem mais vigiou: ${ev.top.map(t => '@' + esc(t.arroba) + ' (' + t.n + ')').join(' · ')}</p>` : ''}
-      <p class="m-nota">Se a ilha chegar à meta, todo mundo com pelo menos 3 patrulhas ganha 30 TIC e 20 de reputação.</p>
+      <p class="m-nota">Se a ilha chegar à meta, todo mundo com pelo menos 3 patrulhas ganha 20 TIC e 20 de reputação.</p>
       ${ev.total >= ev.meta && (ev.meu || 0) >= 3 ? '<button type="button" class="b-ouro" id="tp-premio">PEGAR PRÊMIO DO EVENTO</button>' : ''}<button type="button" class="b-linha" id="tp-postos">VER OS POSTOS</button></div>` : '') +
       `<div class="md-bloco"><h3>📜 MISSÃO DE HISTÓRIA: O ESPIÃO</h3><p>${dentro ? `Prazo: ${fmtData(ESPIAO.prazo)} (faltam ${falta(ESPIAO.prazo)}).` : 'O prazo acabou.'} Alguém está mandando sinais ao Reino do Sul.</p>
       <ol class="jg-missoes">${passos.slice(0, 4).map((p, i) => `<li class="${h.passo > i ? 'ok' : ''}"><i>${h.passo > i ? '✓' : i + 1}</i><div><b>${esc(p)}</b>${i === 1 && h.passo >= 1 ? `<small>${Object.keys(h.pistas).length}/3 pistas</small>` : ''}</div></li>`).join('')}</ol>
-      <p class="m-nota">Prêmio: título Caçador de Espiões, 120 XP, 50 TIC e 30 de reputação.</p></div>`;
+      <p class="m-nota">Prêmio: título Caçador de Espiões, 120 XP, 30 TIC e 30 de reputação.</p></div>`;
     c.querySelectorAll('.tp-votar').forEach(b => b.onclick = () => J.envia({ t: 'votar', op: b.dataset.op }));
     const pr = c.querySelector('#tp-premio'); if (pr) pr.onclick = () => ganho('evento:costa1');
     const po = c.querySelector('#tp-postos'); if (po) po.onclick = () => { K.fechar(); S.camLivre = true; G.pararSeguir(); G.cam.x = POSTOS[1].x; G.cam.y = POSTOS[1].y - 10; if (G.cam.s < 3) G.cam.s = 3; };
@@ -362,7 +362,7 @@
   }
   function abaNatal(c) {
     const pr = presenteHoje(), aberto = (S.perfil.natal || {})[pr.dia];
-    c.innerHTML = `<div class="md-bloco"><h3>🎄 NATAL NA ILHA</h3><p>A árvore está acesa na fogueira e a ilha está coberta de neve. Todo dia tem <b>um presente escondido</b> em algum lugar da ilha: ache, abra no minijogo e ganhe materiais, 30 XP e 10 TIC.</p>
+    c.innerHTML = `<div class="md-bloco"><h3>🎄 NATAL NA ILHA</h3><p>A árvore está acesa na fogueira e a ilha está coberta de neve. Todo dia tem <b>um presente escondido</b> em algum lugar da ilha: ache, abra no minijogo e ganhe materiais, 30 XP e 5 TIC.</p>
       <p>${aberto ? 'Você já abriu o presente de hoje. Amanhã tem outro!' : 'O presente de hoje ainda está escondido. Dica: procure o brilho dourado 🎁 no mapa.'}</p></div>`;
   }
 

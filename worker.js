@@ -85,15 +85,15 @@ const REP_NIVEIS = [[0, "Forasteiro"], [20, "Conhecido"], [80, "Respeitado"], [2
 const repNivel = r => { let i = 0; REP_NIVEIS.forEach(([min], k) => { if (r >= min) i = k; }); return i; };
 // ganhos: tic e reputação por tipo de ação, com limite diário (dia) ou uma vez só (uma)
 const GANHOS = {
-  missao: { tic: 3, rep: 3, dia: 3 }, diaperfeito: { tic: 6, rep: 5, dia: 1 }, pedido: { tic: 5, rep: 4, dia: 3 },
-  coleta: { tic: 0, rep: 1, dia: 12 }, fabrica: { tic: 1, rep: 2, dia: 6 }, conversa: { tic: 0, rep: 1, dia: 8 },
-  "historia:espiao": { tic: 50, rep: 30, uma: true }, "evento:costa1": { tic: 30, rep: 20, uma: true }, presente: { tic: 10, rep: 3, dia: 1 }
+  missao: { tic: 2, rep: 3, dia: 3 }, diaperfeito: { tic: 4, rep: 5, dia: 1 }, pedido: { tic: 3, rep: 4, dia: 2 },
+  coleta: { tic: 0, rep: 1, dia: 12 }, fabrica: { tic: 1, rep: 2, dia: 3 }, conversa: { tic: 0, rep: 1, dia: 8 },
+  "historia:espiao": { tic: 30, rep: 30, uma: true }, "evento:costa1": { tic: 20, rep: 20, uma: true }, presente: { tic: 5, rep: 3, dia: 1 }
 };
 const VOTACAO = { id: "v1", titulo: "O que a ilha constrói primeiro?", fim: Date.parse("2026-11-15T21:00:00-03:00"),
   ops: [{ id: "fortaleza", n: "Fortaleza do Dragão (projeto do Igor)" }, { id: "muralha", n: "Muralha da Costa Sul" }] };
 const EVENTO = { id: "costa1", titulo: "Vigília da Costa Sul", inicio: Date.parse("2026-11-09T12:00:00-03:00"), fim: Date.parse("2026-11-16T23:59:00-03:00"), meta: 400, porDia: 30 };
 const NATAL = { inicio: Date.parse("2026-12-19T00:00:00-03:00"), fim: Date.parse("2026-12-26T23:59:00-03:00") };
-const EQUIP = { luvas_ferreiro: 30, botas_andarilho: 30, lanterna_costa: 30, lamina_runica: 90, manto_aprendiz: 90, amuleto_dragao: 180 };
+const EQUIP = { luvas_ferreiro: 40, botas_andarilho: 40, lanterna_costa: 40, lamina_runica: 120, manto_aprendiz: 120, amuleto_dragao: 250 };
 const EQUIP_FORJA = new Set(["luvas_ferreiro", "botas_andarilho", "lanterna_costa"]);
 const TICPACK = { tic20: [2, 20, "20 TIC (Bronze)"], tic55: [5, 55, "55 TIC (Prata)"], tic120: [10, 120, "120 TIC (Ouro)"], tic260: [20, 260, "260 TIC (Diamante)"] };
 const diaBR = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
@@ -393,7 +393,7 @@ export class Vila extends DurableObject {
       if (!novo) return responde({ t: "voto", erro: "Você já votou.", res: await this.resumoVotacao(ar) });
       const e = await this.eco(ar); v.por[ar] = op; v.peso[ar] = 1 + Math.max(0, repNivel(e.rep) - 1);
       await this.ctx.storage.put("voto:" + VOTACAO.id, v);
-      e.rep += 5; e.tic += 3; e.uma["voto:" + VOTACAO.id] = agora; await this.salvaEco(ar, e);
+      e.rep += 5; e.tic += 2; e.uma["voto:" + VOTACAO.id] = agora; await this.salvaEco(ar, e);
       const res = await this.resumoVotacao(ar);
       responde({ t: "voto", ok: true, res, peso: v.peso[ar] }); ecoMsg(e);
       this.todos({ t: "votacao", res: Object.assign({}, res, { meu: null }) });
