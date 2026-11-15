@@ -85,7 +85,7 @@ const REP_NIVEIS = [[0, "Forasteiro"], [20, "Conhecido"], [80, "Respeitado"], [2
 const repNivel = r => { let i = 0; REP_NIVEIS.forEach(([min], k) => { if (r >= min) i = k; }); return i; };
 // ganhos: tic e reputação por tipo de ação, com limite diário (dia) ou uma vez só (uma)
 const GANHOS = {
-  missao: { tic: 2, rep: 3, dia: 3 }, diaperfeito: { tic: 4, rep: 5, dia: 1 }, pedido: { tic: 3, rep: 4, dia: 2 },
+  missao: { tic: 2, rep: 3, dia: 3 }, diaperfeito: { tic: 3, rep: 5, dia: 1 }, pedido: { tic: 3, rep: 4, dia: 1 },
   coleta: { tic: 0, rep: 1, dia: 12 }, fabrica: { tic: 1, rep: 2, dia: 3 }, conversa: { tic: 0, rep: 1, dia: 8 },
   "historia:espiao": { tic: 30, rep: 30, uma: true }, "evento:costa1": { tic: 20, rep: 20, uma: true }, presente: { tic: 5, rep: 3, dia: 1 }
 };
