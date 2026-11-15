@@ -75,7 +75,7 @@ const LOJA = { tricornio: [3, "Tricórnio pirata"], capa: [5, "Capa de veludo"],
 const COM = { id: "ep7", titulo: "Ep. 7 · Preparar a ilha contra o Reino do Sul", meta: 300 };
 const ITENS_COM = new Set(["trigo", "madeira", "minerio", "erva", "pao", "lamina", "lamina_enc", "remedio"]);
 const LIMITE_DIA = 30;
-const TEMPORADA_MSG = new Set(["ganho", "votar", "patrulha", "casa", "oferta", "retirar", "comprar", "equip_compra", "equip_forja", "eco"]);
+const TEMPORADA_MSG = new Set(["barco", "ganho", "votar", "patrulha", "casa", "oferta", "retirar", "comprar", "equip_compra", "equip_forja", "eco"]);
 
 // ---------------------------------------------------------------------------
 // TEMPORADA (atualizações de novembro/dezembro): reputação, TIC, ranking, votação,
@@ -378,6 +378,14 @@ export class Vila extends DurableObject {
     const ar = a.arroba, responde = (x) => this.envia(ws, x);
     const ecoMsg = (e, extra) => responde(Object.assign({ t: "eco" }, this.ecoPub(e), extra || {}));
     if (m.t === "eco") return ecoMsg(await this.eco(ar));
+    if (m.t === "barco") { // expedições: o Bordon cobra a passagem em TIC (expedicao.js)
+      const BARCO = { t1: 5, t2: 15 }, id = String(m.ilha || "");
+      if (!BARCO[id]) return;
+      const e = await this.eco(ar);
+      if (e.tic < BARCO[id]) return responde({ t: "barco", erro: `A passagem custa ${BARCO[id]} TIC e você tem ${e.tic}.` });
+      e.tic -= BARCO[id]; e.viagens = (e.viagens || 0) + 1; await this.salvaEco(ar, e);
+      responde({ t: "barco", ok: true, ilha: id }); return ecoMsg(e);
+    }
     if (m.t === "ganho") {
       const k = String(m.k || "");
       if (k === "evento:costa1") { const ev = await this.evento(); if (ev.total < EVENTO.meta || (ev.por[ar] || 0) < 3) return; }
@@ -419,7 +427,7 @@ export class Vila extends DurableObject {
     if (m.t === "casa") {
       if (!(await this.moradoresPorArroba())[ar]) return responde({ t: "casa", erro: "Só os moradores têm casa para melhorar." });
       const c = (await this.ctx.storage.get("casas")) || {}, atual = c[ar] || 0, n = m.n | 0;
-      if (n !== atual + 1 || n > 3) return responde({ t: "casa", erro: "Melhoria inválida.", nivel: atual });
+      if (n !== atual + 1 || n > 4) return responde({ t: "casa", erro: "Melhoria inválida.", nivel: atual });
       c[ar] = n; await this.ctx.storage.put("casas", c);
       const e = await this.eco(ar); e.rep += 15; await this.salvaEco(ar, e);
       responde({ t: "casa", ok: true, nivel: n }); ecoMsg(e);

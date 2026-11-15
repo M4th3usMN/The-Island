@@ -50,7 +50,8 @@
     null,
     { n: 'Cerca e jardim', pede: { tabua: 4, prego: 2 } },
     { n: 'Chaminé, lanterna e varanda', pede: { tabua: 6, prego: 4, pedra: 3 } },
-    { n: 'Torre de vigia com bandeira', pede: { tabua: 8, prego: 6, pedra: 6 } }
+    { n: 'Torre de vigia com bandeira', pede: { tabua: 8, prego: 6, pedra: 6 } },
+    { n: 'Casa de pedra e carvalho', pede: { carvalho: 6, ferro: 3, pedra: 4, pinho: 4 } }
   ];
   // lugares no mapa
   const FORTALEZA = { x: 300, y: 100 }, MURALHA = [[318, 490], [356, 494], [430, 494], [478, 490]];
@@ -160,7 +161,7 @@
     const h = hist();
     if (h.passo === 1 && Date.now() < ESPIAO.prazo) { const p = ESPIAO.pistas.find(q => !h.pistas[q.id] && dist(e, q) < 16); if (p) return { i: '🔍', txt: 'INVESTIGAR', f: () => investigar(p) }; }
     const c = minhaCasa(), n = c ? nivelCasa(S.eu.arroba) : 0;
-    if (c && n < 3 && dist(e, { x: c.x, y: c.y + 6 }) < 18) { const nx = CASA_NV[n + 1]; return { i: '🔨', txt: `OBRA (${pedeTxt(nx.pede)})`, f: () => obra(n + 1), off: !temTudo(nx.pede) }; }
+    if (c && n < CASA_NV.length - 1 && dist(e, { x: c.x, y: c.y + 6 }) < 18) { const nx = CASA_NV[n + 1]; return { i: '🔨', txt: `OBRA (${pedeTxt(nx.pede)})`, f: () => obra(n + 1), off: !temTudo(nx.pede) }; }
     if (natalAtivo()) { const pr = presenteHoje(); if (dist(e, pr) < 14 && !(S.perfil.natal || {})[pr.dia]) return { i: '🎁', txt: 'ABRIR PRESENTE', f: () => abrirPresente(pr) }; }
     if (dist(e, FEIRA) < 16) return { i: '⚖️', txt: 'FEIRA', f: () => abrir(4) };
     return null;
@@ -326,8 +327,8 @@
   }
   function abaCasa(c) {
     const casa = minhaCasa(), n = casa ? nivelCasa(S.eu.arroba) : 0, v = inv();
-    const mats = ['madeira', 'minerio', 'tabua', 'prego', 'pedra'].map(k => `<li class="${v[k] ? '' : 'vazio'}"><i>${O.ITENS[k].i}</i><b>${v[k] || 0}</b><span>${O.ITENS[k].n}</span></li>`).join('');
-    c.innerHTML = `<p>As casas dos moradores podem ser melhoradas em 3 etapas, e a ilha inteira vê no mapa. Cada etapa usa materiais de profissões diferentes: <b>tábuas e pedras do Igor</b>, <b>pregos do Kasseki</b>, que precisam de madeira do lenhador, minério da pedreira e pão do Lucas.</p>
+    const mats = ['madeira', 'minerio', 'tabua', 'prego', 'pedra', 'pinho', 'carvalho', 'ferro'].filter(k => O.ITENS[k]).map(k => `<li class="${v[k] ? '' : 'vazio'}"><i>${O.ITENS[k].i}</i><b>${v[k] || 0}</b><span>${O.ITENS[k].n}</span></li>`).join('');
+    c.innerHTML = `<p>As casas dos moradores podem ser melhoradas em 4 etapas, e a ilha inteira vê no mapa. A última, a casa de pedra e carvalho, usa materiais das expedições do Bordon. Cada etapa usa materiais de profissões diferentes: <b>tábuas e pedras do Igor</b>, <b>pregos do Kasseki</b>, que precisam de madeira do lenhador, minério da pedreira e pão do Lucas.</p>
       <ul class="of-inv">${mats}</ul>
       <ol class="jg-missoes">${CASA_NV.slice(1).map((x, i) => `<li class="${n > i ? 'ok' : ''}"><i>${n > i ? '✓' : i + 1}</i><div><b>${esc(x.n)}</b><small>${pedeTxt(x.pede)}${n === i ? (temTudo(x.pede) ? ' · você tem tudo!' : '') : ''}</small></div></li>`).join('')}</ol>
       ${casa ? `<p class="m-nota">Vá até a porta da sua casa e toque em <b>OBRA</b> para martelar (minijogo). Cada etapa dá +15 de reputação.</p><button type="button" class="b-ouro" id="tp-casa">IR PARA A MINHA CASA</button>`
@@ -485,6 +486,11 @@
       P(c, x + 10, y - 26, 7, 26, '#8a6a4a'); P(c, x + 10, y - 26, 7, 1, '#a8885a'); P(c, x + 16, y - 26, 1, 26, 'rgba(0,0,0,.25)');
       P(c, x + 9, y - 28, 9, 2, '#7a2430'); P(c, x + 12, y - 22, 3, 3, '#2a2c3c');
       const o = Math.floor(t / 350) % 2; P(c, x + 13, y - 36, 1, 8, '#4a3a2a'); P(c, x + 14, y - 36, 5 + o, 3, '#ffd046');
+    }
+    if (n >= 4) { // casa de pedra e carvalho (materiais das expedições)
+      for (let i = 0; i < 4; i++) { P(c, x - 10 + (i % 2) * 3, y - 10 + i * 2.5, 6, 2, '#8a8680'); P(c, x + 4 + (i % 2) * 2, y - 10 + i * 2.5, 6, 2, '#8a8680'); }
+      P(c, x - 10, y - 11, 20, 1, '#3f6a2a'); P(c, x - 2, y - 7, 4, 7, '#4a2e18'); P(c, x - 1, y - 6, 2, 1, '#c97a3a'); P(c, x + 1, y - 4, 1, 1, '#ffd046');
+      P(c, x - 16, y - 7, 3, 7, '#5a3a22'); P(c, x - 17, y - 9, 5, 2, '#3f6a2a');
     }
   }
   const NEVE = Array.from({ length: 140 }, (_, i) => [G.rnd('neve', i, 'x'), G.rnd('neve', i, 'y'), 0.5 + G.rnd('neve', i, 'v')]);
