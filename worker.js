@@ -54,7 +54,7 @@ const PROIBIDO = ['porra', 'caralh', 'buceta', 'xoxota', 'piroca', 'arrombad', '
 const CORES = /^#[0-9a-f]{6}$/i;
 const CABELOS = ['curto', 'longo', 'rabo', 'espetado', 'coque', 'careca'];
 const CHAPEUS = ['', 'palha', 'capuz', 'gorro', 'bandana', 'faixa', 'oculos', 'marinheiro'];
-const nivel = xp => 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 60));
+const nivel = xp => 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 150));
 const limpaArroba = s => String(s || '').trim().replace(/^@+/, '').toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 30);
 const num = (v, a, b) => (typeof v === 'number' && isFinite(v) ? Math.max(a, Math.min(b, Math.round(v * 10) / 10)) : null);
 
@@ -85,15 +85,15 @@ const REP_NIVEIS = [[0, "Forasteiro"], [20, "Conhecido"], [80, "Respeitado"], [2
 const repNivel = r => { let i = 0; REP_NIVEIS.forEach(([min], k) => { if (r >= min) i = k; }); return i; };
 // ganhos: tic e reputação por tipo de ação, com limite diário (dia) ou uma vez só (uma)
 const GANHOS = {
-  missao: { tic: 5, rep: 3, dia: 3 }, diaperfeito: { tic: 10, rep: 5, dia: 1 }, pedido: { tic: 8, rep: 4, dia: 3 },
-  coleta: { tic: 0, rep: 1, dia: 12 }, fabrica: { tic: 2, rep: 2, dia: 6 }, conversa: { tic: 0, rep: 1, dia: 8 },
-  "historia:espiao": { tic: 50, rep: 30, uma: true }, "evento:costa1": { tic: 30, rep: 20, uma: true }, presente: { tic: 15, rep: 3, dia: 1 }
+  missao: { tic: 3, rep: 3, dia: 3 }, diaperfeito: { tic: 6, rep: 5, dia: 1 }, pedido: { tic: 5, rep: 4, dia: 3 },
+  coleta: { tic: 0, rep: 1, dia: 12 }, fabrica: { tic: 1, rep: 2, dia: 6 }, conversa: { tic: 0, rep: 1, dia: 8 },
+  "historia:espiao": { tic: 50, rep: 30, uma: true }, "evento:costa1": { tic: 30, rep: 20, uma: true }, presente: { tic: 10, rep: 3, dia: 1 }
 };
 const VOTACAO = { id: "v1", titulo: "O que a ilha constrói primeiro?", fim: Date.parse("2026-11-15T21:00:00-03:00"),
   ops: [{ id: "fortaleza", n: "Fortaleza do Dragão (projeto do Igor)" }, { id: "muralha", n: "Muralha da Costa Sul" }] };
 const EVENTO = { id: "costa1", titulo: "Vigília da Costa Sul", inicio: Date.parse("2026-11-09T12:00:00-03:00"), fim: Date.parse("2026-11-16T23:59:00-03:00"), meta: 400, porDia: 30 };
 const NATAL = { inicio: Date.parse("2026-12-19T00:00:00-03:00"), fim: Date.parse("2026-12-26T23:59:00-03:00") };
-const EQUIP = { luvas_ferreiro: 15, botas_andarilho: 15, lanterna_costa: 15, lamina_runica: 40, manto_aprendiz: 40, amuleto_dragao: 80 };
+const EQUIP = { luvas_ferreiro: 30, botas_andarilho: 30, lanterna_costa: 30, lamina_runica: 90, manto_aprendiz: 90, amuleto_dragao: 180 };
 const EQUIP_FORJA = new Set(["luvas_ferreiro", "botas_andarilho", "lanterna_costa"]);
 const TICPACK = { tic20: [2, 20, "20 TIC (Bronze)"], tic55: [5, 55, "55 TIC (Prata)"], tic120: [10, 120, "120 TIC (Ouro)"], tic260: [20, 260, "260 TIC (Diamante)"] };
 const diaBR = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
@@ -312,7 +312,14 @@ export class Vila extends DurableObject {
   async salvaEco(arroba, e) { await this.ctx.storage.put("eco:" + arroba, e); await this.rankRep(arroba, e.rep); }
   ecoPub(e) { return { tic: e.tic, rep: e.rep, repNv: repNivel(e.rep), repNome: REP_NIVEIS[repNivel(e.rep)][1], equip: e.equip || [], vendas: (e.vendas || []).slice(-5) }; }
   paraArroba(arroba, m) { for (const [ws, b] of this.viajantes()) if (b.arroba === arroba) this.envia(ws, m); }
-  async rank() { if (!this.rk) this.rk = (await this.ctx.storage.get("rank")) || {}; return this.rk; }
+  async rank() {
+    if (!this.rk) {
+      this.rk = (await this.ctx.storage.get("rank")) || {};
+      // curva nova de níveis (15/11/2026): o XP antigo vale 2,5x na escala nova, então ninguém perde o nível
+      if (!this.rk._xp2) { Object.keys(this.rk).forEach(k => { if (Array.isArray(this.rk[k])) this.rk[k][0] = Math.round(this.rk[k][0] * 2.5); }); this.rk._xp2 = [0, 0]; await this.ctx.storage.put("rank", this.rk); }
+    }
+    return this.rk;
+  }
   async rankXp(arroba, xp) { const r = await this.rank(); const v = r[arroba] || [0, 0]; if (v[0] !== xp) { v[0] = xp; r[arroba] = v; await this.ctx.storage.put("rank", r); } }
   async rankRep(arroba, rep) { const r = await this.rank(); const v = r[arroba] || [0, 0]; if (v[1] !== rep) { v[1] = rep; r[arroba] = v; await this.ctx.storage.put("rank", r); } }
   async multRep(arroba, e) {
@@ -351,10 +358,10 @@ export class Vila extends DurableObject {
   async rotaTemporada(rota, q) {
     const eu = limpaArroba(q.get("eu") || "");
     if (rota === "/temporada/ranking") {
-      const r = await this.rank(), lista = Object.entries(r).filter(([, v]) => v[0] > 0);
+      const r = await this.rank(), lista = Object.entries(r).filter(([k, v]) => k[0] !== "_" && v[0] > 0);
       lista.sort((x, y) => y[1][0] - x[1][0]);
       const pos = eu ? lista.findIndex(([ar]) => ar === eu) + 1 : 0;
-      const repTop = Object.entries(r).sort((x, y) => y[1][1] - x[1][1]).slice(0, 5).map(([arroba, v]) => ({ arroba, rep: v[1], nome: REP_NIVEIS[repNivel(v[1])][1] }));
+      const repTop = Object.entries(r).filter(([k]) => k[0] !== "_").sort((x, y) => y[1][1] - x[1][1]).slice(0, 5).map(([arroba, v]) => ({ arroba, rep: v[1], nome: REP_NIVEIS[repNivel(v[1])][1] }));
       return { top: lista.slice(0, 10).map(([arroba, v]) => ({ arroba, xp: v[0], lv: nivel(v[0]), rep: v[1], repNome: REP_NIVEIS[repNivel(v[1])][1] })), total: lista.length, pos, repTop };
     }
     if (rota === "/temporada/votacao") return this.resumoVotacao(eu);
@@ -386,7 +393,7 @@ export class Vila extends DurableObject {
       if (!novo) return responde({ t: "voto", erro: "Você já votou.", res: await this.resumoVotacao(ar) });
       const e = await this.eco(ar); v.por[ar] = op; v.peso[ar] = 1 + Math.max(0, repNivel(e.rep) - 1);
       await this.ctx.storage.put("voto:" + VOTACAO.id, v);
-      e.rep += 5; e.tic += 5; e.uma["voto:" + VOTACAO.id] = agora; await this.salvaEco(ar, e);
+      e.rep += 5; e.tic += 3; e.uma["voto:" + VOTACAO.id] = agora; await this.salvaEco(ar, e);
       const res = await this.resumoVotacao(ar);
       responde({ t: "voto", ok: true, res, peso: v.peso[ar] }); ecoMsg(e);
       this.todos({ t: "votacao", res: Object.assign({}, res, { meu: null }) });
@@ -518,7 +525,7 @@ export class Vila extends DurableObject {
     a.loja = (await this.ctx.storage.get("loja:" + arroba)) || [];
     // perfil oficial da ilha usa todos os itens da loja
     if (arroba === "the_island.lab") a.loja = ["tricornio", "capa", "asas", "aura", "brasinha", "nome", "moldura", "bandeira"];
-    Object.assign(a, { id: crypto.randomUUID().slice(0, 8), arroba, look, x: 392, y: 512, lv: nivel((rec.perfil && rec.perfil.xp) || 0), falhas: 0 });
+    Object.assign(a, { id: crypto.randomUUID().slice(0, 8), arroba, look, x: 392, y: 512, lv: nivel(((rec.perfil && rec.perfil.xp) || 0) * (rec.perfil && rec.perfil.xp2 ? 1 : 2.5)), falhas: 0 });
     ws.serializeAttachment(a);
     const outros = this.viajantes().filter(([w]) => w !== ws).map(([, b]) => this.publico(b));
     const niveis = (await this.ctx.storage.get("niveis")) || {};

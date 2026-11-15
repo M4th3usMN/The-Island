@@ -10,8 +10,8 @@
   const $ = id => document.getElementById(id);
   const { store, esc, limpaArroba, abrir, fechar, abas, anuncia, copiar } = K;
   const VEL = 34, EMOTES = ['Oi!', 'Que ilha linda!', 'Bora explorar?', '♥', 'Haha!', 'Até mais!'];
-  const nivel = xp => 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 60));
-  const xpNivel = lv => 60 * (lv - 1) ** 2;
+  const nivel = xp => 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 150)); // nov/2026: subir de nível ficou 2,5x mais difícil
+  const xpNivel = lv => 150 * (lv - 1) ** 2;
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
   // o @ de quem comentou liga o viajante ao próprio morador (campo arroba em moradores.js)
   const moradorDe = arroba => G.MOR.find(m => m.arroba && m.arroba.toLowerCase() === arroba) || null;
@@ -320,6 +320,8 @@
     S.codigo = store.get('codigo:' + arroba, '');
     const local = store.get('perfil:' + arroba, null);
     S.perfil = Object.assign(novoPerfil(), m.perfil && (!local || (m.perfil.xp || 0) >= (local.xp || 0)) ? m.perfil : local || {});
+    // curva nova de níveis (15/11/2026): converte o XP antigo uma vez, sem ninguém perder o nível que já tinha
+    if (!S.perfil.xp2) { const x = Math.max(0, S.perfil.xp || 0), r = Math.sqrt(x / 60); S.perfil.xp = Math.round(150 * r * r); S.perfil.xp2 = 1; S.mudou = true; }
     S.eu.lv = nivel(S.perfil.xp);
     if (!S.perfil.cartas) S.perfil.cartas = {};
     Object.keys(S.perfil.conversas || {}).forEach(id => { if (G.BY[id] && !S.perfil.cartas[id]) S.perfil.cartas[id] = { e: 0 }; });
