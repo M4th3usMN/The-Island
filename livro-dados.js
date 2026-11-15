@@ -70,7 +70,12 @@ window.LIVRO = {
     iran: ['Iran, ferreiro, 37 anos.', 'Trouxe as minhas ferramentas. A bigorna do Kasseki que se prepare.'],
     bob: ['Bob. 20 anos.', 'Fugi de uma prisão do continente. O que eu fiz? Isso fica entre mim e o mar.'],
     edunedi: ['Edunedi, batata falante. Eu era o rei de um reino de batatas.', 'O meu reino foi atacado e hoje só sobrou eu. Agora sou defensor, e esta ilha eu não deixo cair.'],
-    ludwig: ['Ludwig, mestre engenheiro, 38 anos. Venho de uma terra muito distante, fui exilado depois de uma conspiração e ainda não sei o idioma da ilha.', 'Sou especialista em engenhocas movidas a vapor e tenho planos de construir um enorme dirigível aqui.']
+    ludwig: ['Ludwig, mestre engenheiro, 38 anos. Venho de uma terra muito distante, fui exilado depois de uma conspiração e ainda não sei o idioma da ilha.', 'Sou especialista em engenhocas movidas a vapor e tenho planos de construir um enorme dirigível aqui.'],
+    noah: ['Noah, ladrão, 25 anos. Fui pego roubando e consegui me livrar.', 'Mas ainda sou procurado no mundo inteiro, então aqui eu ando de máscara.'],
+    jin: ['Jin, assassino de aluguel. Fui condenado à morte, mas não tenho medo dela.', 'Se alguém me pagar, eu faço o trabalho.'],
+    elber: ['Elber, maluco doido. Me coloca na história!', 'Eu sou doidão mesmo.'],
+    pietro: ['Pietro, o bicho dos olhos vermelhos.', 'Sou apaixonado pela Livia.'],
+    livia: ['Livia, domadora de feras. Tenho o poder de domar qualquer fera.', 'O bicho dos olhos vermelhos vive me olhando... o nome dele é Pietro.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],

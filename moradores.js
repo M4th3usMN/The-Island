@@ -430,5 +430,37 @@ window.MORADORES = [
     historia: 'Mestre engenheiro de um país distante e avançado, exilado depois de uma conspiração, que ainda não sabe o idioma da ilha. É especialista em engenhocas movidas a vapor e planeja construir um enorme dirigível.',
     rotina: 'engenheiro_vapor', casa: 'auto', chegada: '2026-11-14T16:01:00-04:00',
     visual: { tipo: 'humano', pele: '#f6e0cc', cabelo: 'curto', corCabelo: '#d8c8a0', barba: '#a08050', roupa: '#2e5a5a', detalhe: '#b87a3a', calca: '#4a3a30', chapeu: 'cartola_oculos', corChapeu: '#3a2a24', acessorio: 'chave_vapor' }
+  },
+  // 15/11: comentários do Instagram
+  {
+    id: 'noah', arroba: 'exitafoot_42', nome: 'Noah', profissao: 'Ladrão',
+    historia: 'Ladrão de 25 anos. Foi pego roubando e conseguiu se livrar, mas ainda é procurado no mundo inteiro.',
+    rotina: 'ladrao', casa: 'auto', chegada: '2026-11-15T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#d0a07c', cabelo: 'curto', corCabelo: '#3a2a1a', roupa: '#4a4a58', detalhe: '#7a6a58', calca: '#1e1a24', chapeu: 'mascara_olhos', corChapeu: '#141018', acessorio: 'bolsa_moedas' }
+  },
+  {
+    id: 'jin', arroba: 'sil.va_772', nome: 'Jin', profissao: 'Assassino de aluguel',
+    historia: 'Foi condenado à morte, mas não tem medo dela. Trabalha para quem pagar.',
+    rotina: 'assassino_aluguel', casa: 'auto', chegada: '2026-11-15T16:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#e6c8a0', cabelo: 'rabo', corCabelo: '#0e0e12', roupa: '#1c2440', detalhe: '#8a1a1a', calca: '#141418', chapeu: 'kasa', corChapeu: '#c8a868', acessorio: 'kusarigama' }
+  },
+  // 15/11: comentários do YouTube
+  {
+    id: 'elber', arroba: 'enzoeu096', nome: 'Elber', profissao: 'Maluco doido',
+    historia: 'Pediu para entrar na história e já chegou avisando: "eu sou doidão mesmo".',
+    rotina: 'maluco', casa: 'auto', chegada: '2026-11-15T16:02:00-04:00',
+    visual: { tipo: 'humano', pele: '#b88a66', cabelo: 'espetado', corCabelo: '#e86a2a', roupa: '#e8d040', detalhe: '#4ac07a', calca: '#7a3aa0', chapeu: 'panela', acessorio: 'cata_vento' }
+  },
+  {
+    id: 'pietro', arroba: 'Canalliepi', nome: 'Pietro', profissao: 'O bicho dos olhos vermelhos',
+    historia: 'Um bicho de olhos vermelhos, apaixonado pela Livia.',
+    rotina: 'bicho_apaixonado', casa: 'auto', chegada: '2026-11-15T16:03:00-04:00',
+    visual: { tipo: 'humano', pele: '#c8b8b0', cabelo: 'espetado', corCabelo: '#2a2a2e', olhos: '#ff2a2a', roupa: '#5a3a2a', detalhe: '#8a6a4a', calca: '#3a2a20', chapeu: 'orelhas_fera', corChapeu: '#2a2a2e', acessorio: 'rosa' }
+  },
+  {
+    id: 'livia', nome: 'Livia', profissao: 'Domadora de feras',
+    historia: 'Bonita e com o poder de domar feras. Tem um admirador de olhos vermelhos: o Pietro.',
+    rotina: 'domadora_feras', casa: 'auto', chegada: '2026-11-15T16:04:00-04:00',
+    visual: { tipo: 'humano', pele: '#f0d0b8', cabelo: 'longo', corCabelo: '#e8c060', roupa: '#2a8a7a', detalhe: '#e8d8b0', calca: '#5a3a2a', chapeu: 'tiara_penas', corChapeu: '#d84a3a', acessorio: 'laco' }
   }
 ];

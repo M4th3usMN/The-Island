@@ -353,6 +353,37 @@
         [15, 18, 'cais', 'Medindo o vento para o dirigível'], [18, 20, 'oficina', 'Desenhando o dirigível'], [20, 23, 'taverna', 'Tentando conversar com as mãos']],
       trabalho: ['Pfff! Mais pressão.', 'Caldeira... quente!', 'Engrenagem... aqui.'], social: ['Eu... não falo bem. Ainda.', 'Um dia: dirigível!', 'Na minha terra, tudo a vapor.']
     },
+    // ---- 15/11
+    ladrao: {
+      blocos: [[4, 11, 'casa', 'Dormindo de dia, como bom procurado', S], [11, 12, 'casa', 'Contando as moedas escondidas'], [12, 13, 'taverna', 'Almoçando com o rosto meio escondido'],
+        [13, 16, 'passeio', 'Rondando a ilha de olho nos bolsos alheios'], [16, 18, 'cais', 'Vendo se os navios trazem cartazes de procurado'], [18, 20, 'fogueira', 'Ouvindo as conversas na fogueira'],
+        [20, 23, 'mercearia', 'Rondando a mercearia fechada'], [23, 4, 'floresta', 'Escondendo coisas na floresta']],
+      trabalho: ['Isso estava largado...', 'Ninguém viu nada.', 'Shhh!'], social: ['Me pegaram uma vez. Só uma.', 'Meu rosto está em cartaz no mundo todo.', 'Eu? Ladrão? Imagina.']
+    },
+    assassino_aluguel: {
+      blocos: [[1, 7, 'casa', 'Dormindo com a lâmina perto', S], [7, 9, 'arena', 'Afiando a foice na arena'], [9, 12, 'floresta', 'Treinando escondido na floresta'],
+        [12, 13, 'taverna', 'Almoçando sozinho no canto'], [13, 16, 'ponte', 'Esperando na ponte sem dizer por quê'], [16, 19, 'arena', 'Treinando golpes com a corrente'],
+        [19, 21, 'fogueira', 'Olhando o fogo sem piscar'], [21, 1, 'taverna', 'Esperando alguém com uma proposta']],
+      trabalho: ['...', 'Rápido e em silêncio.', 'A corrente nunca erra.'], social: ['Já fui condenado à morte. Não deu certo.', 'Não tenho medo da morte.', 'Quem paga, manda.']
+    },
+    maluco: {
+      blocos: [[2, 8, 'casa', 'Dormindo de ponta-cabeça', S], [8, 10, 'fogueira', 'Conversando com a fogueira'], [10, 12, 'pasto', 'Imitando as ovelhas'],
+        [12, 13, 'taverna', 'Almoçando a sobremesa primeiro'], [13, 16, 'passeio', 'Correndo pela ilha atrás do vento'], [16, 18, 'cais', 'Tentando pescar sem vara'],
+        [18, 22, 'fogueira', 'Dançando em volta da fogueira'], [22, 2, 'floresta', 'Uivando para a lua']],
+      trabalho: ['Hahaha!', 'Béééé!', 'O vento falou comigo!'], social: ['Eu sou doidão mesmo.', 'Por que a ilha não tem pernas?', 'Já conversou com uma pedra?']
+    },
+    bicho_apaixonado: {
+      blocos: [[22, 5, 'casa', 'Dormindo encolhido', S], [5, 7, 'pasto', 'Rondando o pasto com os olhos brilhando'], [7, 11, 'floresta', 'Farejando a floresta'],
+        [11, 13, 'fogueira', 'Olhando a Livia de longe'], [13, 17, 'arena', 'Assistindo a Livia domar as feras'], [17, 19, 'cais', 'Catando conchas para a Livia'],
+        [19, 22, 'fogueira', 'Tentando puxar assunto com a Livia']],
+      trabalho: ['Grrr...', '*fareja o ar*', 'Olhos vermelhos, coração mole.'], social: ['A Livia é a mais bonita da ilha.', 'Não tenha medo dos meus olhos.', 'Será que ela gosta de conchas?']
+    },
+    domadora_feras: {
+      blocos: [[21, 5, 'casa', 'Dormindo', S], [5, 7, 'pasto', 'Acalmando os bichos do pasto'], [7, 11, 'floresta', 'Procurando feras na floresta'],
+        [11, 13, 'fogueira', 'Almoçando na fogueira'], [13, 17, 'arena', 'Domando feras na arena'], [17, 19, 'cais', 'Passeando pelo cais'],
+        [19, 21, 'fogueira', 'Conversando na fogueira']],
+      trabalho: ['Calma, fera.', 'Isso, devagar...', 'Nenhuma fera me assusta.'], social: ['Eu domo qualquer fera.', 'Aquele de olhos vermelhos não para de me olhar...', 'Quer ver um truque?']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

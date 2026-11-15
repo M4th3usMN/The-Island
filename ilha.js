@@ -81,7 +81,8 @@
     [578, 278], [474, 302], [442, 466], // Dia 8
     [164, 228], [472, 474], [242, 390], [455, 384], // Dia 9
     [170, 392], [596, 420], [312, 446], [560, 446], [276, 186], // Dia 10
-    [182, 322], [588, 316]]; // 14/11
+    [182, 322], [588, 316], // 14/11
+    [166, 280], [606, 344], [598, 388], [172, 440], [224, 462]]; // 15/11
   // RESERVADO (não usar como terreno): pedreira dos Ofícios em (566, 220), ver oficios.js
   const LOTES = [];
   const TRAP = { x0: 586, y0: 170, x1: 597, y1: 137 }; // trapiche da praia até a ponte  // casas com lugar marcado (casa: 'lote:x,y' em moradores.js)
