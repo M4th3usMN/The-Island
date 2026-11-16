@@ -384,6 +384,13 @@
         [19, 21, 'fogueira', 'Conversando na fogueira']],
       trabalho: ['Calma, fera.', 'Isso, devagar...', 'Nenhuma fera me assusta.'], social: ['Eu domo qualquer fera.', 'Aquele de olhos vermelhos não para de me olhar...', 'Quer ver um truque?']
     },
+    // ---- 16/11
+    comandante_tropas: {
+      blocos: [[23, 5, 'casa', 'Dormindo de armadura', S], [5, 7, 'arena', 'Tocando a corneta para reunir as tropas'], [7, 12, 'arena', 'Comandando o treino das tropas'],
+        [12, 13, 'fogueira', 'Almoçando com os soldados'], [13, 16, 'passeio', 'Passando as tropas em revista pela ilha'], [16, 19, 'cais', 'Vigiando o mar com as tropas'],
+        [19, 21, 'fogueira', 'Planejando a defesa na fogueira'], [21, 23, 'taverna', 'Brindando com os soldados na taverna']],
+      trabalho: ['Tropas, em forma!', 'Ninguém sai da linha!', 'Escudos firmes!'], social: ['Sou o Cavaleiro Negro.', 'Eu comando as tropas.', 'A melhor defesa é o ataque.']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

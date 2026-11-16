@@ -462,5 +462,12 @@ window.MORADORES = [
     historia: 'Bonita e com o poder de domar feras. Tem um admirador de olhos vermelhos: o Pietro.',
     rotina: 'domadora_feras', casa: 'auto', chegada: '2026-11-15T16:04:00-04:00',
     visual: { tipo: 'humano', pele: '#f0d0b8', cabelo: 'longo', corCabelo: '#e8c060', roupa: '#2a8a7a', detalhe: '#e8d8b0', calca: '#5a3a2a', chapeu: 'tiara_penas', corChapeu: '#d84a3a', acessorio: 'laco' }
+  },
+  // 16/11: comentário do Instagram
+  {
+    id: 'sir_daniel', arroba: 'firemanctba17', nome: 'Sir Daniel', profissao: 'Cavaleiro negro, comandante das tropas',
+    historia: 'Chegou se apresentando como Daniel, o Cavaleiro Negro, comandante das tropas.',
+    rotina: 'comandante_tropas', casa: 'auto', chegada: '2026-11-16T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#6e4630', cabelo: 'curto', corCabelo: '#141414', roupa: '#2c2c38', detalhe: '#c9a14a', calca: '#464650', chapeu: 'elmo_penacho', corChapeu: '#6a2a8a', acessorio: 'corneta_guerra' }
   }
 ];

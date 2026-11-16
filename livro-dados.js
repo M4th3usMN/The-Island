@@ -75,7 +75,8 @@ window.LIVRO = {
     jin: ['Jin, assassino de aluguel. Fui condenado à morte, mas não tenho medo dela.', 'Se alguém me pagar, eu faço o trabalho.'],
     elber: ['Elber, maluco doido. Me coloca na história!', 'Eu sou doidão mesmo.'],
     pietro: ['Pietro, o bicho dos olhos vermelhos.', 'Sou apaixonado pela Livia.'],
-    livia: ['Livia, domadora de feras. Tenho o poder de domar qualquer fera.', 'O bicho dos olhos vermelhos vive me olhando... o nome dele é Pietro.']
+    livia: ['Livia, domadora de feras. Tenho o poder de domar qualquer fera.', 'O bicho dos olhos vermelhos vive me olhando... o nome dele é Pietro.'],
+    sir_daniel: ['Daniel, o Cavaleiro Negro.', 'Sou o comandante das tropas.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],
