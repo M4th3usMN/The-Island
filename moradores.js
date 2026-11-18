@@ -469,5 +469,18 @@ window.MORADORES = [
     historia: 'Chegou se apresentando como Daniel, o Cavaleiro Negro, comandante das tropas.',
     rotina: 'comandante_tropas', casa: 'auto', chegada: '2026-11-16T16:00:00-04:00',
     visual: { tipo: 'humano', pele: '#6e4630', cabelo: 'curto', corCabelo: '#141414', roupa: '#2c2c38', detalhe: '#c9a14a', calca: '#464650', chapeu: 'elmo_penacho', corChapeu: '#6a2a8a', acessorio: 'corneta_guerra' }
+  },
+  // 18/11: comentários do Instagram
+  {
+    id: 'carlos', arroba: '__carlosz007', nome: 'Carlos', profissao: 'Caçador de recompensas',
+    historia: 'Caçador de recompensas de habilidades diversas, que consegue ver o ponto crítico de qualquer pessoa. Quis uma base na floresta, com uma plantação ao lado.',
+    rotina: 'cacador_plantador', casa: 'auto', chegada: '2026-11-18T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#7a4a2e', cabelo: 'curto', corCabelo: '#2a1a10', barba: '#2a1a10', roupa: '#4a5a2a', detalhe: '#8a6a3a', calca: '#3a3024', chapeu: 'tapa_mira', corChapeu: '#5a3a1e', acessorio: 'facao' }
+  },
+  {
+    id: 'ketchup', arroba: 'o.vinixz', nome: 'Ketchup', profissao: 'Espadachim',
+    historia: 'Espadachim que chegou sem contar de onde veio. Quando perguntam a história dele, a resposta é sempre a mesma: é um mistério.',
+    rotina: 'espadachim_misterioso', casa: 'auto', chegada: '2026-11-18T16:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#a8704e', cabelo: 'curto', corCabelo: '#7a1e1e', roupa: '#b8282a', detalhe: '#e8d8b0', calca: '#2a2228', chapeu: 'chapeu_pluma', corChapeu: '#1e1a20', acessorio: 'florete' }
   }
 ];

@@ -391,6 +391,19 @@
         [19, 21, 'fogueira', 'Planejando a defesa na fogueira'], [21, 23, 'taverna', 'Brindando com os soldados na taverna']],
       trabalho: ['Tropas, em forma!', 'Ninguém sai da linha!', 'Escudos firmes!'], social: ['Sou o Cavaleiro Negro.', 'Eu comando as tropas.', 'A melhor defesa é o ataque.']
     },
+    // ---- 18/11
+    cacador_plantador: {
+      blocos: [[22, 5, 'casa', 'Dormindo na base da floresta', S], [5, 7, 'casa', 'Regando a plantação ao lado da base'], [7, 11, 'floresta', 'Rastreando alvos na floresta'],
+        [11, 12, 'casa', 'Colhendo a plantação da base'], [12, 13, 'taverna', 'Almoçando e ouvindo sobre recompensas'], [13, 17, 'passeio', 'Caçando recompensas pela ilha'],
+        [17, 19, 'fazenda', 'Trocando sementes na fazenda'], [19, 22, 'fogueira', 'Estudando o ponto fraco de cada um na fogueira']],
+      trabalho: ['Achei o ponto crítico.', 'Ninguém foge de mim.', 'Essa recompensa é minha.'], social: ['Minha base fica na floresta.', 'Quer semente? Tenho de sobra.', 'Todo mundo tem um ponto fraco.']
+    },
+    espadachim_misterioso: {
+      blocos: [[23, 6, 'casa', 'Dormindo', S], [6, 8, 'floresta', 'Treinando golpes sozinho na floresta'], [8, 12, 'arena', 'Duelando com a própria sombra na arena'],
+        [12, 13, 'taverna', 'Almoçando num canto escuro da taverna'], [13, 17, 'passeio', 'Andando pela ilha sem dizer de onde veio'], [17, 19, 'ponte', 'Afiando o florete na ponte do riacho'],
+        [19, 23, 'fogueira', 'Ouvindo histórias sem contar a sua']],
+      trabalho: ['Shhf!', 'En garde!', 'Rápido demais pra você.'], social: ['Minha história? É um mistério.', 'Me chamam de Ketchup.', 'Não pergunte de onde eu vim.']
+    },
     gato: {
       blocos: [[22, 6, 'taverna', 'Dormindo no telhado da taverna', { soneca: true }], [6, 9, 'fogueira', 'Esquentando-se no fogo'],
         [9, 20, 'passeio', 'Passeando pela ilha (fugindo do Bidu)'], [20, 22, 'taverna', 'Pedindo peixe na taverna']],

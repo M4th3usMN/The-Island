@@ -76,7 +76,9 @@ window.LIVRO = {
     elber: ['Elber, maluco doido. Me coloca na história!', 'Eu sou doidão mesmo.'],
     pietro: ['Pietro, o bicho dos olhos vermelhos.', 'Sou apaixonado pela Livia.'],
     livia: ['Livia, domadora de feras. Tenho o poder de domar qualquer fera.', 'O bicho dos olhos vermelhos vive me olhando... o nome dele é Pietro.'],
-    sir_daniel: ['Daniel, o Cavaleiro Negro.', 'Sou o comandante das tropas.']
+    sir_daniel: ['Daniel, o Cavaleiro Negro.', 'Sou o comandante das tropas.'],
+    carlos: ['Carlos, caçador de recompensas. Tenho habilidades diversas e consigo ver o ponto crítico de qualquer pessoa.', 'Quero uma base na floresta, com uma plantação do lado.'],
+    ketchup: ['Ketchup, espadachim.', 'Minha história? É um mistério.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],
