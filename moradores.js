@@ -482,5 +482,18 @@ window.MORADORES = [
     historia: 'Espadachim que chegou sem contar de onde veio. Quando perguntam a história dele, a resposta é sempre a mesma: é um mistério.',
     rotina: 'espadachim_misterioso', casa: 'auto', chegada: '2026-11-18T16:01:00-04:00',
     visual: { tipo: 'humano', pele: '#a8704e', cabelo: 'curto', corCabelo: '#7a1e1e', roupa: '#b8282a', detalhe: '#e8d8b0', calca: '#2a2228', chapeu: 'chapeu_pluma', corChapeu: '#1e1a20', acessorio: 'florete' }
+  },
+  // 21/11: comentários do YouTube
+  {
+    id: 'jonathan', arroba: 'protona-r7f', nome: 'Jonathan', profissao: 'Curandeiro',
+    historia: 'Curandeiro que ouviu rumores sobre o que está acontecendo na ilha e resolveu vir ajudar.',
+    rotina: 'curandeiro', casa: 'auto', chegada: '2026-11-21T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#d8a07a', cabelo: 'curto', corCabelo: '#b8501e', barba: '#a8441a', roupa: '#6a5a8a', detalhe: '#d8c890', calca: '#4a3a2a', chapeu: 'chapeu_ervas', corChapeu: '#7a8a3a', acessorio: 'pilao' }
+  },
+  {
+    id: 'caiu', arroba: 'ClaudioClaudinho-ry8yp', nome: 'Caiu', profissao: 'Engenheiro',
+    historia: 'Engenheiro que veio para a ilha por ter ouvido rumores de um dragão.',
+    rotina: 'engenheiro_dragao', casa: 'auto', chegada: '2026-11-21T16:01:00-04:00',
+    visual: { tipo: 'humano', pele: '#5a3a26', cabelo: 'espetado', corCabelo: '#1a1410', roupa: '#c87a2a', avental: '#5a4a3a', calca: '#2a3a4a', chapeu: 'capacete_couro', corChapeu: '#7a4a28', acessorio: 'esquadro' }
   }
 ];

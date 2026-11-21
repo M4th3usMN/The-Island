@@ -84,7 +84,8 @@
     [182, 322], [588, 316], // 14/11
     [166, 280], [606, 344], [598, 388], [172, 440], [224, 462], // 15/11
     [568, 342], // 16/11
-    [204, 248], [564, 256]]; // 18/11
+    [204, 248], [564, 256], // 18/11
+    [150, 254], [522, 478]]; // 21/11
   // RESERVADO (não usar como terreno): pedreira dos Ofícios em (566, 220), ver oficios.js
   const LOTES = [];
   const TRAP = { x0: 586, y0: 170, x1: 597, y1: 137 }; // trapiche da praia até a ponte  // casas com lugar marcado (casa: 'lote:x,y' em moradores.js)

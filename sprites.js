@@ -140,6 +140,9 @@
     // ---- 18/11
     if (ch === 'tapa_mira') { P(x - 3, HY, 6, 1, cc); P(side > 0 ? x - 4 : x + 3, HY, 1, 2, cc); if (!back) { const ex = side > 0 ? x : x - 3; P(ex, HY + 1, 3, 3, '#2a2a32'); P(ex + 1, HY + 2, 1, 1, Math.floor(t * 2) % 3 ? '#ff3a3a' : '#ffd0d0'); } }
     if (ch === 'chapeu_pluma') { P(x - 5, HY, 10, 1, cc); P(side > 0 ? x + 4 : x - 6, HY + 1, 2, 1, cc); P(x - 3, HY - 3, 6, 3, cc); P(x - 3, HY - 1, 6, 1, '#8a1e22'); const fx = side > 0 ? x - 3 : x + 2; P(fx, HY - 5, 1, 3, '#f2ead8'); P(fx + (side > 0 ? -1 : 1), HY - 6, 1, 2, '#e8483a'); P(fx + (side > 0 ? -2 : 2), HY - 5, 1, 2, '#e8483a'); }
+    // ---- 21/11
+    if (ch === 'chapeu_ervas') { P(x - 5, HY, 10, 1, cc); P(x - 3, HY - 2, 6, 2, cc); P(x - 3, HY - 1, 6, 1, shade(cc, 0.7)); const fx = side > 0 ? x + 1 : x - 2; P(fx, HY - 4, 1, 2, '#4a9a3a'); P(fx + 1, HY - 5, 1, 2, '#7ad05a'); P(fx - 1, HY - 3, 1, 1, '#f2e05a'); }
+    if (ch === 'capacete_couro') { P(x - 3, HY - 2, 6, 3, cc); P(x - 4, HY - 1, 1, 3, cc); P(x + 3, HY - 1, 1, 3, cc); P(x - 2, HY - 2, 1, 1, '#c9a14a'); P(x + 1, HY - 2, 1, 1, '#c9a14a'); if (!back) { P(x - 3, HY, 6, 1, '#2a2a2e'); P(x - 2, HY, 1, 1, '#8fd3ff'); P(x + 1, HY, 1, 1, '#8fd3ff'); } else P(x - 3, HY, 6, 3, shade(cc, 0.85)); }
     // acessorio (mao do lado "side")
     const M = (dx, dy, w, h, col) => P(side > 0 ? x + dx : x - dx - w, Y + dy, w, h, col);
     const a = v.acessorio;
@@ -219,6 +222,9 @@
       if (a === 'rosa') { M(4, 0, 1, 4, '#3a8a3a'); M(5, 1, 1, 1, '#3a8a3a'); M(3, -2, 3, 2, '#d8203a'); M(4, -2, 1, 1, '#ff5a6a'); }
       if (a === 'laco') { const k = '#c8a060'; M(3, 1, 3, 1, k); M(3, 3, 3, 1, k); M(3, 2, 1, 1, k); M(5, 2, 1, 1, k); M(6, -2, 1, 3, k); M(6, -6, 4, 1, k); M(6, -3, 4, 1, k); M(6, -5, 1, 2, k); M(9, -5, 1, 2, k); }
       if (a === 'escudo_energia') { const g = 0.45 + 0.25 * Math.sin(t * 3); M(4, 1, 2, 2, '#5a6070'); M(-9, -1, 5, 7, `rgba(90,220,255,${g.toFixed(2)})`); M(-8, 0, 3, 5, 'rgba(210,250,255,0.35)'); M(-9, -1, 5, 1, '#9aeaff'); M(-9, 5, 5, 1, '#9aeaff'); }
+      // ---- 21/11
+      if (a === 'pilao') { M(3, 2, 4, 3, '#8a8e9a'); M(3, 2, 4, 1, '#b8bcc8'); M(4, 2, 2, 1, '#5aa84a'); M(5, -2, 1, 4, '#c8a878'); M(5, -2, 1, 1, '#e8d0a0'); if (Math.floor(t * 2) % 3 === 0) M(4, 0, 1, 1, '#8ad86a'); }
+      if (a === 'esquadro') { M(4, -4, 1, 8, '#c9a14a'); M(4, 3, 5, 1, '#c9a14a'); M(4, -2, 1, 1, '#7a5a2a'); M(4, 0, 1, 1, '#7a5a2a'); M(6, 3, 1, 1, '#7a5a2a'); M(8, 3, 1, 1, '#7a5a2a'); }
     }
     if (a === 'espirito') {
       const fy = Math.round(Math.sin(t * 2.2) * 2);

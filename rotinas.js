@@ -105,6 +105,12 @@
         [19, 22, 'fogueira', 'De olho no mar, desconfiado']],
       trabalho: ['Mais um pilar.', 'Essa não cai.', 'Medida certa.'], social: ['Minha ponte caiu...', 'Aqui eu recomeço.']
     },
+    engenheiro_dragao: {
+      blocos: [[22, 6, 'casa', 'Dormindo', S], [6, 7, 'casa', 'Tomando café e rabiscando plantas'], [7, 11, 'oficina', 'Projetando defesas contra o dragão'],
+        [11, 12, 'cais', 'Medindo o cais'], [12, 13, 'taverna', 'Almoçando e ouvindo rumores'], [13, 17, 'ponte', 'Testando a resistência da ponte'],
+        [17, 19, 'biblioteca', 'Lendo tudo sobre dragões'], [19, 22, 'fogueira', 'Perguntando quem já viu o dragão']],
+      trabalho: ['Régua, esquadro, pronto.', 'Isso aguenta um dragão?', 'Mais um rebite.'], social: ['Vim pelos rumores do dragão.', 'Alguém viu o dragão de perto?', 'Toda ilha precisa de um engenheiro.']
+    },
     // ---- Dia 3
     relojoeiro: {
       blocos: [[23, 7, 'casa', 'Dormindo', S], [7, 8, 'casa', 'Dando corda nos relógios'], [8, 12, 'oficina', 'Ajustando engrenagens com Vitor'],
