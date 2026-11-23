@@ -583,12 +583,20 @@
       let s = 0; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) s += CL[(y + j) * WW + x + i] === 3 ? 1 : 0;
       PF[y * WW + x] = s / 9;
     }
-    const pf = (x, y) => { // bilinear
+    // campo suave da água doce (lago e riacho), também em média 3x3
+    const AG = new Uint8Array(WW * WH), WF = new Float32Array(WW * WH);
+    for (let i = 0; i < WW * WH; i++) { const r = src[i * 4], g = src[i * 4 + 1], b = src[i * 4 + 2]; AG[i] = (r === 24 && g === 66 && b === 120) || (r === 30 && g === 80 && b === 132) ? 1 : 0; }
+    for (let y = 1; y < WH - 1; y++) for (let x = 1; x < WW - 1; x++) {
+      let s = 0; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) s += AG[(y + j) * WW + x + i];
+      WF[y * WW + x] = s / 9;
+    }
+    const bil = (F, x, y) => { // bilinear
       const x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0;
       if (x0 < 0 || y0 < 0 || x0 >= WW - 1 || y0 >= WH - 1) return 0;
       const i = y0 * WW + x0;
-      return (PF[i] * (1 - fx) + PF[i + 1] * fx) * (1 - fy) + (PF[i + WW] * (1 - fx) + PF[i + WW + 1] * fx) * fy;
+      return (F[i] * (1 - fx) + F[i + 1] * fx) * (1 - fy) + (F[i + WW] * (1 - fx) + F[i + WW + 1] * fx) * fy;
     };
+    const pf = (x, y) => bil(PF, x, y), wf = (x, y) => bil(WF, x, y);
     const hx = (x, y, s) => { let h = (x * 374761393 + y * 668265263 + s * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
     const mix = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
     const vn = (x, y, s) => { // ruído suave (manchas orgânicas)
@@ -603,7 +611,22 @@
       rua: [mix(RB, [60, 30, 50], 0.12), RB, mix(RB, [255, 240, 210], 0.08)],
       borda: [74, 50, 52], sombra: mix(GB, [20, 24, 50], 0.3),
     };
-    const atlas = {}; ['grama', 'rua', 'arvores'].forEach(n => { const im = new Image(); im.onload = () => { atlas[n] = im; CACHE.clear(); }; im.src = 'flow/mapa/' + n + '.png?v=1'; });
+    // praia e água (texturas do Flow): a costa vem da conta exata do contorno da ilha (idist), então fica lisa
+    const SB = D.areia ? D.areia.base : [232, 200, 146], WB = D.agua ? D.agua.base : [55, 86, 150];
+    Object.assign(COR, {
+      areia: [mix(SB, [170, 110, 90], 0.14), SB, mix(SB, [255, 250, 230], 0.25)], areiaMolhada: mix(SB, [120, 100, 110], 0.3), areiaBorda: mix(SB, [110, 120, 60], 0.35),
+      fundo: mix(WB, [12, 20, 60], 0.38), mar: [mix(WB, [12, 20, 60], 0.18), WB, mix(WB, [120, 160, 220], 0.15)],
+      raso: [mix(WB, [70, 180, 200], 0.38), mix(WB, [90, 200, 210], 0.5)], espuma: [236, 244, 240],
+      doce: [mix(WB, [40, 130, 160], 0.22), mix(WB, [70, 160, 190], 0.3)], margem: mix(GB, [60, 50, 40], 0.45),
+    });
+    const tipoPx = (wx, wy) => { // 0 nada, 1 grama, 2 mata, 3 rua, 4 areia, 5 mar, 6 água doce
+      const d = idist(wx, wy); if (d >= 1) return 5;
+      if (wf(wx - X0 - 0.5, wy - Y0 - 0.5) > 0.5) return 6;
+      if (d > 0.93) return 4;
+      const ux = Math.floor(wx - X0), uy = Math.floor(wy - Y0); if (ux < 0 || uy < 0 || ux >= WW || uy >= WH) return 0;
+      const k = CL[uy * WW + ux]; return !k ? 0 : pf(wx - X0 - 0.5, wy - Y0 - 0.5) > 0.42 ? 3 : k;
+    };
+    const atlas = {}; ['grama', 'rua', 'arvores', 'areia', 'agua'].forEach(n => { const im = new Image(); im.onload = () => { atlas[n] = im; CACHE.clear(); }; im.src = 'flow/mapa/' + n + '.png?v=1'; });
     const CS = 32, CACHE = new Map(); let ARV_LIVRE = null;
     function pedaco(cx, cy, Kc) {
       const key = cx + ',' + cy + ',' + Kc; let cv = CACHE.get(key);
@@ -613,28 +636,40 @@
       for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
         const wx = wx0 + (i + 0.5) / Kc, wy = wy0 + (j + 0.5) / Kc, ux = Math.floor(wx - X0), uy = Math.floor(wy - Y0);
         if (ux < 0 || uy < 0 || ux >= WW || uy >= WH) continue;
-        const k = CL[uy * WW + ux]; if (!k) continue;
-        const p = pf(wx - X0 - 0.5, wy - Y0 - 0.5);
-        // manchas grandes e suaves (2 tons) em grade de 6 unidades, com borda em degraus de pixel
+        // manchas grandes e suaves (2 tons), com borda em degraus de pixel
         const n = vn(wx / 9, wy / 9, 3) * 0.65 + vn(wx / 3.5, wy / 3.5, 9) * 0.35;
+        const dd = idist(wx, wy);
         let col;
+        if (dd >= 1) { // mar: espuma na beira, faixa rasa turquesa e fundo mais escuro
+          const e = dd - 1, onda = 0.0035 + 0.0015 * Math.sin(wx * 0.35 + wy * 0.2);
+          col = e < onda ? COR.espuma : e < 0.03 + 0.012 * n ? COR.raso[e < 0.012 ? 1 : 0] : e < 0.075 + 0.02 * n ? COR.mar[n < 0.4 ? 0 : n > 0.68 ? 2 : 1] : COR.fundo;
+        } else {
+          const w = wf(wx - X0 - 0.5, wy - Y0 - 0.5);
+          if (w > 0.5) col = w < 0.5 + 1.2 / (Kc * 3) ? COR.espuma : COR.doce[n > 0.55 ? 1 : 0]; // lago e riacho
+          else if (w > 0.36) col = COR.margem;
+          else if (dd > 0.93) col = dd > 0.993 ? COR.areiaMolhada : dd < 0.9335 ? COR.areiaBorda : COR.areia[n < 0.36 ? 0 : n > 0.68 ? 2 : 1]; // praia
+          else {
+            const k = CL[uy * WW + ux]; if (!k) continue;
+            const p = pf(wx - X0 - 0.5, wy - Y0 - 0.5);
         if (p > 0.5) col = p < 0.5 + 1.2 / (Kc * 3) ? COR.borda : COR.rua[n < 0.36 ? 0 : n > 0.66 ? 2 : 1];
         else if (p > 0.38) col = COR.sombra;
         else col = (k === 2 ? COR.mata : COR.grama)[n < 0.37 ? 0 : n > 0.65 ? 2 : 1];
+          }
+        }
         const o = (j * N + i) * 4; d[o] = col[0]; d[o + 1] = col[1]; d[o + 2] = col[2]; d[o + 3] = 255;
       }
       g.putImageData(img, 0, 0);
       // carimbos (em 8 px por unidade; em 4 px ficam pela metade)
       g.imageSmoothingEnabled = false;
       const esc = Kc / 8, CEL = 22; // célula de 22 px (em 8x) = 2,75 unidades
-      const tipoEm = (wx, wy) => { const ux = Math.floor(wx - X0), uy = Math.floor(wy - Y0); if (ux < 0 || uy < 0 || ux >= WW || uy >= WH) return -1; const k = CL[uy * WW + ux]; return !k ? -1 : pf(wx - X0 - 0.5, wy - Y0 - 0.5) > 0.42 ? 3 : k; };
+      const tipoEm = (wx, wy) => { const t = tipoPx(wx, wy); return t === 5 ? (idist(wx, wy) > 1.04 ? 5 : -1) : t || -1; }; // carimbo de onda só longe da espuma
       const gx0 = Math.floor((wx0 * 8) / CEL) - 2, gy0 = Math.floor((wy0 * 8) / CEL) - 2, gx1 = Math.ceil(((wx0 + CS) * 8) / CEL) + 1, gy1 = Math.ceil(((wy0 + CS) * 8) / CEL) + 1;
       for (let gy = gy0; gy <= gy1; gy++) for (let gx = gx0; gx <= gx1; gx++) {
         const h1 = hx(gx, gy, 41), h2 = hx(gx, gy, 77), h3 = hx(gx, gy, 13);
         const px = gx * CEL + h2 * CEL, py = gy * CEL + h3 * CEL, wx = px / 8, wy = py / 8, t = tipoEm(wx, wy);
         if (t < 0) continue;
-        const nome = t === 3 ? 'rua' : 'grama', A = atlas[nome]; if (!A) continue;
-        if (h1 > (t === 3 ? 0.16 : t === 2 ? 0.55 : 0.62)) continue;
+        const nome = t === 3 ? 'rua' : t === 4 ? 'areia' : t >= 5 ? 'agua' : 'grama', A = atlas[nome]; if (!A || !D[nome]) continue;
+        if (h1 > (t === 3 ? 0.16 : t === 4 ? 0.3 : t === 5 ? 0.1 : t === 6 ? 0.06 : t === 2 ? 0.55 : 0.62)) continue;
         const L = D[nome].carimbos, s = L[Math.floor(hx(gx, gy, 5) * L.length)];
         const cw = s[2] / 8, ch = s[3] / 8;
         if (tipoEm(wx - cw / 2, wy - ch) !== t || tipoEm(wx + cw / 2, wy - ch) !== t || tipoEm(wx - cw / 2, wy) !== t || tipoEm(wx + cw / 2, wy) !== t) continue;
@@ -683,7 +718,7 @@
         } });
       });
     }
-    return { desenha, arvores };
+    return { desenha, arvores, fundo: 'rgb(' + COR.fundo.join(',') + ')' };
   })();
   // casas do Google Flow (flow/mapa/casas.png: 4 casas lado a lado — palha, telha, ardósia, madeira)
   const CASAS_FLOW = { w: 223, h: 267, k: 8, img: new Image(), ok: false, lit: null }; // vistas de frente (24/11)
@@ -1197,7 +1232,7 @@
     const c = bctx;
     c.imageSmoothingEnabled = false;
     c.setTransform(K, 0, 0, K, 0, 0);
-    c.fillStyle = '#0e243e'; c.fillRect(0, 0, bw, bh);
+    c.fillStyle = CHAO ? CHAO.fundo : '#0e243e'; c.fillRect(0, 0, bw, bh);
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.drawImage(terrK, (X0 - ox) * K, (Y0 - oy) * K, WW * K, WH * K);
     if (CHAO) CHAO.desenha(c, ox, oy, bw, bh, K);
@@ -1205,10 +1240,17 @@
 
     // agua animada
     const fi = Math.floor(sec * 2.5);
-    for (let i = 0; i < waterPts.length; i += 2) if ((fi + i) % 7 === 0) P(c, waterPts[i], waterPts[i + 1], 1, 1, '#4a7aa8');
-    for (let i = 0; i < shorePts.length; i += 2) {
-      const x = shorePts[i], y = shorePts[i + 1];
-      if (Math.sin(sec * 1.6 + idist(x, y) * 80 + x * 0.05) > 0.85) P(c, x, y, 1, 1, '#5a8cb0');
+    if (CHAO) { // brilhos finos na água (traços de 1 px do sprite, não blocos)
+      c.fillStyle = 'rgba(220,240,255,0.75)';
+      for (let i = 0; i < waterPts.length; i += 2) if ((fi + i) % 7 === 0) c.fillRect(waterPts[i] + 0.25, waterPts[i + 1] + 0.4, 0.75, 0.25);
+      c.fillStyle = 'rgba(240,250,255,0.6)';
+      for (let i = 0; i < shorePts.length; i += 2) { const x = shorePts[i], y = shorePts[i + 1]; if (idist(x, y) > 1.012 && Math.sin(sec * 1.6 + idist(x, y) * 80 + x * 0.05) > 0.9) c.fillRect(x, y + 0.5, 1, 0.25); }
+    } else {
+      for (let i = 0; i < waterPts.length; i += 2) if ((fi + i) % 7 === 0) P(c, waterPts[i], waterPts[i + 1], 1, 1, '#4a7aa8');
+      for (let i = 0; i < shorePts.length; i += 2) {
+        const x = shorePts[i], y = shorePts[i + 1];
+        if (Math.sin(sec * 1.6 + idist(x, y) * 80 + x * 0.05) > 0.85) P(c, x, y, 1, 1, '#5a8cb0');
+      }
     }
 
     // objetos ordenados por y
@@ -1266,7 +1308,7 @@
     if (cl === 'chuva') {
       c.fillStyle = 'rgba(20,30,50,0.22)'; c.fillRect(0, 0, bw, bh);
       c.fillStyle = 'rgba(180,200,230,0.55)';
-      for (let i = 0; i < 160; i++) { const x = (rnd('r', i) * bw + sec * 40) % bw, y = (rnd('ry', i) * bh + sec * 150 + i * 7) % bh; c.fillRect(Math.round(x), Math.round(y), 1, 3); }
+      for (let i = 0; i < 160; i++) { const x = (rnd('r', i) * bw + sec * 40) % bw, y = (rnd('ry', i) * bh + sec * 150 + i * 7) % bh; if (CHAO) c.fillRect(x, y, 0.25, 2.5); else c.fillRect(Math.round(x), Math.round(y), 1, 3); }
     }
 
     // noite e luzes
