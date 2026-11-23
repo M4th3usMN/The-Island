@@ -297,6 +297,7 @@
     }
   }
   function contorno2(cv, cor) {
+    cor = '#140e1a'; // estilo Flow: contorno único em tudo
     const c = cv.getContext('2d'), W = cv.width, H = cv.height, d = c.getImageData(0, 0, W, H), o = new Uint8ClampedArray(d.data);
     const a = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d.data[(y * W + x) * 4 + 3] > 40;
     const [r, g, b] = rgbDe(cor);
@@ -317,7 +318,39 @@
     });
   }
   // cores mais vivas (estudo 6): saturação x1.32 e contraste x1.06, aplicado uma vez em cada sprite do cache
-  function vivo(cv) {
+  // ===================== ESTILO FLOW (23/11/2026) =====================
+  // Cores chapadas em poucos tons, saturação contida, linha escura entre as partes
+  // (no lado escuro de cada borda forte) e contorno #140e1a. Usado por tudo que
+  // antes passava pelo vivo(): moradores, bichos, árvores, casas, prédios, objetos, dragão.
+  const FLOW_OUT = [20, 14, 26];
+  function estiloFlow(cv) {
+    const c = cv.getContext('2d'), W = cv.width, H = cv.height, d = c.getImageData(0, 0, W, H), p = d.data, L = new Float32Array(W * H);
+    for (let i = 0; i < W * H; i++) {
+      const k = i * 4; if (p[k + 3] < 128) { L[i] = -1; continue; }
+      let r = p[k] / 255, g = p[k + 1] / 255, b = p[k + 2] / 255;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let h = 0, s = 0, l = (mx + mn) / 2;
+      if (mx !== mn) { const dd = mx - mn; s = l > 0.5 ? dd / (2 - mx - mn) : dd / (mx + mn); h = mx === r ? (g - b) / dd + (g < b ? 6 : 0) : mx === g ? (b - r) / dd + 2 : (r - g) / dd + 4; h /= 6; }
+      // visual "Flow convertido": cores apagadas, contraste suave, sombras puxadas para o roxo
+      s = Math.min(1, s * (h > 0.02 && h < 0.15 ? 0.9 : 0.66)); l = 0.1 + l * 0.76; // pele, dourado e madeira ficam mais quentes
+      if (l < 0.4) h = h + ((h > 0.25 ? 0.74 : -0.26) - h) * 0.18 * (0.4 - l) / 0.4;
+      h = (h + 1) % 1; l = Math.round(l * 9) / 9; L[i] = l;                    // degraus de luz: cor chapada
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s, pp = 2 * l - q, f = t => { t = (t + 1) % 1; return t < 1 / 6 ? pp + (q - pp) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? pp + (q - pp) * (2 / 3 - t) * 6 : pp; };
+      p[k] = f(h + 1 / 3) * 255; p[k + 1] = f(h) * 255; p[k + 2] = f(h - 1 / 3) * 255; p[k + 3] = 255;
+    }
+    // linhas internas: o pixel mais escuro de uma borda forte vira linha (separa braço, roupa, chapéu...)
+    const marca = new Uint8Array(W * H);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const i = y * W + x; if (L[i] < 0) continue;
+      [[1, 0], [0, 1]].forEach(([dx, dy]) => {
+        const xx = x + dx, yy = y + dy; if (xx >= W || yy >= H) return; const j = yy * W + xx; if (L[j] < 0) return;
+        if (L[j] - L[i] > 0.27) marca[i] = 1; else if (L[i] - L[j] > 0.27) marca[j] = 1;
+      });
+    }
+    for (let i = 0; i < W * H; i++) if (marca[i]) { const k = i * 4; p[k] = FLOW_OUT[0]; p[k + 1] = FLOW_OUT[1]; p[k + 2] = FLOW_OUT[2]; }
+    c.putImageData(d, 0, 0); return cv;
+  }
+  function vivo(cv) { return estiloFlow(cv); }
+  function vivoAntigo(cv) {
     const c = cv.getContext('2d'), d = c.getImageData(0, 0, cv.width, cv.height), p = d.data;
     for (let i = 0; i < p.length; i += 4) {
       if (!p[i + 3]) continue;
@@ -486,7 +519,107 @@
     }
   }
 
-  const ANIM_ITEM = /flauta|cranio|guitarra|runic|orbe|cajado_folhas|cachecol_bracos|moeda|astrolabio|chicote|corneta|chave_vapor|bolsa_moedas|cata_vento|escudo_energia|espirito|visor_tech/;
+  // ---------------- corpo chibi (estilo Flow): 32x48, cabeça grande, cada parte com contorno próprio
+  const CHB_OY = 10; // pés do chibi (y=45) caem na mesma linha dos sprites antigos (55 no canvas)
+  function contornoParte(cv) {
+    const g = cv.getContext('2d'), W = cv.width, H = cv.height, d = g.getImageData(0, 0, W, H).data;
+    const a = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d[(y * W + x) * 4 + 3] > 0;
+    const o = mkc(W, H), og = o.getContext('2d'); og.fillStyle = '#140e1a';
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!a(x, y) && (a(x - 1, y) || a(x + 1, y) || a(x, y - 1) || a(x, y + 1))) og.fillRect(x, y, 1, 1);
+    og.drawImage(cv, 0, 0); return o;
+  }
+  function rampaFlow(c) { c = hex6(c); return [mix(c, '#0c0820', 0.55), mix(c, '#1a1448', 0.32), c, mix(c, '#fff2dc', 0.2)]; }
+  function chibiCorpo(dest, v, p) {
+    const child = v.tipo === 'crianca', dt = child ? 4 : 0, back = p.back, side = p.side || 1;
+    const lift = p.lift || [0, 0], aL = p.aL || 0, aR = p.aR || 0;
+    const R = rampaFlow(v.roupa || '#6a6a6a'), PE = rampaFlow(v.pele || '#e0b090'), C = rampaFlow(v.calca || '#3a3048');
+    const HC = rampaFlow(v.corCabelo || '#4a3020'), BOT = rampaFlow('#4a4650'), OURO = rampaFlow('#e0a836');
+    const manto = !!v.manto, hy = 14 + dt, by = 27 + dt, est = v.cabelo || 'curto';
+    const partes = [];
+    const parte = (fn, semContorno) => { const k = mkc(NW, NH), g = k.getContext('2d'); const r = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x + NX, y + CHB_OY, w, h); }; fn(r, g); partes.push([k, semContorno]); };
+    // sombreia a parte: coluna da esquerda clara, lado direito escuro
+    const sombreia = (r, g, ramp, x0, y0, x1, y1, sombra = 0.6) => {
+      const d = g.getImageData(0, 0, NW, NH), q = d.data;
+      for (let y = y0; y <= y1; y++) { let a = -1, b = -1; for (let x = x0; x <= x1; x++) if (q[((y + CHB_OY) * NW + x + NX) * 4 + 3]) { if (a < 0) a = x; b = x; } if (a < 0) continue;
+        for (let x = a; x <= b; x++) { if (!q[((y + CHB_OY) * NW + x + NX) * 4 + 3]) continue; // só pinta o que já existe (não preenche o vão entre mechas/pernas)
+          const f = b === a ? 0 : (x - a) / (b - a); r(x, y, 1, 1, ramp[x === a && b - a > 2 ? 3 : f > 0.88 && b - a > 3 ? 0 : f > sombra ? 1 : 2]); } }
+    };
+    // pernas e botas
+    const pes = [[11, lift[0]], [17, lift[1]]];
+    parte((r, g) => { pes.forEach(([x, l], i) => { if (!manto) r(x, 37 + dt / 2, 4, 6 - l - dt / 2, C[2]); if (v.pernaDePau && i === 1) { r(x + 1, 40, 2, 5 - l, '#9a6a3a'); } }); sombreia(r, g, C, 9, 30, 23, 44, 0.5); });
+    parte(r => pes.forEach(([x, l], i) => { if (!(v.pernaDePau && i === 1)) { r(x, 42 - l, 4, 3, BOT[2]); r(x, 42 - l, 4, 1, BOT[3]); } }));
+    // tronco / manto
+    parte((r, g) => {
+      if (manto) for (let y = by; y <= 43; y++) { const w = Math.round(6 + (y - by) * 0.17); r(16 - w, y, w * 2, 1, R[2]); }
+      else r(10, by, 12, 10 - dt / 2, R[2]);
+      sombreia(r, g, R, 6, by, 26, 44);
+      if (manto) for (let y = by + 4; y <= 42; y++) { r(13, y, 1, 1, R[1]); r(19, y, 1, 1, R[1]); }
+    });
+    // detalhes da roupa (sem contorno próprio: ficam "pintados" no tronco)
+    parte(r => {
+      const fimR = manto ? 42 : by + 9 - dt / 2;
+      if (v.kilt) for (let y = by + 6; y <= by + 11; y++) for (let x = 10; x <= 21; x++) r(x, y, 1, 1, (x === 12 || x === 19) ? '#b03030' : x < 14 ? '#3e8a4a' : '#2e6b3a');
+      if (v.listras && !back) { const L = rampaFlow(v.listras); for (let y = by + 2; y < fimR; y += 2) r(10, y, 12, 1, L[2]); }
+      if (v.avental && !back) { const A = rampaFlow(v.avental); r(12, by + 3, 8, fimR - by - 3, A[2]); r(12, by + 3, 1, fimR - by - 3, A[3]); r(19, by + 3, 1, fimR - by - 3, A[1]); }
+      if (v.detalhe) { const D = rampaFlow(v.detalhe); r(11, by, 10, 2, D[2]); r(11, by, 3, 1, D[3]); }
+      else r(12, by, 8, 2, R[0]);
+      if (!back && manto) { r(15, by + 3, 2, 1, OURO[2]); r(15, by + 7, 2, 1, OURO[2]); r(15, by + 11, 2, 1, OURO[2]); }
+      if (!manto && !v.avental && !v.kilt) r(10, by + 8 - dt / 2, 12, 1, '#4a2e1e');
+    }, true);
+    // braços (o de trás e o da frente) e mãos
+    parte((r, g) => { r(7, by + 1 + aL, 3, 8, R[2]); sombreia(r, g, R, 7, by, 9, by + 12, 0.7); });
+    parte(r => { r(7, by + 9 + aL, 3, 2, PE[2]); r(7, by + 9 + aL, 1, 2, PE[3]); });
+    parte((r, g) => { r(22, by + 1 + aR, 3, 8, R[2]); sombreia(r, g, R, 22, by, 24, by + 12, 0.4); });
+    parte(r => { r(22, by + 9 + aR, 3, 2, PE[1]); });
+    if (manto) parte(r => { r(7, by + 7 + aL, 3, 2, OURO[2]); r(22, by + 7 + aR, 3, 2, OURO[1]); }, true);
+    // cabeça
+    parte(r => {
+      r(11, hy, 10, 1, PE[2]); r(10, hy + 1, 12, 1, PE[2]); r(9, hy + 2, 14, 9, PE[2]); r(10, hy + 11, 12, 1, PE[2]); r(11, hy + 12, 10, 1, PE[2]);
+      r(21, hy + 2, 2, 9, PE[1]); r(11, hy + 12, 10, 1, PE[1]); r(9, hy + 2, 1, 7, PE[3]);
+    });
+    // cabelo
+    parte((r, g) => {
+      if (back) { if (est !== 'careca') { r(9, hy, 14, 12, HC[2]); if (est === 'longo') r(9, hy + 11, 14, 6, HC[2]); if (est === 'rabo') r(15, hy + 11, 3, 6, HC[2]); if (est === 'coque') r(14, hy - 3, 4, 3, HC[2]); } }
+      else if (est !== 'careca') {
+        r(11, hy - 1, 10, 1, HC[2]); r(10, hy, 12, 1, HC[2]); r(9, hy + 1, 14, 1, HC[2]); r(9, hy + 2, 3, 2, HC[2]); r(13, hy + 2, 7, 1, HC[2]); r(20, hy + 2, 3, 2, HC[2]);
+        r(8, hy + 2, 2, est === 'longo' ? 14 : 5, HC[2]); r(22, hy + 2, 2, est === 'longo' ? 14 : 5, HC[2]);
+        if (est === 'espetado') [[10, -3], [13, -4], [16, -4], [19, -3]].forEach(([x, d]) => r(x, hy + d, 2, 3, HC[2]));
+        if (est === 'coque') r(14, hy - 4, 4, 3, HC[2]);
+        if (est === 'rabo') r(side > 0 ? 23 : 7, hy + 4, 2, 8, HC[2]);
+      }
+      sombreia(r, g, HC, 6, hy - 5, 26, hy + 17, 0.55);
+    });
+    // rosto (sem contorno próprio)
+    if (!back) parte(r => {
+      const oc = v.olhos && v.olhos !== '#2a1e1e' ? v.olhos : '#1a1420';
+      if (p.dormindo) { r(12, hy + 8, 2, 1, '#1a1420'); r(18, hy + 8, 2, 1, '#1a1420'); }
+      else { r(12, hy + 6, 2, 3, oc); r(18, hy + 6, 2, 3, oc); r(12, hy + 6, 1, 1, '#1a1420'); r(18, hy + 6, 1, 1, '#1a1420'); }
+      if (est === 'careca') r(12, hy, 4, 1, mix(hex6(v.pele || '#e0b090'), '#ffffff', 0.3));
+      if (!v.barba) { r(11, hy + 10, 2, 1, mix(hex6(v.pele || '#e0b090'), '#ff6a6a', 0.3)); r(19, hy + 10, 2, 1, mix(hex6(v.pele || '#e0b090'), '#ff6a6a', 0.3)); }
+      if (v.manchas) { r(18, hy + 4, 1, 1, v.manchas); r(11, hy + 9, 1, 1, v.manchas); r(20, hy + 8, 1, 1, v.manchas); }
+    }, true);
+    if (!back && v.barba) parte((r, g) => {
+      const B = rampaFlow(v.barba);
+      r(10, hy + 9, 12, 2, B[2]); r(11, hy + 11, 10, 1, B[2]); r(12, hy + 12, 8, 1, B[2]); r(13, hy + 13, 6, 1, B[2]);
+      sombreia(r, g, B, 9, hy + 8, 22, hy + 14, 0.6); r(14, hy + 10, 4, 1, mix(hex6(v.pele || '#e0b090'), '#3a1a1a', 0.35));
+    });
+    // chapéus grandes desenhados no próprio estilo (os outros vêm do desenho antigo, por cima)
+    const ch = v.chapeu, cc = hex6(v.corChapeu || mix(hex6(v.roupa || '#6a6a6a'), '#000000', 0.2)), CH = rampaFlow(cc);
+    if (CHIBI_CHAPEU[ch]) parte((r, g) => {
+      if (ch === 'mago') {
+        for (let y = 2; y <= 12; y++) { const w = Math.round(2 + (y - 2) * 0.55), cx = Math.round(16 - (12 - y) * 0.45); r(cx - w, hy - 14 + y, w * 2, 1, CH[2]); }
+        r(9, hy - 13, 3, 2, CH[2]); r(7, hy - 12, 3, 2, CH[2]); r(6, hy - 11, 2, 2, CH[2]);
+        r(3, hy - 1, 26, 3, CH[2]); sombreia(r, g, CH, 2, hy - 15, 29, hy + 2, 0.62);
+        r(10, hy - 4, 13, 2, OURO[1]); r(15, hy - 4, 3, 2, OURO[3]); r(3, hy + 1, 26, 1, CH[0]);
+      }
+      if (ch === 'palha') { const PA = rampaFlow('#d8b060'); r(4, hy - 1, 24, 3, PA[2]); r(11, hy - 5, 10, 1, PA[2]); r(10, hy - 4, 12, 3, PA[2]); sombreia(r, g, PA, 3, hy - 6, 28, hy + 2, 0.65); r(10, hy - 2, 12, 1, '#a8402a'); }
+      if (ch === 'capuz') { if (back) r(8, hy - 1, 16, 15, CH[2]); else { r(11, hy - 2, 10, 1, CH[2]); r(9, hy - 1, 14, 1, CH[2]); r(7, hy, 18, 3, CH[2]); r(7, hy + 3, 3, 11, CH[2]); r(22, hy + 3, 3, 11, CH[2]); } sombreia(r, g, CH, 6, hy - 3, 26, hy + 15, 0.6); }
+    });
+    partes.forEach(([k, sem]) => dest.drawImage(sem ? k : contornoParte(k), 0, 0));
+  }
+  const CHIBI_CHAPEU = { mago: 1, palha: 1, capuz: 1 };
+
+  const ANIM_ITEM =/flauta|cranio|guitarra|runic|orbe|cajado_folhas|cachecol_bracos|moeda|astrolabio|chicote|corneta|chave_vapor|bolsa_moedas|cata_vento|escudo_energia|espirito|visor_tech/;
   const CACHE = new Map();
   function spriteNovo(v, o) {
     const back = o.dir === 'up', side = o.side || 1, t = o.t || 0;
@@ -503,15 +636,15 @@
     cv = mkc(NW, NH); const c = cv.getContext('2d');
     const by = p.by || 0;
     const camada = fn => { const k = mkc(NW, NH); fn(k.getContext('2d'), p); c.drawImage(k, 0, by); };
-    if (ehAldric(v) && !back) {
+    if (false && ehAldric(v) && !back) { // estilo Flow: o Aldric também vira chibi (coroa, manto e espada vêm do visual)
       camada(ALD.atras); ALD.pernas(c, p); camada(ALD.frente);
     } else {
       const ch = corpoGenerico(v), child = v.tipo === 'crianca', dt = child ? 4 : 0;
-      camada(ch.atras); ch.pernas(c, p); camada(ch.frente);
+      void ch; camada((k, pp) => chibiCorpo(k, v, pp));
       // itens antigos ampliados: chapéu preso na cabeça, acessório preso no tronco
       const ov = { t: anim / 4, side, dir: o.dir, dormindo: o.dormindo };
       const lh = child ? 2 : 3, bh = child ? 4 : 5, Yold = 34 - lh - bh, HYold = Yold - 5;
-      pintaItem(c, itemMask(v, ov, 'chapeu'), HYold, 10 + dt, by);
+      if (!CHIBI_CHAPEU[v.chapeu]) pintaItem(c, itemMask(v, ov, 'chapeu'), HYold, 10 + dt, by);
       pintaItem(c, itemMask(v, ov, 'acessorio'), Yold, 22 + dt, by);
     }
     vivo(cv);
@@ -575,7 +708,36 @@
     c.restore(); c.imageSmoothingEnabled = sm;
   }
 
+  // ---------------- sprites vindos do Google Flow (convertidos): flow/<id>.png com 4 quadros
+  // [frente parado, passo A, passo B, costas]. Quem não tem imagem continua no desenho em código.
+  const FLOW_IMG = {}, ID_DE = new WeakMap();
+  function idDe(v) {
+    if (!ID_DE.has(v)) (window.MORADORES || []).forEach(m => ID_DE.set(m.visual, m.id));
+    return ID_DE.get(v);
+  }
+  function flowSprite(v) {
+    const lista = window.FLOW_SPRITES || {}, id = idDe(v), info = id && lista[id];
+    if (!info) return null;
+    let e = FLOW_IMG[id];
+    if (!e) { e = FLOW_IMG[id] = { img: new Image(), ok: false, info }; e.img.onload = () => { e.ok = true; }; e.img.src = 'flow/' + id + '.png?v=' + (info.v || 1); }
+    return e.ok ? e : null;
+  }
+  function drawFlow(c, x, y, e, o) {
+    // k = pixels do sprite por unidade do mundo (2 = ~48 px, 4 = ~96 px); window.ESCALA_PERS < 1 encolhe o morador no mundo
+    // (o mapa usa 0.5: casas, árvores e ruas ficam do tamanho certo perto dos moradores)
+    const es = o.escala || window.ESCALA_PERS || 1;
+    const { w, h } = e.info, t = o.t || 0, k = (e.info.k || 2) / es;
+    const q = o.dir === 'up' ? 3 : o.walking ? [1, 0, 2, 0][Math.floor(t * 7) % 4] : 0;
+    x = Math.round(x * 4) / 4; y = Math.round(y * 4) / 4;
+    c.fillStyle = 'rgba(0,0,0,0.32)'; c.fillRect(x - 5 * es, y - 0.5 * es, 10 * es, 1.5 * es); c.fillRect(x - 4 * es, y + es, 8 * es, 0.5 * es);
+    const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false; c.save(); c.translate(x, 0);
+    if ((o.side || 1) < 0 && o.dir !== 'up') c.scale(-1, 1);
+    c.drawImage(e.img, q * w, 0, w, h, -w / (2 * k), y - h / k + 1, w / k, h / k);
+    c.restore(); c.imageSmoothingEnabled = sm;
+  }
   function drawCharacter(c, x, y, v, o) {
+    const fe = flowSprite(v);
+    if (fe) return drawFlow(c, x, y, fe, o);
     if ((v.tipo === 'gato' || v.tipo === 'cao') && escalaDe(c) >= 1.9) return drawBichoNovo(c, x, y, v, o);
     if (v.tipo === 'gato') return drawCat(c, x, y, v, o);
     if (v.tipo === 'cao') return drawDog(c, x, y, v, o);
@@ -584,6 +746,8 @@
   }
 
   function hitBox(v) {
+    const fe = flowSprite(v), es = window.ESCALA_PERS || 1;
+    if (fe) { const k = (fe.info.k || 2) / es; return { l: -fe.info.w / (2.6 * k), r: fe.info.w / (2.6 * k), t: -fe.info.h / k, b: 1 }; }
     if (v.tipo === 'gato') return { l: -6, r: 6, t: -10, b: 2 };
     if (v.tipo === 'cao') return { l: -7, r: 7, t: -10, b: 2 };
     if (v.tipo === 'crianca') return { l: -5, r: 5, t: -15, b: 2 };
@@ -597,7 +761,7 @@
     s.width = w * K; s.height = h * K;
     const c = s.getContext('2d');
     c.setTransform(K, 0, 0, K, 0, 0);
-    drawCharacter(c, 8, h - 3, v, { t: 0, dir: 'down', side: 1 });
+    drawCharacter(c, 8, h - 3, v, { t: 0, dir: 'down', side: 1, escala: 1 });
     const out = document.createElement('canvas');
     out.width = w * scale; out.height = h * scale;
     const oc = out.getContext('2d');
@@ -606,5 +770,5 @@
     return out;
   }
 
-  window.IlhaSprites = { vivo, drawCharacter, drawPerson, drawPersonNovo, spriteNovo, drawCat, drawDog, hitBox, icon, shade, rampa };
+  window.IlhaSprites = { estiloFlow, chibiCorpo, vivo,drawCharacter, drawPerson, drawPersonNovo, spriteNovo, drawCat, drawDog, hitBox, icon, shade, rampa };
 })();

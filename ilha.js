@@ -4,7 +4,9 @@
 (function () {
   'use strict';
   const SP = window.IlhaSprites, ROT = window.IlhaRotinas;
-  const WW = 760, WH = 600, CX = 380, CY = 300, RX = 292, RY = 242;
+  // Ilha ampliada (23/11/2026): cresce para norte, leste e oeste; a costa sul (cais) fica no mesmo lugar.
+  // O terreno cobre x de X0 a X0+WW e y de Y0 a Y0+WH (coordenadas antigas continuam valendo).
+  const X0 = -100, Y0 = -170, WW = 960, WH = 770, CX = 380, CY = 220, RX = 380, RY = 323;
   const TZ = -3 * 3600e3;                                   // Brasília (UTC-3, sem horário de verão)
   const DIA2 = Date.parse('2026-11-03T21:00:00-03:00');     // início do Dia 2 (mesmo instante de 20:00 em Manaus)
   const SPEED = 9, SLOT = 20 * 60e3, ARR = 180e3;
@@ -26,11 +28,13 @@
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const P = (c, x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w, h); };
   function localHours(t) { return (((t + TZ) / 3600e3) % 24 + 24) % 24; }
-  function idist(x, y) {
-    const dx = (x - CX) / RX, dy = (y - CY) / RY, a = Math.atan2(dy, dx);
+  function idistC(x, y, cx, cy, rx, ry) {
+    const dx = (x - cx) / rx, dy = (y - cy) / ry, a = Math.atan2(dy, dx);
     const rad = 1 + 0.06 * Math.sin(3 * a + 1) + 0.04 * Math.sin(5 * a + 2) + 0.03 * Math.sin(9 * a);
     return Math.hypot(dx, dy) / rad;
   }
+  const idist = (x, y) => idistC(x, y, CX, CY, RX, RY);
+  const idistAntiga = (x, y) => idistC(x, y, 380, 300, 292, 242); // contorno da ilha até 23/11
 
   // ---------------------------------------------------------------- orla: volta completa pela areia, começando e terminando no cais
   const ORLA = (function () {
@@ -86,6 +90,18 @@
     [568, 342], // 16/11
     [204, 248], [564, 256], // 18/11
     [150, 254], [522, 478]]; // 21/11
+  // terrenos da ilha ampliada (23/11/2026): só na terra nova, sempre no FIM da lista (quem já mora não muda de casa)
+  (function () {
+    const usados = SLOTS.concat(SLOTS_EXTRA).concat([[566, 220]]), novos = [];
+    for (let y = Y0 + 40; y < 560; y += 22) for (let x = X0 + 40; x < X0 + WW - 40; x += 26) {
+      const xx = x + ((y / 22) % 2) * 13;
+      if (idist(xx, y) > 0.8 || idistAntiga(xx, y) < 0.95) continue;
+      if (usados.concat(novos).some(s => Math.hypot(s[0] - xx, s[1] - y) < 44)) continue;
+      novos.push([xx, y]);
+    }
+    novos.sort((a, b) => Math.hypot(a[0] - 380, a[1] - 300) - Math.hypot(b[0] - 380, b[1] - 300));
+    SLOTS_EXTRA.push(...novos);
+  })();
   // RESERVADO (não usar como terreno): pedreira dos Ofícios em (566, 220), ver oficios.js
   const LOTES = [];
   const TRAP = { x0: 586, y0: 170, x1: 597, y1: 137 }; // trapiche da praia até a ponte  // casas com lugar marcado (casa: 'lote:x,y' em moradores.js)
@@ -135,6 +151,37 @@
         m._home = { x: HUB.x, y: HUB.y, dentro: false };
       }
     });
+    // casas do Flow têm ~28 de largura: casas no mesmo lugar viram uma só (os donos dividem) e
+    // casas lado a lado que se encostam são afastadas na horizontal (24/11/2026)
+    for (let i = 0; i < casas.length; i++) for (let j = i + 1; j < casas.length; j++) {
+      const a = casas[i], b = casas[j]; if (a.dup || b.dup) continue;
+      const dx = b.x - a.x, dy = Math.abs(b.y - a.y);
+      if (dy >= 12 || Math.abs(dx) >= 29) continue;
+      if (Math.abs(dx) < 8 && dy < 8) { b.dup = a; b.donos.forEach(m => { if (!a.donos.includes(m)) a.donos.push(m); m._casaObj = a; }); continue; }
+      const em = (29 - Math.abs(dx)) / 2 * (dx < 0 ? -1 : 1);
+      [[a, -em], [b, em]].forEach(([h, d]) => { h.x += d; h.donos.forEach(m => { if (m._casaObj === h && m._home) m._home.x += d; }); });
+    }
+    for (let i = casas.length - 1; i >= 0; i--) if (casas[i].dup) casas.splice(i, 1);
+    // casas que invadem um lugar (arena, fazenda, pasto, prédios) saem pelo lado mais curto
+    const AREA = { arena: [-26, -13, 26, 14], fazenda: [-33, -22, 42, 20], pasto: [-32, -21, 32, 21], taverna: [-23, -40, 23, 5], forja: [-17, -36, 17, 5],
+      oficina: [-17, -36, 17, 5], mercearia: [-17, -40, 17, 5], laboratorio: [-14, -38, 14, 5], biblioteca: [-18, -34, 18, 5], torre: [-9, -46, 9, 4], santuario: [-16, -12, 16, 9] };
+    const CASA = [-14, -32, 14, 3];
+    for (let volta = 0; volta < 3; volta++) casas.forEach(h => Object.keys(AREA).forEach(k => {
+      const L = LUG[k], A = AREA[k]; if (!L) return;
+      const ax0 = L.x + A[0], ay0 = L.y + A[1], ax1 = L.x + A[2], ay1 = L.y + A[3];
+      const hx0 = h.x + CASA[0], hy0 = h.y + CASA[1], hx1 = h.x + CASA[2], hy1 = h.y + CASA[3];
+      if (hx1 <= ax0 || hx0 >= ax1 || hy1 <= ay0 || hy0 >= ay1) return;
+      const opts = [[ax0 - hx1, 0], [ax1 - hx0, 0], [0, ay0 - hy1], [0, ay1 - hy0]].sort((p, q) => Math.abs(p[0] + p[1]) - Math.abs(q[0] + q[1]));
+      const [dx, dy] = opts[0];
+      h.x += dx; h.y += dy; h.donos.forEach(m => { if (m._casaObj === h && m._home) { m._home.x += dx; m._home.y += dy; } });
+    }));
+    // depois de empurrar, separa de novo as casas que ficaram encostadas lado a lado
+    for (let volta = 0; volta < 4; volta++) for (let i = 0; i < casas.length; i++) for (let j = i + 1; j < casas.length; j++) {
+      const a = casas[i], b = casas[j], dx = b.x - a.x;
+      if (Math.abs(b.y - a.y) >= 12 || Math.abs(dx) >= 29) continue;
+      const em = (29 - Math.abs(dx)) / 2 * (dx < 0 ? -1 : 1);
+      [[a, -em], [b, em]].forEach(([h, d]) => { h.x += d; h.donos.forEach(m => { if (m._casaObj === h && m._home) m._home.x += d; }); });
+    }
   })();
 
   function arrived(m, t) { return PREVIEW || t >= m._ch; }
@@ -267,35 +314,38 @@
     const c = terr.getContext('2d');
     const img = c.createImageData(WW, WH), D = img.data, R = mulberry(7);
     const pathMask = new Uint8Array(WW * WH);
-    const stamp = (x, y, r, val) => { for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) { const X = Math.round(x + i), Y = Math.round(y + j); if (X >= 0 && Y >= 0 && X < WW && Y < WH) pathMask[Y * WW + X] = Math.max(pathMask[Y * WW + X], val); } };
+    const PM = (X, Y) => (X >= X0 && Y >= Y0 && X < X0 + WW && Y < Y0 + WH) ? (Y - Y0) * WW + (X - X0) : -1; // índice no terreno
+    const stamp = (x, y, r, val) => { for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) { const k = PM(Math.round(x + i), Math.round(y + j)); if (k >= 0) pathMask[k] = Math.max(pathMask[k], val); } };
     const line = (a, b, r, val) => { const n = Math.ceil(Math.hypot(b.x - a.x, b.y - a.y)); for (let s = 0; s <= n; s++) { const f = n ? s / n : 0; stamp(a.x + (b.x - a.x) * f + (R() - 0.5) * 0.8, a.y + (b.y - a.y) * f, r, val); } };
     Object.keys(LUG).forEach(k => { if (k !== 'fogueira' && k !== 'floresta' && !NOVOS.has(k)) line(HUB, { x: LUG[k].sx, y: LUG[k].sy }, 1, 1); });
     line(HUB, { x: 350, y: 200 }, 1, 1);
     SLOTS.forEach(s => line({ x: s[0], y: s[1] + 3 }, { x: s[0] + (HUB.x - s[0]) * 0.25, y: s[1] + 3 + (HUB.y - s[1]) * 0.25 }, 0, 1));
     line({ x: 600, y: 144 }, { x: YUKINE_CASA[0], y: YUKINE_CASA[1] + 4 }, 1, 1);
     for (let i = 0; i < STREAM.length - 1; i++) line({ x: STREAM[i][0], y: STREAM[i][1] }, { x: STREAM[i + 1][0], y: STREAM[i + 1][1] }, 2, 2);
-    for (let y = 0; y < WH; y++) for (let x = 0; x < WW; x++) {
-      const d = idist(x, y), o = (y * WW + x) * 4, n = R();
+    for (let py = 0; py < WH; py++) for (let px = 0; px < WW; px++) {
+      const x = px + X0, y = py + Y0, d = idist(x, y), o = (py * WW + px) * 4, n = R();
       let col;
       const lake = ((x - LAKE.x) / LAKE.rx) ** 2 + ((y - LAKE.y) / LAKE.ry) ** 2;
       const fr = ((x - 350) / 175) ** 2 + ((y - 138) / 78) ** 2;
       const plaza = Math.hypot((x - FIRE.x) / 1, (y - FIRE.y - 3) / 0.75);
       if (d >= 1) { col = d < 1.07 ? [24, 58, 92] : [14, 36, 62]; if (d < 1.07) shorePts.push(x, y); else if (n < 0.012) waterPts.push(x, y); }
-      else if (lake < 1 || pathMask[y * WW + x] === 2) { col = lake < 0.55 ? [24, 66, 120] : [30, 80, 132]; if (n < 0.04) waterPts.push(x, y); }
+      else if (lake < 1 || pathMask[py * WW + px] === 2) { col = lake < 0.55 ? [24, 66, 120] : [30, 80, 132]; if (n < 0.04) waterPts.push(x, y); }
       else if (d > 0.93) col = n < 0.35 ? [168, 146, 96] : [184, 162, 108];
-      else if (pathMask[y * WW + x] === 1 || plaza < 34) col = n < 0.5 ? [124, 100, 70] : [112, 90, 62];
+      else if (pathMask[py * WW + px] === 1 || plaza < 34) col = n < 0.5 ? [124, 100, 70] : [112, 90, 62];
       else if (fr < 1 || Math.hypot(x - 190, y - 205) < 40) col = n < 0.5 ? [36, 74, 52] : [40, 82, 56];
       else { col = n < 0.5 ? [58, 110, 66] : [64, 120, 70]; if (n > 0.985) col = [80, 140, 82]; if (n < 0.006) landPts.push(x, y); }
       D[o] = col[0]; D[o + 1] = col[1]; D[o + 2] = col[2]; D[o + 3] = 255;
     }
     c.putImageData(img, 0, 0);
+    c.setTransform(1, 0, 0, 1, -X0, -Y0); // daqui em diante desenha em coordenadas do mundo
     // arvores e detalhes
     const blocked = (x, y) => {
       if (idist(x, y) > 0.9) return true;
-      if (pathMask[Math.round(y) * WW + Math.round(x)] || pathMask[Math.round(y + 3) * WW + Math.round(x)]) return true;
+      const k1 = PM(Math.round(x), Math.round(y)), k2 = PM(Math.round(x), Math.round(y + 3));
+      if ((k1 >= 0 && pathMask[k1]) || (k2 >= 0 && pathMask[k2])) return true;
       if (Math.hypot(x - FIRE.x, (y - FIRE.y) / 0.75) < 52) return true;
       for (const k in LUG) { if (k === 'floresta' || NOVOS.has(k)) continue; const L = LUG[k]; if (Math.hypot(x - L.x, y - L.y + 6) < 26 + L.r || Math.hypot(x - L.sx, y - L.sy) < 14 + L.r) return true; }
-      for (const s of SLOTS) if (Math.hypot(x - s[0], y - s[1] + 6) < 20) return true;
+      for (const s of SLOTS.concat(SLOTS_EXTRA)) if (Math.hypot(x - s[0], y - s[1] + 6) < 20) return true;
       if (Math.hypot(x - YUKINE_CASA[0], y - YUKINE_CASA[1] + 6) < 20) return true;
       if (((x - LAKE.x) / (LAKE.rx + 8)) ** 2 + ((y - LAKE.y) / (LAKE.ry + 8)) ** 2 < 1) return true;
       return false;
@@ -308,7 +358,7 @@
           const f = n ? s / n : 0, cx = a.x + (b.x - a.x) * f + (R2() - 0.5) * 0.8, cy = a.y + (b.y - a.y) * f;
           for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) {
             const X = Math.round(cx + i), Y = Math.round(cy + j);
-            if (X < 0 || Y < 0 || X >= WW || Y >= WH || idist(X, Y) > 0.93) continue;
+            if (PM(X, Y) < 0 || idist(X, Y) > 0.93) continue;
             P(c, X, Y, 1, 1, R2() < 0.5 ? '#7c6446' : '#705a3e');
           }
         }
@@ -317,8 +367,8 @@
       SLOTS_EXTRA.concat(LOTES).forEach(s => cam({ x: s[0], y: s[1] + 3 }, { x: s[0] + (HUB.x - s[0]) * 0.2, y: s[1] + 3 + (HUB.y - s[1]) * 0.2 }, 0));
     })();
     const trees = [];
-    for (let i = 0; i < 9000 && trees.length < 420; i++) {
-      const x = 90 + R() * 580, y = 60 + R() * 470;
+    for (let i = 0; i < 16000 && trees.length < 720; i++) {
+      const x = X0 + 40 + R() * (WW - 80), y = Y0 + 40 + R() * (WH - 80);
       if (blocked(x, y)) continue;
       const fr = ((x - 350) / 175) ** 2 + ((y - 138) / 78) ** 2;
       const dens = fr < 1 ? 0.9 : Math.hypot(x - 190, y - 205) < 40 ? 0.7 : idist(x, y) > 0.7 ? 0.32 : 0.06;
@@ -349,8 +399,8 @@
       P(c, x - 1, y - 9, 1, 2, lt); P(c, x - 2, y - 5, 1, 2, lt);
     });
     // pedras, flores
-    for (let i = 0; i < 160; i++) {
-      const x = Math.round(90 + R() * 580), y = Math.round(60 + R() * 480);
+    for (let i = 0; i < 280; i++) {
+      const x = Math.round(X0 + 40 + R() * (WW - 80)), y = Math.round(Y0 + 40 + R() * (WH - 80));
       if (blocked(x, y)) continue;
       const k = R();
       if (k < 0.3) { P(c, x - 2, y - 1, 4, 3, '#7a7e8a'); P(c, x - 1, y - 1, 2, 1, '#a0a4ae'); }
@@ -371,6 +421,7 @@
   const rndE = s => { let r = s; return () => (r = (r * 16807) % 2147483647) / 2147483647; };
   const mkE = (w, h) => { const k = document.createElement('canvas'); k.width = w; k.height = h; return k; };
   function contornoE(cv, cor) {
+    cor = '#140e1a'; // estilo Flow: mesmo contorno escuro em tudo
     const c = cv.getContext('2d'), W = cv.width, H = cv.height, d = c.getImageData(0, 0, W, H), o = new Uint8ClampedArray(d.data);
     const a = (x, y) => x >= 0 && y >= 0 && x < W && y < H && d.data[(y * W + x) * 4 + 3] > 200;
     const [r, g, b] = [1, 3, 5].map(i => parseInt(cor.slice(i, i + 2), 16));
@@ -450,8 +501,9 @@
     const g = dest.getContext('2d'), W = dest.width, H = dest.height, img = g.getImageData(0, 0, W, H), D = img.data;
     const hx = (x, y, s) => { let h = (x * 374761393 + y * 668265263 + s * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
     const rgb = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
-    const GR = ['#2c5a2a', '#3e7a34', '#56a043', '#7cc456', '#a8e07a'].map(rgb), FL = ['#fff6e6', '#ffd84a', '#ff8aa8'].map(rgb);
-    const LA = [['#d9bc7c', '#ead198', '#b89a5c'], ['#c9a868', '#dcbf84', '#a88a50']].map(a => a.map(rgb));
+    // estilo Flow: verdes menos saturados e lajotas de terra batida mais quentes
+    const GR = ['#2e4a26', '#3d6230', '#507c3a', '#6a9446', '#8fb260'].map(rgb), FL = ['#f2ead8', '#f2c94a', '#e88aa0'].map(rgb);
+    const LA = [['#c9a46a', '#dbb985', '#9e7a48'], ['#bb9660', '#cfac78', '#8e6c40']].map(a => a.map(rgb));
     const cls = (r, gg, b) => {
       if ((r === 58 && gg === 110 && b === 66) || (r === 64 && gg === 120 && b === 70) || (r === 80 && gg === 140 && b === 82)) return 1;
       if ((r === 36 && gg === 74 && b === 52) || (r === 40 && gg === 82 && b === 56)) return 2;
@@ -460,7 +512,7 @@
     };
     const TUFO = [[0, 0], [0, 1], [1, 1], [2, 0], [2, 1]], BRILHO = [[0, 0], [1, 0], [1, -1]];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const so = ((y >> 1) * WW + (x >> 1)) * 4, k = cls(src[so], src[so + 1], src[so + 2]); if (!k) continue;
+      const so = (Math.floor(y * WW / W) * WW + Math.floor(x * WW / W)) * 4, k = cls(src[so], src[so + 1], src[so + 2]); if (!k) continue;
       const o = (y * W + x) * 4; let col;
       if (k === 3) { // lajotas de 8x8
         const tx = Math.floor(x / 8), ty = Math.floor(y / 8), lx = x - tx * 8, ly = y - ty * 8, A = LA[(tx + ty) & 1];
@@ -479,16 +531,187 @@
     g.putImageData(img, 0, 0);
   }
   function arvoresE(dest) {
-    const g = dest.getContext('2d'); g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false;
+    // as árvores são desenhadas em 2x; aqui o buffer tem KT px por unidade e começa em (X0, Y0)
+    const g = dest.getContext('2d'), KT = dest.width / WW; g.setTransform(KT / 2, 0, 0, KT / 2, -X0 * KT, -Y0 * KT); g.imageSmoothingEnabled = false;
     ARV.forEach(([x, y, k]) => {
       const tp = k < 0.12 ? 'outono' : k < 0.3 ? 'redonda' : 'pinheiro', va = Math.floor(k * 1000) % 3, cv = arvoreE(tp, va);
       g.fillStyle = 'rgba(16,40,12,0.35)'; for (let j = -2; j <= 2; j++) { const w = Math.round(13 * Math.sqrt(1 - (j / 2.6) ** 2)); g.fillRect(x * 2 - w, y * 2 + j, w * 2, 1); }
       g.drawImage(cv, x * 2 - 17, y * 2 - cv.height + 2);
     });
   }
+  // estilo Flow nos lugares desenhados direto no mapa (cais, ponte, arena, fazenda, pasto, forja...):
+  // desenha num canvas à parte em 2x, aplica cores chapadas + contorno e cola no mapa (cache de 1/4 s)
+  const FLOW_DRAW = {};
+  function desenhaFlow(k, c, L, sec, night, dia) {
+    if (!SP.estiloFlow) return DRAW[k](c, L, sec, night, dia);
+    const R = 48, KK = 4, key =(night ? 1 : 0) + ':' + Math.floor(sec * 4);
+    let e = FLOW_DRAW[k];
+    if (!e || e.key !== key) {
+      const cv = e ? e.cv : (() => { const z = document.createElement('canvas'); z.width = z.height = R * 2 * KK; return z; })();
+      const g = cv.getContext('2d', { willReadFrequently: true }); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, cv.width, cv.height);
+      g.imageSmoothingEnabled = false; g.setTransform(KK, 0, 0, KK, (R - L.x) * KK, (R - L.y) * KK);
+      try { DRAW[k](g, L, sec, night, dia); } catch (er) { }
+      g.setTransform(1, 0, 0, 1, 0, 0); SP.estiloFlow(cv); contornoE(cv);
+      e = FLOW_DRAW[k] = { key, cv };
+    }
+    const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false;
+    c.drawImage(e.cv, L.x - R, L.y - R, R * 2, R * 2); c.imageSmoothingEnabled = sm;
+  }
+  // ---------------- chão no estilo Flow (23/11/2026): grama e ruas desenhadas em pedaços de 32x32 unidades,
+  // em 4 ou 8 px por unidade conforme o zoom, com tufos/flores/pedras recortados de texturas do Google Flow
+  // (flow/mapa/grama.png e rua.png + flow/mapa/chao.js). Bordas das ruas arredondadas e contornadas.
+  const CHAO = (function () {
+    const D = window.CHAO_FLOW; if (!D) return null;
+    const src = terr.getContext('2d').getImageData(0, 0, WW, WH).data, CL = new Uint8Array(WW * WH), PF = new Float32Array(WW * WH);
+    for (let i = 0; i < WW * WH; i++) {
+      const r = src[i * 4], g = src[i * 4 + 1], b = src[i * 4 + 2];
+      CL[i] = ((r === 58 && g === 110 && b === 66) || (r === 64 && g === 120 && b === 70) || (r === 80 && g === 140 && b === 82)) ? 1
+        : ((r === 36 && g === 74 && b === 52) || (r === 40 && g === 82 && b === 56)) ? 2
+        : ((r === 124 && g === 100 && b === 70) || (r === 112 && g === 90 && b === 62)) ? 3 : 0;
+    }
+    // o trapiche da praia até a ponte vira um caminho de terra comum (a passarela de tábuas em degraus ficava torta)
+    for (let s = 0; s <= 1; s += 0.01) {
+      const tx = TRAP.x0 + (TRAP.x1 - TRAP.x0) * s, ty = TRAP.y0 + (TRAP.y1 - TRAP.y0) * s;
+      for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) {
+        if (i * i + j * j > 4) continue;
+        const ux = Math.round(tx + i - X0), uy = Math.round(ty + j - Y0), k = uy * WW + ux;
+        if (ux >= 0 && uy >= 0 && ux < WW && uy < WH && CL[k]) CL[k] = 3;
+      }
+    }
+    // campo suave das ruas (média 3x3) para bordas arredondadas
+    for (let y = 1; y < WH - 1; y++) for (let x = 1; x < WW - 1; x++) {
+      let s = 0; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) s += CL[(y + j) * WW + x + i] === 3 ? 1 : 0;
+      PF[y * WW + x] = s / 9;
+    }
+    const pf = (x, y) => { // bilinear
+      const x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0;
+      if (x0 < 0 || y0 < 0 || x0 >= WW - 1 || y0 >= WH - 1) return 0;
+      const i = y0 * WW + x0;
+      return (PF[i] * (1 - fx) + PF[i + 1] * fx) * (1 - fy) + (PF[i + WW] * (1 - fx) + PF[i + WW + 1] * fx) * fy;
+    };
+    const hx = (x, y, s) => { let h = (x * 374761393 + y * 668265263 + s * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+    const mix = (a, b, f) => a.map((v, i) => Math.round(v + (b[i] - v) * f));
+    const vn = (x, y, s) => { // ruído suave (manchas orgânicas)
+      const x0 = Math.floor(x), y0 = Math.floor(y); let fx = x - x0, fy = y - y0; fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+      const a = hx(x0, y0, s), b = hx(x0 + 1, y0, s), c = hx(x0, y0 + 1, s), d = hx(x0 + 1, y0 + 1, s);
+      return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy;
+    };
+    const GB = D.grama.base, RB = D.rua.base;
+    const COR = {
+      grama: [mix(GB, [30, 40, 60], 0.10), GB, mix(GB, [235, 245, 200], 0.08)],
+      mata: [mix(GB, [16, 30, 40], 0.42), mix(GB, [20, 36, 44], 0.32), mix(GB, [24, 40, 48], 0.24)],
+      rua: [mix(RB, [60, 30, 50], 0.12), RB, mix(RB, [255, 240, 210], 0.08)],
+      borda: [74, 50, 52], sombra: mix(GB, [20, 24, 50], 0.3),
+    };
+    const atlas = {}; ['grama', 'rua', 'arvores'].forEach(n => { const im = new Image(); im.onload = () => { atlas[n] = im; CACHE.clear(); }; im.src = 'flow/mapa/' + n + '.png?v=1'; });
+    const CS = 32, CACHE = new Map(); let ARV_LIVRE = null;
+    function pedaco(cx, cy, Kc) {
+      const key = cx + ',' + cy + ',' + Kc; let cv = CACHE.get(key);
+      if (cv) { CACHE.delete(key); CACHE.set(key, cv); return cv; }
+      cv = document.createElement('canvas'); cv.width = cv.height = CS * Kc;
+      const g = cv.getContext('2d'), N = CS * Kc, img = g.createImageData(N, N), d = img.data, wx0 = X0 + cx * CS, wy0 = Y0 + cy * CS;
+      for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+        const wx = wx0 + (i + 0.5) / Kc, wy = wy0 + (j + 0.5) / Kc, ux = Math.floor(wx - X0), uy = Math.floor(wy - Y0);
+        if (ux < 0 || uy < 0 || ux >= WW || uy >= WH) continue;
+        const k = CL[uy * WW + ux]; if (!k) continue;
+        const p = pf(wx - X0 - 0.5, wy - Y0 - 0.5);
+        // manchas grandes e suaves (2 tons) em grade de 6 unidades, com borda em degraus de pixel
+        const n = vn(wx / 9, wy / 9, 3) * 0.65 + vn(wx / 3.5, wy / 3.5, 9) * 0.35;
+        let col;
+        if (p > 0.5) col = p < 0.5 + 1.2 / (Kc * 3) ? COR.borda : COR.rua[n < 0.36 ? 0 : n > 0.66 ? 2 : 1];
+        else if (p > 0.38) col = COR.sombra;
+        else col = (k === 2 ? COR.mata : COR.grama)[n < 0.37 ? 0 : n > 0.65 ? 2 : 1];
+        const o = (j * N + i) * 4; d[o] = col[0]; d[o + 1] = col[1]; d[o + 2] = col[2]; d[o + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+      // carimbos (em 8 px por unidade; em 4 px ficam pela metade)
+      g.imageSmoothingEnabled = false;
+      const esc = Kc / 8, CEL = 22; // célula de 22 px (em 8x) = 2,75 unidades
+      const tipoEm = (wx, wy) => { const ux = Math.floor(wx - X0), uy = Math.floor(wy - Y0); if (ux < 0 || uy < 0 || ux >= WW || uy >= WH) return -1; const k = CL[uy * WW + ux]; return !k ? -1 : pf(wx - X0 - 0.5, wy - Y0 - 0.5) > 0.42 ? 3 : k; };
+      const gx0 = Math.floor((wx0 * 8) / CEL) - 2, gy0 = Math.floor((wy0 * 8) / CEL) - 2, gx1 = Math.ceil(((wx0 + CS) * 8) / CEL) + 1, gy1 = Math.ceil(((wy0 + CS) * 8) / CEL) + 1;
+      for (let gy = gy0; gy <= gy1; gy++) for (let gx = gx0; gx <= gx1; gx++) {
+        const h1 = hx(gx, gy, 41), h2 = hx(gx, gy, 77), h3 = hx(gx, gy, 13);
+        const px = gx * CEL + h2 * CEL, py = gy * CEL + h3 * CEL, wx = px / 8, wy = py / 8, t = tipoEm(wx, wy);
+        if (t < 0) continue;
+        const nome = t === 3 ? 'rua' : 'grama', A = atlas[nome]; if (!A) continue;
+        if (h1 > (t === 3 ? 0.16 : t === 2 ? 0.55 : 0.62)) continue;
+        const L = D[nome].carimbos, s = L[Math.floor(hx(gx, gy, 5) * L.length)];
+        const cw = s[2] / 8, ch = s[3] / 8;
+        if (tipoEm(wx - cw / 2, wy - ch) !== t || tipoEm(wx + cw / 2, wy - ch) !== t || tipoEm(wx - cw / 2, wy) !== t || tipoEm(wx + cw / 2, wy) !== t) continue;
+        g.drawImage(A, s[0], s[1], s[2], s[3], Math.round((wx - cw / 2 - wx0) * Kc), Math.round((wy - ch - wy0) * Kc), Math.max(1, Math.round(s[2] * esc)), Math.max(1, Math.round(s[3] * esc)));
+      }
+      // árvores por cima: do Google Flow (flow/mapa/arvores.png: carvalho, macieira, pinheiro, outono) ou as em código
+      // árvores do Flow NÃO vão no chão: entram na fila por y (CHAO.arvores), atrás/na frente de casas e moradores.
+      // Só as antigas (enquanto a imagem não carrega) ficam pintadas no chão.
+      const AF = atlas.arvores;
+      g.setTransform(Kc / 2, 0, 0, Kc / 2, -wx0 * Kc, -wy0 * Kc);
+      if (!AF) ARV.forEach(([x, y, k]) => {
+        if (x < wx0 - 20 || x > wx0 + CS + 20 || y < wy0 - 4 || y > wy0 + CS + 26) return;
+        const tp = k < 0.12 ? 'outono' : k < 0.3 ? 'redonda' : 'pinheiro', va = Math.floor(k * 1000) % 3, tc = arvoreE(tp, va);
+        g.fillStyle = 'rgba(16,40,12,0.35)'; for (let j = -2; j <= 2; j++) { const w = Math.round(13 * Math.sqrt(1 - (j / 2.6) ** 2)); g.fillRect(x * 2 - w, y * 2 + j, w * 2, 1); }
+        g.drawImage(tc, x * 2 - 17, y * 2 - tc.height + 2);
+      });
+      CACHE.set(key, cv);
+      while (CACHE.size > 260) CACHE.delete(CACHE.keys().next().value);
+      return cv;
+    }
+    function desenha(c, ox, oy, bw, bh, Kb) {
+      const Kc = Kb > 4 ? 8 : 4, sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false;
+      const cx0 = Math.floor((ox - X0) / CS), cy0 = Math.floor((oy - Y0) / CS), cx1 = Math.floor((ox + bw - X0) / CS), cy1 = Math.floor((oy + bh - Y0) / CS);
+      for (let cy = Math.max(0, cy0); cy <= Math.min(Math.ceil(WH / CS) - 1, cy1); cy++) for (let cx = Math.max(0, cx0); cx <= Math.min(Math.ceil(WW / CS) - 1, cx1); cx++)
+        c.drawImage(pedaco(cx, cy, Kc), Math.round((X0 + cx * CS - ox) * Kb), Math.round((Y0 + cy * CS - oy) * Kb), CS * Kb, CS * Kb);
+      c.imageSmoothingEnabled = sm;
+    }
+    // árvores visíveis entram na lista de objetos ordenada por y (a base do tronco é o y)
+    function arvores(objs, c, ox, oy, bw, bh) {
+      const AF = atlas.arvores; if (!AF) return;
+      const FW = AF.width / 4, FH = AF.height, aw = FW / 8, ah = FH / 8;
+      if (!ARV_LIVRE) { // tira árvores cuja copa cobriria a frente de uma casa ou prédio (as do Flow são maiores que as antigas)
+        const cobre = (x, y, cx, cy, meia) => Math.abs(x - cx) < meia + 7 && y - cy > -6 && y - cy < 26;
+        ARV_LIVRE = ARV.filter(([x, y]) => !casas.some(h => cobre(x, y, h.x, h.y, 14))
+          && !Object.keys(PRED_FLOW).some(k => cobre(x, y, LUG[k].x, LUG[k].y, PRED_FLOW[k][2] / 2))
+          && !['torre', 'santuario', 'arena', 'fazenda', 'pasto', 'cais', 'ponte'].some(k => LUG[k] && Math.hypot(x - LUG[k].x, y - LUG[k].y) < 30 + LUG[k].r));
+      }
+      ARV_LIVRE.forEach(([x, y, k]) => {
+        if (x < ox - aw || x > ox + bw + aw || y < oy - 2 || y > oy + bh + ah) return;
+        const tp = k < 0.12 ? 3 : k < 0.36 ? 0 : k < 0.5 ? 1 : 2; // outono, carvalho, macieira, pinheiro
+        objs.push({ y, f: () => {
+          c.fillStyle = 'rgba(20,24,50,0.30)'; c.beginPath(); c.ellipse(x + 1.2, y + 0.3, aw * 0.4, 2, 0, 0, 6.283); c.fill();
+          const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false;
+          c.drawImage(AF, tp * FW, 0, FW, FH, x - aw / 2, y - ah + 0.75, aw, ah);
+          c.imageSmoothingEnabled = sm;
+        } });
+      });
+    }
+    return { desenha, arvores };
+  })();
+  // casas do Google Flow (flow/mapa/casas.png: 4 casas lado a lado — palha, telha, ardósia, madeira)
+  const CASAS_FLOW = { w: 223, h: 267, k: 8, img: new Image(), ok: false, lit: null }; // vistas de frente (24/11)
+  CASAS_FLOW.img.onload = () => { CASAS_FLOW.lit = acendeJanelas(CASAS_FLOW.img); CASAS_FLOW.ok = true; };
+  CASAS_FLOW.img.src = 'flow/mapa/casas.png?v=3';
+  function acendeJanelas(im) { // cópia com os vidros azul-esverdeados acesos (amarelo) para a noite
+    const cv = document.createElement('canvas'); cv.width = im.width; cv.height = im.height;
+    const g = cv.getContext('2d'); g.drawImage(im, 0, 0);
+    let d; try { d = g.getImageData(0, 0, cv.width, cv.height); } catch (e) { return im; } // aberto como arquivo local: sem janelas acesas
+    const D = d.data;
+    for (let i = 0; i < D.length; i += 4) {
+      const r = D[i], gg = D[i + 1], b = D[i + 2];
+      if (D[i + 3] && gg > r + 35 && b > r + 15) { const l = (r + gg + b) / 765; D[i] = 255; D[i + 1] = Math.round(170 + 80 * l); D[i + 2] = Math.round(60 + 120 * l); }
+    }
+    g.putImageData(d, 0, 0); return cv;
+  }
   function drawHouse(c, h, lit, t) {
+    if (CASAS_FLOW.ok) {
+      const F = CASAS_FLOW, q = Math.abs(Math.round(h.v + h.x)) % 4, src = lit ? F.lit : F.img;
+      // sombra rente à base (a casa encosta no chão)
+      c.fillStyle = 'rgba(20,16,40,0.40)'; c.fillRect(h.x - 13, h.y + 1, 28.5, 1.75);
+      c.fillStyle = 'rgba(20,16,40,0.20)'; c.fillRect(h.x - 12, h.y + 2.75, 28, 1);
+      const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false;
+      c.drawImage(src, q * F.w, 0, F.w, F.h, h.x - F.w / (2 * F.k), h.y - F.h / F.k + 2, F.w / F.k, F.h / F.k);
+      c.imageSmoothingEnabled = sm; return;
+    }
     { // estilo estudo 6: casa desenhada em 2x (palha ou telha), janelas acesas à noite
-      const cv = casaE(h.v + h.x, lit);
+      const cv = casaE(Math.abs(Math.round(h.v + h.x)), lit);
       c.fillStyle = 'rgba(0,0,0,.3)'; c.fillRect(h.x - 14, h.y - 1, 28, 3);
       c.drawImage(cv, h.x - cv.width / 4, h.y - 24, cv.width / 2, cv.height / 2);
       return;
@@ -533,6 +756,7 @@
   };
   const PRED_CACHE = {};
   function predioE(nome, lit) {
+    if (predFlowOk(nome)) return PRED_VAZIO; // o prédio do Flow é desenhado à parte (drawPredioFlow)
     const cfg = PREDIOS_E[nome], key = nome + (cfg.acende && lit ? 1 : 0); if (PRED_CACHE[key]) return PRED_CACHE[key];
     const S2 = 2, w = cfg.w * S2, h = cfg.h * S2, rh = cfg.rh * S2, ov = cfg.ov * S2, mx = 14;
     const CW = w + ov * 2 + mx * 2, CH = h + rh + 24, cv = mkE(CW, CH), c = cv.getContext('2d');
@@ -583,7 +807,83 @@
     contornoE(cv, '#1a1008'); SP.vivo && SP.vivo(cv);
     return (PRED_CACHE[key] = { cv, ax: cx, ay: WB });
   }
-  const hdE = (c, o, x, y) => { const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false; c.drawImage(o.cv, x - o.ax / 2, y - o.ay / 2, o.cv.width / 2, o.cv.height / 2); c.imageSmoothingEnabled = sm; };
+  // prédios do Google Flow (flow/mapa/predios_a.png e predios_b.png): caixa [x, y, w, h] na folha e largura no mundo
+  const PRED_FLOW = {
+    taverna: ['a', [1, 1, 340, 347], 44], forja: ['a', [376, 55, 273, 293], 32], oficina: ['a', [724, 61, 261, 287], 32],
+    mercearia: ['b', [1, 1, 279, 321], 32], laboratorio: ['b', [307, 20, 229, 302], 27], biblioteca: ['b', [563, 62, 279, 260], 34],
+  };
+  const PRED_IMG = {};
+  ['a', 'b'].forEach(f => { const im = new Image(); im.onload = () => { PRED_IMG[f] = im; }; im.src = 'flow/mapa/predios_' + f + '.png?v=1'; });
+  const predFlowOk = k => PRED_FLOW[k] && PRED_IMG[PRED_FLOW[k][0]];
+  function drawPredioFlow(c, k, lit) {
+    const [f, [sx, sy, sw, sh], alvo] = PRED_FLOW[k], L = LUG[k], s = alvo / sw, dw = alvo, dh = sh * s;
+    c.fillStyle = 'rgba(20,16,40,0.38)'; c.beginPath(); c.ellipse(L.x + 2, L.y + 2.5, dw * 0.5, 2.2, 0, 0, 6.283); c.fill();
+    const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false;
+    c.drawImage(PRED_IMG[f], sx, sy, sw, sh, L.x - dw / 2, L.y - dh + 3, dw, dh);
+    c.imageSmoothingEnabled = sm;
+  }
+  // objetos da vila do Google Flow (flow/mapa/props_a.png e props_b.png): [folha, caixa, largura no mundo]
+  const PROP_FLOW = {
+    barril: ['a', [64, 1, 145, 187], 4.5], banco: ['a', [274, 9, 271, 179], 10], caixote: ['a', [602, 20, 161, 168], 5.5], saco: ['a', [889, 12, 133, 176], 4],
+    torre: ['m', [37, 1, 134, 393], 15], altar: ['m', [249, 249, 129, 145], 7], pilar: ['m', [482, 139, 80, 255], 3.5], barraca: ['m', [628, 187, 207, 207], 18],
+    cerca: ['r', [1, 105, 287, 171], 12], poste: ['r', [405, 165, 57, 111], 2.4], boneco: ['r', [630, 31, 184, 245], 7], armas: ['r', [908, 1, 206, 275], 8],
+    espantalho: ['f', [1, 1, 229, 313], 9], broto: ['f', [245, 219, 203, 95], 10], trigo: ['f', [489, 150, 176, 164], 6.5], cocho: ['f', [700, 196, 217, 118], 8],
+    bote: ['p', [100, 188, 119, 109], 10], caravela: ['p', [320, 1, 317, 296], 34], ponte: ['p', [705, 165, 184, 132], 20], deck: ['p', [1030, 118, 172, 179], 13.5],
+    bigorna: ['b', [37, 197, 175, 213], 6], pocoes: ['b', [262, 193, 225, 217], 8], lanterna: ['b', [552, 1, 145, 409], 5], fogueira: ['b', [751, 254, 248, 156], 15],
+  };
+  const PROP_IMG = {};
+  ['a', 'b', 'm', 'r', 'f', 'p'].forEach(f => { const im = new Image(); im.onload = () => { PROP_IMG[f] = im; }; im.src = 'flow/mapa/props_' + f + '.png?v=1'; });
+  const propFlowOk = k => PROP_FLOW[k] && PROP_IMG[PROP_FLOW[k][0]];
+  function drawPropFlow(c, k, x, y, lado, semSombra) { // (x, y) = meio da base; lado < 0 espelha
+    const [f, [sx, sy, sw, sh], dw] = PROP_FLOW[k], dh = sh * dw / sw;
+    if (!semSombra) { c.fillStyle = 'rgba(20,16,40,0.30)'; c.beginPath(); c.ellipse(x + 0.6, y, dw * 0.45, Math.max(0.8, dw * 0.1), 0, 0, 6.283); c.fill(); }
+    const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false;
+    if (lado < 0) { c.save(); c.translate(x, 0); c.scale(-1, 1); c.drawImage(PROP_IMG[f], sx, sy, sw, sh, -dw / 2, y - dh + 0.5, dw, dh); c.restore(); }
+    else c.drawImage(PROP_IMG[f], sx, sy, sw, sh, x - dw / 2, y - dh + 0.5, dw, dh);
+    c.imageSmoothingEnabled = sm;
+  }
+  // bichos do Google Flow (flow/mapa/bichos.png, de lado olhando para a direita): [caixa, largura no mundo]
+  const BICHO_FLOW = { touro: [[1, 1, 317, 245], 15], ovelha: [[371, 55, 214, 191], 7.5], gato: [[713, 75, 168, 171], 5], ave: [[1048, 101, 137, 145], 3.5] };
+  const BICHO_IMG = new Image(); let bichoOk = false; BICHO_IMG.onload = () => { bichoOk = true; }; BICHO_IMG.src = 'flow/mapa/bichos.png?v=1';
+  function drawBichoFlow(c, nome, x, y, lado, sobe, semSombra) { // (x, y) = meio das patas; lado < 0 olha para a esquerda
+    const [[sx, sy, sw, sh], dw] = BICHO_FLOW[nome], dh = sh * dw / sw;
+    if (!semSombra) { c.fillStyle = 'rgba(20,16,40,0.30)'; c.beginPath(); c.ellipse(x, y, dw * 0.42, Math.max(0.7, dw * 0.09), 0, 0, 6.283); c.fill(); }
+    const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false; c.save(); c.translate(x, 0); if (lado < 0) c.scale(-1, 1);
+    c.drawImage(BICHO_IMG, sx, sy, sw, sh, -dw / 2, y - dh + 0.5 - (sobe || 0), dw, dh);
+    c.restore(); c.imageSmoothingEnabled = sm;
+  }
+  // arena, fazenda e pasto com peças do Flow: cada peça entra na fila por y (cerca da frente na frente dos bichos e moradores)
+  function lugarFlow(k, objs, c, sec, dia) {
+    const L = LUG[k]; if (!L) return false;
+    const peca = (nome, x, y) => objs.push({ y, f: () => drawPropFlow(c, nome, x, y) });
+    if (k === 'arena' && ['poste', 'boneco', 'armas'].every(propFlowOk)) {
+      const x = L.x, y = L.y;
+      objs.push({ y: y - 30, f: () => { for (let j = -10; j <= 10; j++) { const w = Math.sqrt(1 - (j / 10.5) ** 2) * 23; c.fillStyle = j % 3 ? '#c8a874' : '#bea06c'; c.fillRect(x - w, y + j, w * 2, 1); } } });
+      for (let a = 0; a < 6.28; a += 0.4) peca('poste', x + Math.cos(a) * 24, y + Math.sin(a) * 11 + 1);
+      peca('boneco', x + 10, y); peca('armas', x - 14, y - 1);
+      return true;
+    }
+    if (k === 'fazenda' && ['broto', 'trigo', 'espantalho'].every(propFlowOk)) {
+      const x = L.x, y = L.y, g = clamp(dia - 1, 1, 4);
+      for (let r = 0; r < 6; r++) {
+        const yy = y - 14 + r * 6;
+        for (let i = -25; i <= 25; i += 10) peca('broto', x + i, yy);
+        if (g > 2) for (let i = -27; i <= 27; i += 6) objs.push({ y: yy + 0.2, f: () => drawPropFlow(c, 'trigo', x + i + Math.sin(sec * 1.5 + i * 0.3 + r) * 0.3, yy - 0.5) });
+      }
+      peca('espantalho', x + 35, y + 2);
+      return true;
+    }
+    if (k === 'pasto' && ['cerca', 'poste', 'cocho'].every(propFlowOk)) {
+      const x = L.x, y = L.y, w = 58, h = 36;
+      for (let i = 0; i < 5; i++) { peca('cerca', x - w / 2 + 6 + i * 11.6, y - h / 2); peca('cerca', x - w / 2 + 6 + i * 11.6, y + h / 2); }
+      for (let j = 6; j < h; j += 6) { peca('poste', x - w / 2, y - h / 2 + j); peca('poste', x + w / 2, y - h / 2 + j); }
+      peca('cocho', x - 16, y + 9);
+      return true;
+    }
+    return false;
+  }
+  const PRED_VAZIO = { cv: document.createElement('canvas'), ax: 0, ay: 0 }; PRED_VAZIO.cv.width = PRED_VAZIO.cv.height = 1;
+  const hdE = (c, o, x, y) => { if (o === PRED_VAZIO) return; if (o.prop) return drawPropFlow(c, o.prop, x, y); const sm = c.imageSmoothingEnabled; c.imageSmoothingEnabled = false; c.drawImage(o.cv, x - o.ax / 2, y - o.ay / 2, o.cv.width / 2, o.cv.height / 2); c.imageSmoothingEnabled = sm; };
   function torreE() {
     if (PRED_CACHE.torre) return PRED_CACHE.torre;
     const CW = 40, CH = 112, cv = mkE(CW, CH), c = cv.getContext('2d'), PA = PAREDE_E.pedraTorre;
@@ -606,6 +906,7 @@
     return (PRED_CACHE.pilar = { cv, ax: 5, ay: 19 });
   }
   function propE(tipo) {
+    if (propFlowOk(tipo)) return { prop: tipo };
     if (PRED_CACHE['p' + tipo]) return PRED_CACHE['p' + tipo];
     let cv, ax, ay; const R = (c, x, y, w, h, col) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
     if (tipo === 'barril') { cv = mkE(14, 16); const c = cv.getContext('2d'); for (let y = 0; y < 16; y++) { const w = 6 - (y < 2 || y > 13 ? 1 : 0); for (let x = -w; x <= w; x++) R(c, 7 + x, y, 1, 1, MAD_E[x < -3 ? 3 : x < 2 ? 2 : 1]); } [3, 12].forEach(y => R(c, 1, y, 12, 1, '#7e869c')); ax = 7; ay = 15; }
@@ -631,7 +932,7 @@
   const DRAW = {
     taverna(c, L, t, night) {
       const x = L.x, y = L.y;
-      P(c, x - 22, y - 1, 44, 3, 'rgba(0,0,0,.3)');
+      if (!predFlowOk('taverna')) P(c, x - 22, y - 1, 44, 3, 'rgba(0,0,0,.3)');
       { hdE(c, predioE('taverna', night), x, y); hdE(c, propE('banco'), x - 9, y + 10); hdE(c, propE('barril'), x + 15, y + 1); hdE(c, propE('barril'), x + 11, y + 4); smoke(c, x - 11, y - 31, t); return; }
       P(c, x - 18, y - 15, 36, 15, '#7a5030'); for (let i = -18; i < 18; i += 6) P(c, x + i, y - 15, 1, 15, '#5e3c24');
       P(c, x - 18, y - 6, 36, 1, '#5e3c24');
@@ -649,9 +950,9 @@
     },
     forja(c, L, t) {
       const x = L.x, y = L.y;
-      P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
+      if (!predFlowOk('forja')) P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
       { hdE(c, predioE('forja'), x, y); const fl = 0.75 + 0.25 * Math.sin(t * 9) * Math.sin(t * 5.3);
-        P(c, x - 4, y - 5, 8, 5, `rgba(255,${Math.round(110 + 60 * fl)},40,1)`); P(c, x - 2, y - 3, 4, 2, '#ffe08a');
+        if (!predFlowOk('forja')) P(c, x - 4, y - 5, 8, 5, `rgba(255,${Math.round(110 + 60 * fl)},40,1)`); P(c, x - 2, y - 3, 4, 2, '#ffe08a');
         hdE(c, propE('bigorna'), x + 10, y + 7); hdE(c, propE('barril'), x - 12, y + 6); smoke(c, x + 8, y - 27, t, 'rgba(120,120,130,A)', 4); return; }
       P(c, x - 12, y - 13, 24, 13, '#6e6e78'); for (let j = 0; j < 13; j += 3) P(c, x - 12, y - 13 + j, 24, 1, '#5a5a64');
       roof(c, x, y - 20, y - 20, 7, 20, 28, ['#3e4250', '#4e5262', '#2e313c']);
@@ -664,10 +965,10 @@
     },
     oficina(c, L, t) {
       const x = L.x, y = L.y;
-      P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
+      if (!predFlowOk('oficina')) P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
       { hdE(c, predioE('oficina'), x, y); const g = Math.floor(t * 2) % 2;
-        P(c, x - 10, y - 10, 5, 5, '#e8b84a'); P(c, x - 9, y - 9, 3, 3, '#9a7a2a'); P(c, x - 8, y - 8, 1, 1, '#e8b84a');
-        if (g) { P(c, x - 11, y - 8, 1, 1, '#e8b84a'); P(c, x - 5, y - 8, 1, 1, '#e8b84a'); } else { P(c, x - 8, y - 11, 1, 1, '#e8b84a'); P(c, x - 8, y - 5, 1, 1, '#e8b84a'); }
+        if (!predFlowOk('oficina')) P(c, x - 10, y - 10, 5, 5, '#e8b84a'); P(c, x - 9, y - 9, 3, 3, '#9a7a2a'); P(c, x - 8, y - 8, 1, 1, '#e8b84a');
+        if (predFlowOk('oficina')) { } else if (g) { P(c, x - 11, y - 8, 1, 1, '#e8b84a'); P(c, x - 5, y - 8, 1, 1, '#e8b84a'); } else { P(c, x - 8, y - 11, 1, 1, '#e8b84a'); P(c, x - 8, y - 5, 1, 1, '#e8b84a'); }
         hdE(c, propE('caixote'), x + 15, y + 1); hdE(c, propE('caixote'), x + 17, y - 4); return; }
       P(c, x - 13, y - 12, 26, 12, '#8a6440'); for (let i = -13; i < 13; i += 5) P(c, x + i, y - 12, 1, 12, '#6a4a2e');
       roof(c, x, y - 20, y - 20, 8, 22, 30, ['#4e6a86', '#5e7c9a', '#3a5068']);
@@ -680,7 +981,7 @@
     },
     mercearia(c, L, t, night) {
       const x = L.x, y = L.y;
-      P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
+      if (!predFlowOk('mercearia')) P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
       { hdE(c, predioE('mercearia', night), x, y); hdE(c, propE('caixote'), x - 17, y + 1); hdE(c, propE('saco'), x + 16, y + 1); hdE(c, propE('saco'), x + 19, y + 2); return; }
       P(c, x - 13, y - 12, 26, 12, '#9a7a52'); for (let i = -13; i < 13; i += 4) P(c, x + i, y - 12, 1, 12, '#7a5a38');
       roof(c, x, y - 21, y - 21, 9, 20, 30, ['#3f7a4a', '#4f9258', '#2e5e38']);
@@ -694,7 +995,7 @@
     },
     laboratorio(c, L, t) {
       const x = L.x, y = L.y;
-      P(c, x - 13, y - 1, 26, 3, 'rgba(0,0,0,.3)');
+      if (!predFlowOk('laboratorio')) P(c, x - 13, y - 1, 26, 3, 'rgba(0,0,0,.3)');
       { hdE(c, predioE('laboratorio'), x, y); hdE(c, propE('pocoes'), x - 14, y + 7); smoke(c, x + 6, y - 25, t, 'rgba(110,230,140,A)', 4); return; }
       P(c, x - 10, y - 12, 20, 12, '#7c7a84'); for (let j = 0; j < 12; j += 3) P(c, x - 10, y - 12 + j, 20, 1, '#66646e');
       roof(c, x, y - 19, y - 19, 7, 16, 24, ['#3f6a4a', '#4f805a', '#2e5038']);
@@ -706,7 +1007,7 @@
     },
     biblioteca(c, L, t) {
       const x = L.x, y = L.y;
-      P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
+      if (!predFlowOk('biblioteca')) P(c, x - 15, y - 1, 30, 3, 'rgba(0,0,0,.3)');
       { hdE(c, predioE('biblioteca'), x, y); hdE(c, propE('banco'), x + 12, y + 5); return; }
       P(c, x - 12, y - 13, 24, 13, '#9a948a'); for (let j = 0; j < 13; j += 3) P(c, x - 12, y - 13 + j, 24, 1, '#86807a');
       roof(c, x, y - 21, y - 21, 8, 20, 28, ['#6e2a2a', '#843636', '#561e1e']);
@@ -739,6 +1040,13 @@
     },
     cais(c, L, t) {
       const x = L.x, y = L.y;
+      if (['deck', 'bote', 'lanterna', 'caixote'].every(propFlowOk)) { // tablado de pranchas do Flow, bote balançando, lanterna e caixote
+        c.fillStyle = 'rgba(10,20,40,0.30)'; c.fillRect(x - 5.5, y + 2, 13.5, 45);
+        for (let j = 0; j < 4; j++) drawPropFlow(c, 'deck', x, y + 13 + j * 11, 1, true);
+        drawPropFlow(c, 'bote', x + 15, y + 42 + Math.sin(t * 1.4) * 0.6, 1, true);
+        drawPropFlow(c, 'caixote', x - 3, y + 8); drawPropFlow(c, 'lanterna', x + 5, y + 44);
+        return;
+      }
       P(c, x - 5, y + 2, 12, 44, 'rgba(0,0,0,.25)');
       P(c, x - 6, y, 12, 44, '#8a6234'); for (let j = 0; j < 44; j += 3) P(c, x - 6, y + j, 12, 1, '#6e4c28');
       P(c, x - 7, y + 6, 2, 3, '#5a3e22'); P(c, x + 5, y + 6, 2, 3, '#5a3e22'); P(c, x - 7, y + 26, 2, 3, '#5a3e22'); P(c, x + 5, y + 26, 2, 3, '#5a3e22');
@@ -751,6 +1059,7 @@
     torre(c, L, t, night) {
       const x = L.x, y = L.y;
       P(c, x - 10, y - 1, 20, 3, 'rgba(0,0,0,.35)');
+      if (propFlowOk('torre')) { drawPropFlow(c, 'torre', x, y + 1); return; }
       { hdE(c, torreE(), x, y); const glow = 0.6 + 0.4 * Math.sin(t * 2.3);
         if (night) { P(c, x - 1, y - 29, 4, 5, `rgba(190,130,255,${glow.toFixed(2)})`); P(c, x - 1, y - 16, 4, 4, '#8a60e0'); } return; }
       P(c, x - 7, y - 40, 14, 40, '#4a4458'); P(c, x - 7, y - 40, 3, 40, '#5a5468');
@@ -764,10 +1073,11 @@
     },
     santuario(c, L, t, night) {
       const x = L.x, y = L.y;
-      { const pil = pilarE(), pts = []; for (let a = 0; a < 6.28; a += 1.05) pts.push([x + Math.cos(a) * 13, y + Math.sin(a) * 7]);
+      { const pil = propFlowOk('pilar') ? { prop: 'pilar' } : pilarE(), pts = []; for (let a = 0; a < 6.28; a += 1.05) pts.push([x + Math.cos(a) * 13, y + Math.sin(a) * 7]);
         pts.filter(p => p[1] < y).forEach(p => hdE(c, pil, p[0], p[1] + 1));
+        if (propFlowOk('altar')) drawPropFlow(c, 'altar', x, y + 1); else {
         P(c, x - 4, y - 3, 8, 4, '#7e8290'); P(c, x - 4, y - 3, 8, 1, '#b4b8c4'); const f = Math.round(Math.sin(t * 8));
-        P(c, x - 3, y - 6, 1, 3, '#f2ead8'); P(c, x - 3, y - 7 + (f > 0 ? 0 : 1), 1, 1, '#ffcc5c'); P(c, x + 2, y - 6, 1, 3, '#f2ead8'); P(c, x + 2, y - 7 + (f > 0 ? 1 : 0), 1, 1, '#ffcc5c');
+        P(c, x - 3, y - 6, 1, 3, '#f2ead8'); P(c, x - 3, y - 7 + (f > 0 ? 0 : 1), 1, 1, '#ffcc5c'); P(c, x + 2, y - 6, 1, 3, '#f2ead8'); P(c, x + 2, y - 7 + (f > 0 ? 1 : 0), 1, 1, '#ffcc5c'); }
         pts.filter(p => p[1] >= y).forEach(p => hdE(c, pil, p[0], p[1] + 1));
         for (let k = 0; k < 4; k++) { const a = t * 0.6 + k * 1.57, px = x + Math.cos(a) * 10, py = y - 12 + Math.sin(a * 1.3) * 4; P(c, px, py, 1, 1, night ? '#cfefff' : 'rgba(207,239,255,0.55)'); }
         return; }
@@ -783,12 +1093,15 @@
     },
     ponte(c, L, t) {
       const x = L.x, y = L.y;
-      P(c, x - 9, y - 4, 18, 8, 'rgba(0,0,0,.25)');
-      P(c, x - 9, y - 5, 18, 8, '#8a6234'); for (let i = -9; i < 9; i += 3) P(c, x + i, y - 5, 1, 8, '#6e4c28');
-      P(c, x - 9, y - 7, 18, 1, '#5e3c24'); P(c, x - 9, y + 3, 18, 1, '#5e3c24');
-      P(c, x - 9, y - 8, 2, 3, '#5e3c24'); P(c, x + 7, y - 8, 2, 3, '#5e3c24'); P(c, x - 9, y + 2, 2, 3, '#5e3c24'); P(c, x + 7, y + 2, 2, 3, '#5e3c24');
+      if (propFlowOk('ponte')) drawPropFlow(c, 'ponte', x, y + 5);
+      else {
+        P(c, x - 9, y - 4, 18, 8, 'rgba(0,0,0,.25)');
+        P(c, x - 9, y - 5, 18, 8, '#8a6234'); for (let i = -9; i < 9; i += 3) P(c, x + i, y - 5, 1, 8, '#6e4c28');
+        P(c, x - 9, y - 7, 18, 1, '#5e3c24'); P(c, x - 9, y + 3, 18, 1, '#5e3c24');
+        P(c, x - 9, y - 8, 2, 3, '#5e3c24'); P(c, x + 7, y - 8, 2, 3, '#5e3c24'); P(c, x - 9, y + 2, 2, 3, '#5e3c24'); P(c, x + 7, y + 2, 2, 3, '#5e3c24');
+      }
       // trapiche: liga a praia à ponte (por ele os viajantes chegam até lá)
-      for (let yy = TRAP.y1; yy <= TRAP.y0; yy++) {
+      if (!CHAO) for (let yy = TRAP.y1; yy <= TRAP.y0; yy++) {
         const cx = Math.round(TRAP.x0 + (yy - TRAP.y0) / (TRAP.y1 - TRAP.y0) * (TRAP.x1 - TRAP.x0));
         P(c, cx - 2, yy + 1, 5, 1, 'rgba(0,0,0,.22)'); P(c, cx - 2, yy, 5, 1, (yy >> 1) % 2 ? '#8a6234' : '#7a5530');
         if ((yy - TRAP.y1) % 9 === 4) { P(c, cx - 3, yy, 1, 3, '#5e3c24'); P(c, cx + 3, yy, 1, 3, '#5e3c24'); }
@@ -797,8 +1110,11 @@
   };
   function drawFire(c, t) {
     const x = FIRE.x, y = FIRE.y;
-    for (let a = 0; a < 6.28; a += 0.785) P(c, x + Math.round(9 * Math.cos(a)) - 1, y + 3 + Math.round(4.5 * Math.sin(a)) - 1, 3, 2, '#7a7a86');
-    P(c, x - 6, y + 2, 12, 2, '#6a4428'); P(c, x - 4, y + 4, 8, 1, '#4a2e1a');
+    if (propFlowOk('fogueira')) drawPropFlow(c, 'fogueira', x, y + 6); // anel de pedras e lenha do Flow; as chamas continuam animadas por cima
+    else {
+      for (let a = 0; a < 6.28; a += 0.785) P(c, x + Math.round(9 * Math.cos(a)) - 1, y + 3 + Math.round(4.5 * Math.sin(a)) - 1, 3, 2, '#7a7a86');
+      P(c, x - 6, y + 2, 12, 2, '#6a4428'); P(c, x - 4, y + 4, 8, 1, '#4a2e1a');
+    }
     const h = 9 + (Math.floor(t * 12) % 3);
     c.fillStyle = '#f06e1e'; c.beginPath(); c.moveTo(x - 5, y + 3); c.lineTo(x + 5, y + 3); c.lineTo(x + 2, y - h / 2); c.lineTo(x, y - h); c.lineTo(x - 2, y - h / 2); c.closePath(); c.fill();
     c.fillStyle = '#ffbe3c'; c.beginPath(); c.moveTo(x - 3, y + 3); c.lineTo(x + 3, y + 3); c.lineTo(x + 1, y - h / 2 + 2); c.lineTo(x, y - h + 4); c.lineTo(x - 1, y - h / 2 + 2); c.closePath(); c.fill();
@@ -807,9 +1123,15 @@
   }
   const LANTERNAS = [[344, 318], [416, 320], [380, 342], [352, 274]];
   function drawLantern(c, x, y, night) {
+    if (propFlowOk('lanterna')) {
+      drawPropFlow(c, 'lanterna', x, y);
+      if (night) { c.fillStyle = 'rgba(255,214,110,0.9)'; c.fillRect(x + 0.6, y - 10.6, 1.4, 1.6); }
+      return;
+    }
     P(c, x, y - 9, 1, 9, '#3a2a1e'); P(c, x - 1, y - 12, 3, 3, night ? '#ffd36a' : '#6a5a3a'); P(c, x - 1, y - 13, 3, 1, '#3a2a1e');
   }
   function drawSheep(c, x, y, t, k) {
+    if (bichoOk) { const s = k % 2 ? 1 : -1, pasta = Math.floor(t * 0.7 + k * 1.3) % 4 === 0; drawBichoFlow(c, 'ovelha', x, y, s, pasta ? 0 : Math.abs(Math.sin(t * 3 + k)) * 0.25); return; }
     x = Math.round(x); y = Math.round(y);
     { const s = k % 2 ? 1 : -1, pasta = Math.floor(t * 0.7 + k * 1.3) % 4 === 0 ? 1 : 0, o = ovelhaE(pasta);
       c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(x - 6, y, 12, 2);
@@ -823,10 +1145,13 @@
   // ---------------------------------------------------------------- DOM / estado
   const stage = document.getElementById('ilha');
   const ctx = stage.getContext('2d');
-  const K = 2; // buffer em 2x: personagens no estilo 32x44 ganham o dobro de pixels
-  const terrK = document.createElement('canvas'); terrK.width = WW * K; terrK.height = WH * K;
-  { const g = terrK.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(terr, 0, 0, WW * K, WH * K); }
-  repintaChaoE(terrK); arvoresE(terrK); if (SP.vivo) SP.vivo(terrK); // estilo estudo 6
+  // 23/11/2026: moradores com metade do tamanho no mundo (ESCALA_PERS) e zoom dobrado — casas, árvores e ruas
+  // ficam proporcionais aos moradores. O buffer usa até 8 px por unidade (K muda com o zoom); o chão fica pronto em 4x.
+  window.ESCALA_PERS = 0.5;
+  let K = 8; const KT = 4;
+  const terrK = document.createElement('canvas'); terrK.width = WW * KT; terrK.height = WH * KT;
+  { const g = terrK.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(terr, 0, 0, WW * KT, WH * KT); }
+  if (!CHAO) { repintaChaoE(terrK); arvoresE(terrK); } // com o chão do Flow, grama, ruas e árvores vêm em pedaços (CHAO) // (árvores já vêm no estilo Flow; o filtro no chão inteiro em 4x deixava a abertura lenta)
   const buf = document.createElement('canvas'), bctx = buf.getContext('2d');
   const lightC = document.createElement('canvas'), lctx = lightC.getContext('2d');
   const cam = { x: 390, y: 320, s: 2, follow: null };
@@ -838,11 +1163,12 @@
     vw = stage.clientWidth; vh = stage.clientHeight;
     stage.width = Math.round(vw * dpr); stage.height = Math.round(vh * dpr);
   }
-  function defaultScale() { return clamp(Math.round(Math.min(vw, vh) / 430), 2, 6); }
+  function defaultScale() { return clamp(Math.round(Math.min(vw, vh) / 430) * 2, 4, 12); }
 
   // ---------------------------------------------------------------- render
   function render(t) {
     const S = cam.s * dpr;
+    K = Math.max(2, Math.min(8, Math.ceil(S)));
     const bw = Math.ceil(stage.width / S) + 2, bh = Math.ceil(stage.height / S) + 2;
     if (buf.width !== bw * K || buf.height !== bh * K) { buf.width = bw * K; buf.height = bh * K; lightC.width = bw * K; lightC.height = bh * K; }
     const hrs = localHours(t), night = darkness(hrs) > 0.3, dia = diaDe(t), sec = t / 1000;
@@ -864,7 +1190,7 @@
       const f = frameChars.find(q => q.m.id === cam.follow);
       if (f) { cam.x += (f.p.x - cam.x) * 0.18; cam.y += (f.p.y - 6 - cam.y) * 0.18; }
     }
-    cam.x = clamp(cam.x, 0, WW); cam.y = clamp(cam.y, 0, WH);
+    cam.x = clamp(cam.x, X0, X0 + WW); cam.y = clamp(cam.y, Y0, Y0 + WH);
     const ox = Math.round(cam.x - bw / 2 + offPx() / cam.s), oy = Math.round(cam.y - bh / 2);
     lastOx = ox; lastOy = oy;
 
@@ -873,7 +1199,8 @@
     c.setTransform(K, 0, 0, K, 0, 0);
     c.fillStyle = '#0e243e'; c.fillRect(0, 0, bw, bh);
     c.setTransform(1, 0, 0, 1, 0, 0);
-    c.drawImage(terrK, -ox * K, -oy * K);
+    c.drawImage(terrK, (X0 - ox) * K, (Y0 - oy) * K, WW * K, WH * K);
+    if (CHAO) CHAO.desenha(c, ox, oy, bw, bh, K);
     c.setTransform(K, 0, 0, K, -ox * K, -oy * K);
 
     // agua animada
@@ -886,15 +1213,20 @@
 
     // objetos ordenados por y
     const places = placesAt(t), objs = [];
-    places.forEach(k => { if (DRAW[k]) objs.push({ y: k === 'arena' || k === 'fazenda' || k === 'pasto' ? LUG[k].y - 30 : k === 'cais' ? LUG[k].y - 2 : LUG[k].y, f: () => DRAW[k](c, LUG[k], sec, night, dia) }); });
+    const lugarFeito = new Set();
+    places.forEach(k => { if (lugarFlow(k, objs, c, sec, dia)) lugarFeito.add(k); });
+    places.forEach(k => { if (predFlowOk(k)) objs.push({ y: LUG[k].y - 0.5, f: () => drawPredioFlow(c, k, night) }); });
+    // lugares cujo prédio já é do Flow: os objetos em volta também são, então desenha direto (sem o filtro em 4x)
+    places.forEach(k => { if (DRAW[k] && !lugarFeito.has(k)) objs.push({ y: k === 'arena' || k === 'fazenda' || k === 'pasto' ? LUG[k].y - 30 : k === 'cais' ? LUG[k].y - 2 : LUG[k].y, f: () => predFlowOk(k) ? DRAW[k](c, LUG[k], sec, night, dia) : desenhaFlow(k, c, LUG[k], sec, night, dia) }); });
     const sleepers = new Set();
     frameChars.forEach(q => { if (q.p.hidden && q.m._casaObj) sleepers.add(q.m._casaObj); });
     casas.forEach(h => {
       if (!h.donos.some(m => arrived(m, t))) return;
       const anyHome = h.donos.some(m => { const q = frameChars.find(z => z.m === m); return q && q.p.leg.pl === 'casa' && !q.p.hidden; });
       const lit = night && (anyHome || (hrs >= 18 && hrs < 22.5));
-      objs.push({ y: h.y, f: () => { drawHouse(c, h, lit, sec); if (!sleepers.has(h)) smoke(c, h.x + 5, h.y - 24, sec); } });
+      objs.push({ y: h.y, f: () => { drawHouse(c, h, lit, sec); if (!sleepers.has(h)) smoke(c, h.x + 5, h.y - 28, sec); } });
     });
+    if (CHAO) CHAO.arvores(objs, c, ox, oy, bw, bh);
     objs.push({ y: FIRE.y + 3, f: () => drawFire(c, sec) });
     LANTERNAS.forEach(l => objs.push({ y: l[1], f: () => drawLantern(c, l[0], l[1], night) }));
     if (places.has('pasto')) {
@@ -981,7 +1313,7 @@
     // textos em tela (nomes, falas, z)
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const scr = (x, y) => [(x - ox) * cam.s, (y - oy) * cam.s];
-    const fs = cam.s >= 4 ? 16 : 8;
+    const fs = cam.s >= 8 ? 16 : cam.s >= 4 ? 12 : 8;
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
     sleepers.forEach(h => {
       const [sx, sy] = scr(h.x - 4, h.y - 24); const ph = (sec * 0.6) % 1;
@@ -998,7 +1330,7 @@
         const ph = (sec * 0.6 + m._i * 0.3) % 1;
         ctx.font = `${fs}px Silkscreen, monospace`; ctx.fillStyle = `rgba(220,230,255,${(1 - ph).toFixed(2)})`; ctx.fillText('z', sx + 6 + ph * 6, sy - ph * 12);
       }
-      if (cam.s >= 3 || focus || p.arriving) {
+      if (cam.s >= 6 || focus || p.arriving) {
         ctx.font = `${fs}px Silkscreen, monospace`;
         const label = p.arriving ? m.nome.toUpperCase() + ' CHEGOU!' : m.nome.toUpperCase();
         ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(10,12,16,0.9)'; ctx.lineJoin = 'round';
@@ -1006,10 +1338,10 @@
         ctx.fillStyle = p.arriving ? '#ffd046' : focus ? '#ffd046' : '#f4f1e8'; ctx.fillText(label, sx, sy);
       }
       const fr = frase(m, p, t);
-      if (fr && cam.s >= 2) {
+      if (fr && cam.s >= 4) {
         ctx.font = `${fs === 16 ? 14 : 12}px "Pixelify Sans", monospace`;
         const w = Math.ceil(ctx.measureText(fr).width) + 12, h = fs === 16 ? 22 : 18;
-        const bx = Math.round(sx - w / 2), by = Math.round(sy - (cam.s >= 3 ? fs + 4 : 4) - h);
+        const bx = Math.round(sx - w / 2), by = Math.round(sy - (cam.s >= 6 ? fs + 4 : 4) - h);
         ctx.fillStyle = '#f7f2e4'; ctx.fillRect(bx, by, w, h); ctx.fillRect(bx + 2, by - 2, w - 4, h + 4);
         ctx.fillStyle = '#1b1a1f'; ctx.fillRect(Math.round(sx) - 2, by + h + 2, 4, 3);
         ctx.fillStyle = '#f7f2e4'; ctx.fillRect(Math.round(sx) - 2, by + h + 1, 4, 3);
@@ -1122,7 +1454,7 @@
   // ---------------------------------------------------------------- camera e interacao
   function seguir(id) {
     cam.follow = id; pinnedId = id; hoverId = null;
-    if (cam.s < 4) cam.s = Math.min(6, Math.max(4, cam.s));
+    if (cam.s < 8) cam.s = Math.min(12, Math.max(8, cam.s));
     fillCard(BY[id], Date.now());
     card.classList.add('fixo');
     if (window.innerWidth < 760) { $('painel').classList.remove('aberto'); $('btn-lista').setAttribute('aria-expanded', 'false'); }
@@ -1176,7 +1508,7 @@
     if (q) seguir(q.m.id); else if (pinnedId) pararSeguir();
   });
   stage.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY < 0 ? 1 : -1); }, { passive: false });
-  function zoom(d) { cam.s = clamp(cam.s + d, 1, 6); }
+  function zoom(d) { cam.s = clamp(cam.s + d * (cam.s >= 4 ? 2 : 1), 1, 12); }
   $('z-mais').addEventListener('click', () => zoom(1));
   $('z-menos').addEventListener('click', () => zoom(-1));
   $('z-ilha').addEventListener('click', () => { cam.follow = null; cam.x = 390; cam.y = 310; cam.s = Math.max(1, Math.floor(Math.min(vw / 740, vh / 560))) || 1; });
@@ -1279,7 +1611,7 @@
   if (!window.ILHA_MANUAL) requestAnimationFrame(loop);
   window.GrandeIlha = {
     hitAll, posAt, MOR, BY, casas, LUG, estado, cam, seguir, pararSeguir,
-    rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, jogados: JOGADOS, arrived: (m, t) => t >= m._ch, localHours,
+    rnd, diaDe, DIA2, FIRE, P, hooks: HOOKS, bicho: (...a) => bichoOk && (drawBichoFlow(...a), true), casaFlow: () => CASAS_FLOW.ok, prop: (c, k, x, y, lado, semSombra) => propFlowOk(k) && (drawPropFlow(c, k, x, y, lado, semSombra), true), jogados: JOGADOS, arrived: (m, t) => t >= m._ch, localHours,
     andavel: (x, y) => {
       if (x > LUG.ponte.x - 9 && x < LUG.ponte.x + 9 && y > LUG.ponte.y - 5 && y < LUG.ponte.y + 4) return true; // tábuas da ponte
       if (y >= TRAP.y1 && y <= TRAP.y0 + 2 && Math.abs(x - (TRAP.x0 + (y - TRAP.y0) / (TRAP.y1 - TRAP.y0) * (TRAP.x1 - TRAP.x0))) < 3) return true; // trapiche

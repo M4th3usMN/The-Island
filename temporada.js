@@ -464,7 +464,8 @@
     if (acesa) { const f = Math.floor(t / 120) % 3; P(c, x - 1, y - 13 - (f === 1 ? 1 : 0), 3, 3, '#ff8a2a'); P(c, x, y - 14 - f % 2, 1, 2, '#ffd046'); }
   }
   function barraca(c, x, y) {
-    // a Feira: barraca listrada com balança
+    // a Feira: barraca listrada com balança (do Google Flow, via G.prop; senão o desenho em código)
+    if (G.prop && G.prop(c, 'barraca', x, y)) return;
     P(c, x - 11, y - 1, 22, 2, 'rgba(0,0,0,.28)');
     P(c, x - 9, y - 8, 18, 7, '#8a5a32'); P(c, x - 9, y - 8, 18, 1, '#a8743e');
     for (let i = 0; i < 5; i++) P(c, x - 11 + i * 4.4, y - 15, 4, 4, i % 2 ? '#f1ead8' : '#c8433a');
@@ -473,6 +474,7 @@
   }
   function melhorias(c, h, n, t) {
     const x = h.x, y = h.y;
+    if (G.casaFlow && G.casaFlow()) return melhoriasFlow(c, h, n, t);
     if (n >= 1) { // cerca e jardim
       for (let i = -15; i <= 15; i += 3) P(c, x + i, y + 1, 1, 3, '#c9a46a');
       P(c, x - 15, y + 2, 31, 1, '#a8844a'); P(c, x - 2, y + 1, 4, 3, 'rgba(0,0,0,0)');
@@ -492,6 +494,29 @@
       P(c, x - 10, y - 11, 20, 1, '#3f6a2a'); P(c, x - 2, y - 7, 4, 7, '#4a2e18'); P(c, x - 1, y - 6, 2, 1, '#c97a3a'); P(c, x + 1, y - 4, 1, 1, '#ffd046');
       P(c, x - 16, y - 7, 3, 7, '#5a3a22'); P(c, x - 17, y - 9, 5, 2, '#3f6a2a');
     }
+  }
+  // melhorias para as casas do Flow (28 de largura, 33 de altura): tudo AO LADO ou NA FRENTE da casa, nada pintado por cima da parede
+  function melhoriasFlow(c, h, n, t) {
+    const x = h.x, y = h.y;
+    if (n >= 1) { // cerca baixa na frente com portão aberto e flores
+      for (let i = -17; i <= 17; i += 3) if (Math.abs(i) > 3) P(c, x + i, y + 3, 1, 3, '#c9a46a');
+      P(c, x - 17, y + 4, 14, 1, '#a8844a'); P(c, x + 4, y + 4, 14, 1, '#a8844a');
+      [[-15, '#e84a8a'], [-11, '#ffd046'], [11, '#e84a8a'], [15, '#9ad0ff']].forEach(([dx, cor]) => { P(c, x + dx, y + 1, 2, 1, cor); P(c, x + dx, y + 2, 2, 1, '#4a8a3a'); });
+    }
+    if (n >= 2) { // poste com lanterna ao lado da casa
+      if (!(G.prop && G.prop(c, 'lanterna', x - 17, y + 2))) { P(c, x - 17, y - 8, 1, 10, '#3a2a1a'); P(c, x - 18, y - 10, 3, 3, '#ffd36a'); }
+    }
+    if (n >= 4) { // pilha de pedra e carvalho no quintal da frente (não invade a casa vizinha)
+      for (let i = 0; i < 3; i++) P(c, x - 12 + (i % 2) * 2, y + 5 + i * 1.5, 6, 1.5, '#8a8680');
+      P(c, x - 13, y + 4.5, 8, 0.8, '#3f6a2a');
+    }
+  }
+  // torre de vigia ATRÁS da casa (entra na fila antes dela): só o alto aparece acima do telhado
+  function torreVigia(c, h, t) {
+    const x = h.x + 8, y = h.y - 9;
+    P(c, x, y - 34, 7, 34, '#8a6a4a'); P(c, x, y - 34, 7, 1, '#a8885a'); P(c, x + 6, y - 34, 1, 34, 'rgba(0,0,0,.25)');
+    P(c, x - 1, y - 36, 9, 2, '#7a2430'); P(c, x + 2, y - 30, 3, 3, '#2a2c3c');
+    const o = Math.floor(t / 350) % 2; P(c, x + 3, y - 44, 1, 8, '#4a3a2a'); P(c, x + 4, y - 44, 5 + o, 3, '#ffd046');
   }
   const NEVE = Array.from({ length: 140 }, (_, i) => [G.rnd('neve', i, 'x'), G.rnd('neve', i, 'y'), 0.5 + G.rnd('neve', i, 'v')]);
   function arvoreNatal(c, x, y, t) {
@@ -517,6 +542,7 @@
       if (!m.arroba || !m._casaObj || m._casaObj.donos[0] !== m || !G.arrived(m, t)) return;
       const ar = m.arroba.toLowerCase(), n = casas[ar] || 0, h = m._casaObj;
       if (n) objs.push({ y: h.y + 0.5, f: () => melhorias(c, h, n, t) });
+      if (n >= 3 && G.casaFlow && G.casaFlow()) objs.push({ y: h.y - 9, f: () => torreVigia(c, h, t) });
       if (lojas.has(ar)) objs.push({ y: h.y + 3, f: () => placa(c, h.x - 15, h.y + 4, '#ffd046') });
     });
     // Natal

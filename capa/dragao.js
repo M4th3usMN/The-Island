@@ -5,7 +5,7 @@
 (function () {
   const W = 48, H = 46, OY = 12;
   const COR = {
-    contorno: '#2a0a10', corpo: '#b3242e', luz: '#e04a3c', sombra: '#7e1520',
+    contorno: '#140e1a', corpo: '#b3242e', luz: '#e04a3c', sombra: '#7e1520',
     barriga: '#f2bc68', barrigaSombra: '#d18a3e', asa: '#6e1a2a', asaLuz: '#9a2a3a', osso: '#e04a3c',
     chifre: '#f1ead8', olho: '#ffe27a', pupila: '#2a0a10', garra: '#f1ead8'
   };
@@ -89,7 +89,9 @@
     return c;
   }
   const cache = {};
-  const sprite = pose => cache[pose] || (cache[pose] = monta(pose));
+  // estilo Flow: cores chapadas e linha escura entre asa, corpo, barriga e chifres
+  const flow = cv => (window.IlhaSprites && window.IlhaSprites.estiloFlow ? window.IlhaSprites.estiloFlow(cv) : cv);
+  const sprite = pose => cache[pose] || (cache[pose] = flow(monta(pose)));
   // (x, y) = ponto embaixo da barriga/patas; lado -1 vira para a esquerda
   function desenha(ctx, x, y, pose, lado, escala) {
     const s = escala || 1, sp = sprite(pose || 'cima');
