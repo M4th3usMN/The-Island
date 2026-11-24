@@ -495,5 +495,12 @@ window.MORADORES = [
     historia: 'Engenheiro que veio para a ilha por ter ouvido rumores de um dragão.',
     rotina: 'engenheiro_dragao', casa: 'auto', chegada: '2026-11-21T16:01:00-04:00',
     visual: { tipo: 'humano', pele: '#5a3a26', cabelo: 'espetado', corCabelo: '#1a1410', roupa: '#c87a2a', avental: '#5a4a3a', calca: '#2a3a4a', chapeu: 'capacete_couro', corChapeu: '#7a4a28', acessorio: 'esquadro' }
+  },
+  // 24/11: comentário do YouTube
+  {
+    id: 'fabricio', arroba: 'fabricioormes3875', nome: 'Fabrício', profissao: 'Cozinheiro',
+    historia: 'Naufragou depois que algo bateu no barco e veio parar na ilha, carregando itens de culinária e uma máscara na mochila. A avó avisou: quem a usa tem 5 segundos para tirá-la antes de ser possuído, por isso ele só a usaria em último caso.',
+    rotina: 'cozinheiro', casa: 'taverna', chegada: '2026-11-24T16:00:00-04:00',
+    visual: { tipo: 'humano', pele: '#c08458', cabelo: 'coque', corCabelo: '#3a2416', roupa: '#d8d0b8', detalhe: '#2a6a8a', avental: '#f4efe4', calca: '#5a2a2a', chapeu: 'touca_cozinha', corChapeu: '#c83a2a', acessorio: 'concha' }
   }
 ];

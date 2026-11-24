@@ -80,7 +80,8 @@ window.LIVRO = {
     carlos: ['Carlos, caçador de recompensas. Tenho habilidades diversas e consigo ver o ponto crítico de qualquer pessoa.', 'Quero uma base na floresta, com uma plantação do lado.'],
     ketchup: ['Ketchup, espadachim.', 'Minha história? É um mistério.'],
     jonathan: ['Jonathan, curandeiro. Ouvi rumores sobre o que está acontecendo nesta ilha.', 'Resolvi vir ajudar: onde tem gente em perigo, um curandeiro faz falta.'],
-    caiu: ['Caiu, engenheiro. Vim para a ilha porque ouvi rumores de um dragão.', 'Quero ver de perto o que se pode construir num lugar desses.']
+    caiu: ['Caiu, engenheiro. Vim para a ilha porque ouvi rumores de um dragão.', 'Quero ver de perto o que se pode construir num lugar desses.'],
+    fabricio: ['Fabrício, cozinheiro. Algo bateu no meu barco e eu caí nesta ilha sem saber se era deserta, até encontrar gente.', 'Na mochila trago meus itens de cozinha e uma máscara que minha avó mandou nunca usar, a não ser em último caso.']
   },
   marcos: {
     fundador: [['Ep. 1', 'Acendeu a primeira fogueira da ilha com a Fundadora.']],

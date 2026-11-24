@@ -261,6 +261,12 @@
         [12, 13, 'taverna', 'Almoçando'], [13, 17, 'laboratorio', 'Preparando remédios'], [17, 19, 'cais', 'Examinando o dragão'], [19, 22, 'fogueira', 'Ouvindo as dores de todo mundo']],
       trabalho: ['Isso vai sarar.', 'Erva certa, dose certa.', 'Respira fundo.'], social: ['Machucou? Me chama.', 'Remédio bom é chá quente.']
     },
+    cozinheiro: {
+      blocos: [[23, 5, 'casa', 'Dormindo', S], [5, 6, 'casa', 'Conferindo a mochila (e a máscara guardada)'], [6, 8, 'cais', 'Escolhendo o peixe do dia'],
+        [8, 12, 'taverna', 'Cozinhando o almoço'], [12, 13, 'taverna', 'Servindo o almoço'], [13, 15, 'floresta', 'Colhendo temperos'],
+        [15, 16, 'fazenda', 'Buscando legumes'], [16, 20, 'taverna', 'Preparando o jantar'], [20, 23, 'fogueira', 'Contando a história da máscara']],
+      trabalho: ['Mais sal!', 'Panela no fogo!', 'Prova essa sopa.'], social: ['Naufraguei e vim parar aqui.', 'Essa máscara eu não uso.', 'Minha avó me avisou...']
+    },
     padeiro: {
       blocos: [[19, 2, 'mercearia', 'Dormindo', S], [2, 7, 'mercearia', 'Assando o pão do dia'], [7, 10, 'fogueira', 'Entregando pão quentinho'],
         [10, 12, 'fazenda', 'Buscando trigo'], [12, 15, 'mercearia', 'Fazendo salgados e bolos'], [15, 19, 'taverna', 'Levando bolo para a taverna']],
